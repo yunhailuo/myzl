@@ -1,6 +1,6 @@
-# 快问快答 (Quick Q&A) - Educational Games App
+# Personal App
 
-An educational games application designed for learning arithmetic, built with Vue 3 and Vite.
+An personal application built with Vue 3 and Vite.
 
 ## Features
 
@@ -12,11 +12,16 @@ An educational games application designed for learning arithmetic, built with Vu
 
 ## Current Games
 
-- **加减法 (Addition & Subtraction)**: Practice arithmetic within 1-19 with:
+- **Addition & Subtraction**: Practice arithmetic within 1-19 with:
   - Flash card style questions
   - Multiple navigation methods: left/right arrows, keyboard (arrow keys), swipe gestures
   - Question history tracking
   - Progress counter
+
+## AI Documentation
+
+- This repo includes dedicated AI guidance in [AGENTS.md](AGENTS.md).
+- The app is structured for future AI enhancements like adaptive question generation, personalized hints, and agent-driven tutoring.
 
 ## Development
 
@@ -36,6 +41,18 @@ npm run dev
 
 ```bash
 npm run build
+```
+
+### Build for GitHub Pages
+
+```bash
+npm run build:gh
+```
+
+### Build for a root-hosted site (Cloudflare Pages or root domain)
+
+```bash
+npm run build:root
 ```
 
 ### Type Checking
@@ -67,17 +84,25 @@ npm run test:e2e
 
 ### GitHub Pages
 
-1. Push to GitHub repository named `myzl`
-2. Go to repository settings > Pages
-3. Set source to "Deploy from a branch", branch "main", folder "/ (root)"
-4. Available at `https://<username>.github.io/myzl/`
+This repo includes a GitHub Actions workflow at `.github/workflows/deploy.yml` that publishes `dist/` to GitHub Pages on every push to `main`.
+
+The workflow uses `npm run build:gh`, so the site is built with the repository base path before deployment.
 
 ### Cloudflare Pages
 
-1. Connect repository to Cloudflare Pages
-2. Build command: `npm run build`
-3. Build output directory: `dist`
+Cloudflare Pages is not automatically configured by this repository yet, but the app is ready for Cloudflare deployment.
+
+- For a root-hosted Cloudflare Pages site, use `npm run build:root`
+- For a GitHub Pages-style subpath site, use `npm run build:gh`
+
+To deploy on Cloudflare Pages:
+
+1. Connect the repo to Cloudflare Pages
+2. Set build command to `npm run build`
+3. Set output directory to `dist`
 4. Deploy
+
+If you want GitHub Actions to also trigger Cloudflare Pages deployments, you can add a separate workflow with Cloudflare Pages Action and the required secrets.
 
 ## Project Structure
 
