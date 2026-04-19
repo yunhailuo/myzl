@@ -1,85 +1,142 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+
+const menuOpen = ref(false)
+
+const toggleMenu = () => {
+  menuOpen.value = !menuOpen.value
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <div class="app">
+    <button @click="toggleMenu" class="hamburger fixed-hamburger" :class="{ open: menuOpen }">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <nav class="nav" :class="{ open: menuOpen }">
+      <RouterLink to="/" @click="menuOpen = false">首页</RouterLink>
+      <RouterLink to="/addition-subtraction" @click="menuOpen = false">加减法</RouterLink>
+    </nav>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
+    <div v-if="menuOpen" class="overlay" @click="menuOpen = false"></div>
 
-  <RouterView />
+    <main class="main">
+      <RouterView />
+    </main>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
+.app {
+  min-height: 100vh;
   width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+  max-width: 100%;
+  min-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.main {
+  flex: 1;
+  width: 100vw;
+  max-width: 100vw;
+  padding: 0;
+  margin: 0;
+}
+.header {
+  display: none;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 1rem;
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.hamburger span {
+  width: 40px;
+  height: 4px;
+  background: #333;
+  transition: all 0.3s;
 }
 
-nav a:first-of-type {
-  border: 0;
+.hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(7px, 7px);
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+.hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(9px, -9px);
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.fixed-hamburger {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1001;
+}
 
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
+.nav {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  height: 100vh;
+  width: 250px;
+  background: #f8f9fa;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  padding-top: 60px;
+}
 
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.nav.open {
+  left: 0;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.nav a {
+  padding: 1rem;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #eee;
+}
+
+.nav a:last-child {
+  border-bottom: none;
+}
+
+.nav a:hover {
+  background: #e9ecef;
+}
+
+.main {
+  flex: 1;
+  padding: 0;
 }
 </style>
