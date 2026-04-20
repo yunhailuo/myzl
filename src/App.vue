@@ -11,13 +11,41 @@ const toggleMenu = () => {
 
 <template>
   <div class="app">
-    <button @click="toggleMenu" class="hamburger fixed-hamburger" :class="{ open: menuOpen }">
-      <span></span>
-      <span></span>
-      <span></span>
+    <button
+      v-if="!menuOpen"
+      @click="toggleMenu"
+      class="hamburger fixed-hamburger"
+      :class="{ open: menuOpen }"
+      aria-label="Menu"
+    >
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path
+          d="M3 12h18M3 6h18M3 18h18"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
     </button>
 
     <nav class="nav" :class="{ open: menuOpen }">
+      <div class="nav-header">
+        <span class="nav-title">菜单</span>
+        <button class="close-btn" @click="menuOpen = false" aria-label="Close">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
       <RouterLink to="/" @click="menuOpen = false">首页</RouterLink>
       <RouterLink to="/addition-subtraction" @click="menuOpen = false">加减法</RouterLink>
     </nav>
@@ -54,8 +82,8 @@ const toggleMenu = () => {
 
 .hamburger {
   display: flex;
-  flex-direction: column;
-  justify-content: space-around;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
   background: transparent;
@@ -63,25 +91,18 @@ const toggleMenu = () => {
   cursor: pointer;
   padding: 0;
   margin-right: 1rem;
+  font-size: 1.5rem;
+  line-height: 1;
 }
 
-.hamburger span {
-  width: 40px;
-  height: 4px;
-  background: #333;
-  transition: all 0.3s;
+.hamburger svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
 }
 
-.hamburger.open span:nth-child(1) {
-  transform: rotate(45deg) translate(7px, 7px);
-}
-
-.hamburger.open span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.open span:nth-child(3) {
-  transform: rotate(-45deg) translate(9px, -9px);
+.hamburger.open svg {
+  opacity: 0.5;
 }
 
 .fixed-hamburger {
@@ -103,11 +124,48 @@ const toggleMenu = () => {
   flex-direction: column;
   transition: left 0.3s ease;
   z-index: 1000;
-  padding-top: 60px;
 }
 
 .nav.open {
   left: 0;
+}
+
+.nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.nav-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.close-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
 }
 
 .overlay {

@@ -17,6 +17,8 @@ An personal application built with Vue 3 and Vite.
   - Multiple navigation methods: left/right arrows, keyboard (arrow keys), swipe gestures
   - Question history tracking
   - Progress counter
+  - Settings panel with options to toggle arrows and navigation methods
+  - Config panel with gear icon and close button (X)
 
 ## AI Documentation
 
