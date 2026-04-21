@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import App from './App.vue'
-import { createRouter, createMemoryHistory } from 'vue-router'
 
 describe('App.vue', () => {
   let wrapper: VueWrapper
@@ -26,73 +26,44 @@ describe('App.vue', () => {
     expect(wrapper.find('.app').exists()).toBe(true)
   })
 
-  it('hides hamburger button when menu is open', async () => {
-    const hamburger = wrapper.find('.hamburger')
-    await hamburger.trigger('click')
-    await wrapper.vm.$nextTick()
+  it('opens the menu from the hamburger button', async () => {
+    expect(wrapper.find('.nav').classes()).not.toContain('open')
+
+    await wrapper.find('.hamburger').trigger('click')
+
+    expect(wrapper.find('.nav').classes()).toContain('open')
     expect(wrapper.find('.hamburger').exists()).toBe(false)
+    expect(wrapper.find('.overlay').exists()).toBe(true)
   })
 
-  it('shows hamburger button when menu closes', async () => {
-    const hamburger = wrapper.find('.hamburger')
-    await hamburger.trigger('click')
-    await wrapper.vm.$nextTick()
-    expect(wrapper.find('.hamburger').exists()).toBe(false)
-    await hamburger.trigger('click')
-    await wrapper.vm.$nextTick()
+  it('closes the menu from the close button and restores the hamburger', async () => {
+    await wrapper.find('.hamburger').trigger('click')
+    expect(wrapper.find('.nav').classes()).toContain('open')
+
+    await wrapper.find('.close-btn').trigger('click')
+
+    expect(wrapper.find('.nav').classes()).not.toContain('open')
+    expect(wrapper.find('.hamburger').exists()).toBe(true)
+    expect(wrapper.find('.overlay').exists()).toBe(false)
+  })
+
+  it('closes the menu when the overlay is clicked', async () => {
+    await wrapper.find('.hamburger').trigger('click')
+    await wrapper.find('.overlay').trigger('click')
+
+    expect(wrapper.find('.nav').classes()).not.toContain('open')
     expect(wrapper.find('.hamburger').exists()).toBe(true)
   })
 
-  it('opens menu when hamburger button is clicked', async () => {
-    const hamburger = wrapper.find('.hamburger')
-    const nav = wrapper.find('.nav')
-    expect(nav.classes()).not.toContain('open')
-    await hamburger.trigger('click')
-    expect(nav.classes()).toContain('open')
-  })
+  it('renders the menu header and links when open', async () => {
+    await wrapper.find('.hamburger').trigger('click')
 
-  it('closes menu when close button is clicked', async () => {
-    const hamburger = wrapper.find('.hamburger')
-    const closeBtn = wrapper.find('.close-btn')
-    await hamburger.trigger('click')
-    expect(wrapper.find('.nav').classes()).toContain('open')
-    await closeBtn.trigger('click')
-    expect(wrapper.find('.nav').classes()).not.toContain('open')
-  })
+    expect(wrapper.find('.nav-header').exists()).toBe(true)
+    expect(wrapper.find('.nav-title').text()).toBe('菜单')
 
-  it('closes menu when overlay is clicked', async () => {
-    const hamburger = wrapper.find('.hamburger')
-    await hamburger.trigger('click')
-    expect(wrapper.find('.nav').classes()).toContain('open')
-    const overlay = wrapper.find('.overlay')
-    if (overlay.exists()) {
-      await overlay.trigger('click')
-    }
-    expect(wrapper.find('.nav').classes()).not.toContain('open')
-  })
-
-  it('has correct menu header with title and close button', async () => {
-    const hamburger = wrapper.find('.hamburger')
-    await hamburger.trigger('click')
-    const header = wrapper.find('.nav-header')
-    expect(header.exists()).toBe(true)
-    expect(header.find('.nav-title').text()).toBe('菜单')
-    expect(header.find('.close-btn').exists()).toBe(true)
-  })
-
-  it('has home link in menu', async () => {
-    const hamburger = wrapper.find('.hamburger')
-    await hamburger.trigger('click')
-    const homeLink = wrapper.find('.nav a')
-    expect(homeLink.exists()).toBe(true)
-    expect(homeLink.text()).toBe('首页')
-  })
-
-  it('has addition-subtraction link in menu', async () => {
-    const hamburger = wrapper.find('.hamburger')
-    await hamburger.trigger('click')
-    const gameLink = wrapper.findAll('.nav a')[1]
-    expect(gameLink!.exists()).toBe(true)
-    expect(gameLink!.text()).toBe('加减法')
+    const links = wrapper.findAll('.nav a')
+    expect(links).toHaveLength(2)
+    expect(links[0]?.text()).toBe('首页')
+    expect(links[1]?.text()).toBe('加减法')
   })
 })

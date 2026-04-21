@@ -140,13 +140,13 @@ onUnmounted(() => {
       </div>
       <div class="config-item">
         <label class="config-label">
-          <input v-model="enableArrows" type="checkbox" />
+          <input v-model="enableArrows" type="checkbox" data-testid="toggle-arrows" />
           <span>显示左右箭头按钮</span>
         </label>
       </div>
       <div class="config-item">
         <label class="config-label">
-          <input v-model="enableNavigation" type="checkbox" />
+          <input v-model="enableNavigation" type="checkbox" data-testid="toggle-navigation" />
           <span>启用键盘和滑动操作</span>
         </label>
       </div>
