@@ -1,104 +1,204 @@
 # AGENTS.md
 
-This file is for coding agents and tools. It contains build, test, deploy, and project conventions that should be easy for an AI assistant to follow.
+This document is the agent-facing reference for `/media/yunhai-luo/Life/GitHub/myzl`.
 
-## Project overview
+Use it to understand the project quickly, choose the right commands, and make changes that fit the repo's current structure.
 
-- App: 快问快答
+## Project Snapshot
+
+- App name: `快问快答`
+- Product type: child-friendly arithmetic practice app
 - Framework: Vue 3 + TypeScript + Vite
-- Main feature: 加减法 practice game within 1-19
-- Deployment targets: GitHub Pages and Cloudflare Pages
+- Routing: Vue Router history mode
+- Current game: addition and subtraction practice within `1-19`
+- Hosting targets: GitHub Pages and Cloudflare Pages
 
-## Recommended workflow
+## What the App Does Today
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Run development server:
-   ```bash
-   npm run dev
-   ```
-3. Build for GitHub Pages:
-   ```bash
-   npm run build:gh
-   ```
-4. Build for root site hosting:
-   ```bash
-   npm run build:root
-   ```
-5. Run unit tests:
-   ```bash
-   npm run test:unit
-   ```
-6. Run E2E tests:
-   ```bash
-   npm run build
-   npm run test:e2e
-   ```
+- Shows a home screen with game selection
+- Supports one playable mode: `加减法`
+- Generates random addition and subtraction questions
+- Keeps question history so users can move backward and forward
+- Supports arrow-button navigation
+- Supports keyboard arrow navigation
+- Supports touch swipe navigation
+- Includes a settings drawer for toggling arrows and keyboard/swipe controls
 
-## Build commands
+## Key Files
 
-- `npm run build:gh` — build with `VITE_BASE_URL=/myzl/` for GitHub Pages repos hosted under `/myzl/`
-- `npm run build:root` — build with `VITE_BASE_URL=/` for root-hosted sites like Cloudflare Pages or root domains
-- `npm run build` — default build using the current environment
+- `src/App.vue`
+  Purpose: app shell, slide-out navigation menu, router outlet
 
-## Test commands
+- `src/views/HomeView.vue`
+  Purpose: home screen with game links
 
-- `npm run test:unit` — runs Vitest unit tests
-- `npm run test:e2e` — runs Playwright end-to-end tests
-- `npm run type-check` — validates TypeScript and Vue SFC types
-- `npm run lint` — runs ESLint and oxlint checks
+- `src/views/AdditionSubtractionView.vue`
+  Purpose: main practice experience, question generation, navigation behavior, settings drawer
 
-## Project layout
+- `src/router/index.ts`
+  Purpose: application routes
 
-- `src/App.vue` — root layout and navigation
-- `src/views/HomeView.vue` — home screen and game selection
-- `src/views/AdditionSubtractionView.vue` — main addition/subtraction game view
-- `src/router/index.ts` — client-side routes
-- `vite.config.ts` — build configuration with dynamic base URL support
+- `src/assets/base.css`
+  Purpose: global design tokens and base styles
 
-## Agent guidance
+- `src/assets/main.css`
+  Purpose: app-wide layout foundation
 
-### AI-friendly entry points
+- `src/App.spec.ts`
+  Purpose: unit tests for app shell behavior
 
-- `src/views/AdditionSubtractionView.vue` contains the current gameplay and question generation logic.
-- `generateQuestion()` is the main function responsible for random math questions.
-- The app already supports keyboard arrows, swipe gestures, and visible navigation controls.
+- `src/views/AdditionSubtractionView.spec.ts`
+  Purpose: unit tests for arithmetic game behavior
 
-### Good next improvements for agents
+- `e2e/vue.spec.ts`
+  Purpose: Playwright smoke coverage for core user flows
 
-- Add adaptive difficulty based on user answers and response time.
-- Add AI-powered hints or short explanations for each question.
-- Add a review mode that explains correct answers.
-- Add analytics or state tracking for user progress.
+- `docs/ADDING_GAME.md`
+  Purpose: step-by-step guide for adding a new playable game
 
-### What agents should know
+## Recommended Workflow
 
-- The repository is intentionally small and self-contained.
-- The app uses Vue Router history mode, so static hosting should serve `index.html` for client-side routes.
-- `AGENTS.md` is the canonical place for commands, conventions, and instructions for coding agents.
+1. Install dependencies.
 
-## Code conventions
+```bash
+npm install
+```
 
-- Commit messages should follow Conventional Commits.
-- Use TypeScript and strict type checking.
-- Keep state minimal and prefer local view state unless adding a shared store.
-- Add tests for any behavior changes.
+2. Start the development server if you need manual verification.
 
-## Deployment notes
+```bash
+npm run dev
+```
+
+3. Run targeted checks while editing.
+
+```bash
+npm run type-check
+npm run lint
+CI=1 npm run test:unit -- --run
+```
+
+4. Run E2E coverage when changing user-visible interactions.
+
+```bash
+npm run test:e2e
+```
+
+5. Build before wrapping up changes that affect deploy behavior or asset paths.
+
+```bash
+npm run build
+```
+
+## Command Reference
+
+### Development
+
+- `npm run dev`
+  Starts the Vite dev server.
+
+### Builds
+
+- `npm run build`
+  Default production build using the current environment.
+
+- `npm run build:gh`
+  Production build for GitHub Pages under `/myzl/`.
+
+- `npm run build:root`
+  Production build for root-hosted sites such as Cloudflare Pages.
+
+### Validation
+
+- `npm run type-check`
+  Runs `vue-tsc --build`.
+
+- `npm run lint`
+  Runs ESLint and oxlint.
+
+- `npm run test:unit`
+  Runs Vitest in its default mode.
+
+- `CI=1 npm run test:unit -- --run`
+  Best command for a non-watch, CI-style unit test run.
+
+- `npm run test:e2e`
+  Runs Playwright end-to-end tests.
+
+## Editing Guidance
+
+### When changing gameplay
+
+- Start in `src/views/AdditionSubtractionView.vue`.
+- Keep the random question generator behavior easy to test.
+- Add or update tests for any behavior changes.
+- Prefer small, explicit state changes over deeply nested logic.
+
+### When changing navigation
+
+- Update both:
+  - `src/App.vue` for shell navigation
+  - `src/views/HomeView.vue` for game discovery if needed
+
+- Verify both unit tests and E2E coverage if the user flow changes.
+
+### When changing styling
+
+- Keep global styles small and intentional.
+- Prefer component-scoped styles for view-specific UI.
+- Avoid reintroducing starter-template CSS that is not used by the app.
+
+### When adding a new game
+
+- Follow `docs/ADDING_GAME.md` as the default workflow.
+- Add the route in `src/router/index.ts`.
+- Add a visible entry point in `src/views/HomeView.vue`.
+- Update navigation links in `src/App.vue`.
+- Add unit and E2E coverage for the new flow.
+- Update `README.md` and this file if the product surface changes.
+
+## Testing Expectations
+
+- Behavior changes should include tests.
+- Prefer assertions about user-visible behavior rather than internal implementation details.
+- Use stable selectors where needed, such as `data-testid`, but favor accessible queries in Playwright.
+- If a test depends on current DOM after a UI transition, re-query the DOM instead of reusing stale wrappers.
+
+## Deployment Notes
 
 ### GitHub Pages
 
-- Use `npm run build:gh` to compile for `https://<username>.github.io/myzl/`.
-- Ensure branch `main` is selected in GitHub Pages settings with root folder `/`.
+- Build with `npm run build:gh`.
+- Deploy the generated `dist/` folder.
+- The expected public base path is `/myzl/`.
 
-### Cloudflare Pages or root hosting
+### Cloudflare Pages or root-hosted sites
 
-- Use `npm run build:root` if deploying to a root domain or root site.
-- Deploy the `dist/` folder.
+- Build with `npm run build:root`.
+- Deploy the generated `dist/` folder.
+- The expected public base path is `/`.
 
-## References
+## Current Limitations
 
-- `https://agents.md/` — agent-friendly documentation format
-- `AGENTS.md` is useful for any coding agent, including VS Code AI tools, GitHub Copilot assistants, and CLI agents
+These are useful to know before changing behavior:
+
+- The app currently shows questions but does not accept or grade answers.
+- Settings are not persisted across reloads.
+- Game logic still lives inside the main game view component.
+- There is only one playable mode today.
+
+## Good Next Improvements
+
+- Add answer reveal or answer entry
+- Track correctness and review missed questions
+- Persist settings in local storage
+- Extract gameplay logic into a composable
+- Add configurable difficulty or operation filters
+
+## Agent Checklist Before Finishing
+
+- Run `npm run type-check`
+- Run `npm run lint`
+- Run `CI=1 npm run test:unit -- --run`
+- Run `npm run build` if build behavior may be affected
+- Update `README.md` and `AGENTS.md` when workflows or product behavior change

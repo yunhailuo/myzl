@@ -1,184 +1,151 @@
 # Personal App
 
-An personal application built with Vue 3 and Vite.
+An personal application built with Vue 3 and Vite. The current experience focuses on features with large-card presentation, touch-friendly navigation, and deployment targets that work well for static hosting.
 
-## Features
+## Current Experience
 
-- **Responsive Design**: Works seamlessly on PC and mobile devices
-- **Intuitive Navigation**: Kindle-style sidebar navigation with arrow keys, swipe, and touch support
-- **Extensible Architecture**: Easy to add new games and features
-- **Modern Stack**: Vue 3 with TypeScript, Vite for fast development
-- **CI/CD Ready**: GitHub Actions workflow included
+- Home screen with game selection
+- Addition and subtraction flash-card style practice
+- Previous and next question history
+- Keyboard arrow navigation
+- Swipe navigation on touch devices
+- Settings drawer for arrow buttons and gesture/keyboard controls
+- Static hosting support for both GitHub Pages and root-hosted sites
 
-## Current Games
+## Tech Stack
 
-- **Addition & Subtraction**: Practice arithmetic within 1-19 with:
-  - Flash card style questions
-  - Multiple navigation methods: left/right arrows, keyboard (arrow keys), swipe gestures
-  - Question history tracking
-  - Progress counter
-  - Settings panel with options to toggle arrows and navigation methods
-  - Config panel with gear icon and close button (X)
+- Vue 3
+- TypeScript
+- Vite
+- Vue Router
+- Vitest
+- Playwright
+- ESLint, oxlint, and Prettier
 
-## AI Documentation
+## Project Structure
 
-- This repo includes dedicated AI guidance in [AGENTS.md](AGENTS.md).
-- The app is structured for future AI enhancements like adaptive question generation, personalized hints, and agent-driven tutoring.
+```text
+.
+├── src/
+│   ├── assets/
+│   │   ├── base.css
+│   │   └── main.css
+│   ├── router/
+│   │   └── index.ts
+│   ├── views/
+│   │   ├── AdditionSubtractionView.vue
+│   │   ├── AdditionSubtractionView.spec.ts
+│   │   ├── HomeView.vue
+│   │   └── HomeView.spec.ts
+│   ├── App.spec.ts
+│   ├── App.vue
+│   └── main.ts
+├── e2e/
+│   └── vue.spec.ts
+├── AGENTS.md
+├── docs/
+│   ├── ADDING_GAME.md
+│   └── REVIEW.md
+├── playwright.config.ts
+├── vite.config.ts
+└── package.json
+```
 
-## Development
+## Getting Started
 
-### Setup
+### Install
 
 ```bash
 npm install
 ```
 
-### Development Server
+### Run the app locally
 
 ```bash
 npm run dev
 ```
 
-### Build for Production
+### Build commands
 
 ```bash
+# Default build
 npm run build
-```
 
-### Build for GitHub Pages
-
-```bash
+# GitHub Pages build under /myzl/
 npm run build:gh
-```
 
-### Build for a root-hosted site (Cloudflare Pages or root domain)
-
-```bash
+# Root-hosted build for Cloudflare Pages or custom domains
 npm run build:root
 ```
 
-### Type Checking
+## Quality Checks
 
 ```bash
+# TypeScript and Vue SFC types
 npm run type-check
-```
 
-### Linting
-
-```bash
+# ESLint + oxlint
 npm run lint
-```
 
-### Unit Tests
-
-```bash
+# Unit tests
 npm run test:unit
+
+# CI-friendly unit test run
+CI=1 npm run test:unit -- --run
 ```
 
-### E2E Tests (requires build)
+### End-to-end tests
 
 ```bash
-npm run build
+# Install Playwright browsers the first time
+npx playwright install
+
+# Start the dev server automatically and run tests
 npm run test:e2e
+
+# Run only Chromium
+npm run test:e2e -- --project=chromium
 ```
 
 ## Deployment
 
 ### GitHub Pages
 
-This repo includes a GitHub Actions workflow at `.github/workflows/deploy.yml` that publishes `dist/` to GitHub Pages on every push to `main`.
+This repo includes `.github/workflows/deploy.yml`, which builds with:
 
-The workflow uses `npm run build:gh`, so the site is built with the repository base path before deployment.
-
-### Cloudflare Pages
-
-Cloudflare Pages is not automatically configured by this repository yet, but the app is ready for Cloudflare deployment.
-
-- For a root-hosted Cloudflare Pages site, use `npm run build:root`
-- For a GitHub Pages-style subpath site, use `npm run build:gh`
-
-To deploy on Cloudflare Pages:
-
-1. Connect the repo to Cloudflare Pages
-2. Set build command to `npm run build`
-3. Set output directory to `dist`
-4. Deploy
-
-If you want GitHub Actions to also trigger Cloudflare Pages deployments, you can add a separate workflow with Cloudflare Pages Action and the required secrets.
-
-## Project Structure
-
-```
-src/
-├── views/              # Page components
-│   ├── HomeView.vue    # Game selection screen
-│   └── AdditionSubtractionView.vue # Game view
-├── App.vue            # Root component with navigation
-├── main.ts            # Application entry point
-├── router/            # Vue Router configuration
-└── assets/            # Styles and static files
+```bash
+npm run build:gh
 ```
 
-## Technologies
+Use this when the app is hosted at:
 
-- **Vue 3** - Progressive JavaScript framework
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Next generation build tool
-- **Vue Router** - Client-side routing
-- **Pinia** - State management (prepared for future use)
-- **Vitest** - Unit testing framework
-- **Playwright** - E2E testing framework
-- **ESLint & Prettier** - Code quality and formatting
-
-## Recommended IDE Setup
-
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
-
-## Project Setup
-
-```sh
-npm install
+```text
+https://<username>.github.io/myzl/
 ```
 
-### Compile and Hot-Reload for Development
+### Cloudflare Pages or root hosting
 
-```sh
-npm run dev
+Build with:
+
+```bash
+npm run build:root
 ```
 
-### Type-Check, Compile and Minify for Production
+Deploy the generated `dist/` folder.
 
-```sh
-npm run build
-```
+## Notes for Contributors
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+- `src/views/AdditionSubtractionView.vue` contains the main game behavior.
+- `generateQuestion()` is the current question generator.
+- Behavior changes should include tests.
+- `AGENTS.md` contains agent-oriented instructions and project conventions.
+- `docs/ADDING_GAME.md` explains the step-by-step workflow for adding a new playable game.
+- `docs/REVIEW.md` tracks the current review findings and backlog.
 
-```sh
-npm run test:unit
-```
+## Roadmap Ideas
 
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
-
-```sh
-# Install browsers for the first run
-npx playwright install
-
-# When testing on CI, must build the project first
-npm run build
-
-# Runs the end-to-end tests
-npm run test:e2e
-# Runs the tests only on Chromium
-npm run test:e2e -- --project=chromium
-# Runs the tests of a specific file
-npm run test:e2e -- tests/example.spec.ts
-# Runs the tests in debug mode
-npm run test:e2e -- --debug
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+- Add answer reveal or answer input flow
+- Track correct and incorrect responses
+- Add review mode for missed questions
+- Add adaptive difficulty
+- Persist settings and progress locally
