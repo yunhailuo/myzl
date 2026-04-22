@@ -14,6 +14,11 @@ const router = createRouter({
       name: 'addition-subtraction',
       component: () => import('../views/AdditionSubtractionView.vue'),
     },
+    {
+      path: '/hanzi',
+      name: 'hanzi',
+      component: () => import('../views/HanziView.vue'),
+    },
   ],
 })
 

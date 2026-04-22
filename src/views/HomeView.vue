@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 
-const games = [{ name: '加减法', route: '/addition-subtraction' }]
+const games = [
+  { name: '加减法', route: '/addition-subtraction' },
+  { name: '汉字', route: '/hanzi' }
+]
 </script>
 
 <template>

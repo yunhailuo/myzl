@@ -48,6 +48,7 @@ const toggleMenu = () => {
       </div>
       <RouterLink to="/" @click="menuOpen = false">首页</RouterLink>
       <RouterLink to="/addition-subtraction" @click="menuOpen = false">加减法</RouterLink>
+      <RouterLink to="/hanzi" @click="menuOpen = false">汉字</RouterLink>
     </nav>
 
     <div v-if="menuOpen" class="overlay" @click="menuOpen = false"></div>
