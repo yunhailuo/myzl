@@ -23,6 +23,8 @@
     "cnchar-poly": "^3.2.6",
     "cnchar-words": "^3.2.6",
     "hanzi-writer": "^3.7.3",
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
     "pinyin-pro": "^3.28.1",
     "vue": "^3.5.31",
     "vue-router": "^5.0.4"

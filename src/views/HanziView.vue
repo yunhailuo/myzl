@@ -5,122 +5,133 @@ import { pinyin } from 'pinyin-pro'
 import cnchar from 'cnchar'
 import 'cnchar-poly'
 import 'cnchar-words'
+import { useHanziStore } from '../stores/hanzi'
 
-const characters = ['我', '你', '他', '双', '壮', '床']
+// 组词配置常量
+const WORD_LENGTH_MIN = 2
+const WORD_LENGTH_MAX = 3
+const WORD_DISPLAY_COUNT = 3
 
-const index = ref(0)
+const store = useHanziStore()
 const writerRef = ref<HanziWriter | null>(null)
 const containerId = 'hanzi-container'
 const showConfig = ref(false)
-const enableArrows = ref(true)
-const enableNavigation = ref(true)
-const configOpen = ref(false)
-const showPinyin = ref(true)
-const loopAnimation = ref(true)
-const hidePinyin = ref(true) // 默认遮盖拼音
-const hideWords = ref(true) // 默认遮盖组词
 
-const currentCharacter = computed(() => characters[index.value])
-const currentPinyin = computed(() => {
-  if (currentCharacter.value) {
-    return pinyin(currentCharacter.value, { toneType: 'symbol' })
-  }
-  return ''
+// 字库选择折叠状态(默认折叠)
+const charSetsExpanded = ref(false)
+
+// 本地遮罩状态(翻页时自动重置)
+const hidePinyin = ref(true)
+const hideWords = ref(true)
+
+// 监听翻页,重置遮罩
+watch(() => store.currentIndex, () => {
+  hidePinyin.value = true
+  hideWords.value = true
 })
 
-// 获取组词 - 使用 cnchar.words API
+// 计算属性
+const currentPinyin = computed(() => 
+  store.currentCharacter ? pinyin(store.currentCharacter, { toneType: 'symbol' }) : ''
+)
+
 const wordGroups = computed(() => {
-  if (!currentCharacter.value) return []
+  if (!store.currentCharacter) return []
 
-  // 使用 cnchar.words 获取包含当前汉字的词语
-  const words = cnchar.words(currentCharacter.value, 'array') as string[]
-
-  // 过滤出2-3个字的词语,最多取3个
-  const filteredWords = words.filter((word) => word.length >= 2 && word.length <= 3).slice(0, 3)
-
-  // 为每个词语生成带拼音的数据
-  return filteredWords.map((word) => {
-    const chars = word.split('')
-    return {
+  const words = cnchar.words(store.currentCharacter, 'array') as string[]
+  return words
+    .filter(word => word.length >= WORD_LENGTH_MIN && word.length <= WORD_LENGTH_MAX)
+    .slice(0, WORD_DISPLAY_COUNT)
+    .map(word => ({
       word,
-      chars: chars.map((char) => ({
+      chars: word.split('').map(char => ({
         char,
-        pinyin: char === currentCharacter.value ? '' : pinyin(char, { toneType: 'symbol' }),
-        isCurrent: char === currentCharacter.value,
+        pinyin: char === store.currentCharacter ? '' : pinyin(char, { toneType: 'symbol' }),
+        isCurrent: char === store.currentCharacter,
       })),
-    }
-  })
+    }))
 })
 
-const count = computed(() => index.value + 1)
+const count = computed(() => store.currentIndex + 1)
 
+// Hanzi Writer 初始化
 const initWriter = (char: string) => {
   if (!writerRef.value) {
-    // 首次创建实例
     writerRef.value = HanziWriter.create(containerId, char, {
       width: 250,
       height: 250,
-      renderer: 'canvas', // 使用 canvas 渲染器,性能更好
-      showOutline: true, // 显示汉字轮廓
-      strokeColor: '#e74c3c', // 笔画颜色
-      outlineColor: '#bdc3c7', // 轮廓颜色
-      strokeAnimationSpeed: 1.5, // 笔画动画速度
-      delayBetweenStrokes: 400, // 笔画间延迟(毫秒)
-      delayBetweenLoops: 1000, // 循环间隔(毫秒)
-      padding: 10, // 内边距
+      renderer: 'canvas',
+      showOutline: true,
+      strokeColor: '#e74c3c',
+      outlineColor: '#bdc3c7',
+      strokeAnimationSpeed: 1.5,
+      delayBetweenStrokes: 400,
+      delayBetweenLoops: 1000,
+      padding: 10,
     })
   } else {
-    // 重用实例,切换汉字
     writerRef.value.setCharacter(char)
   }
 
-  // 自动播放动画,根据配置决定是否循环
-  if (loopAnimation.value) {
+  if (store.loopAnimation) {
     writerRef.value.loopCharacterAnimation()
   } else {
     writerRef.value.animateCharacter()
   }
 }
 
-const nextCharacter = () => {
-  if (index.value < characters.length - 1) {
-    index.value++
-    initWriter(characters[index.value]!)
+// 导航函数
+const goToNext = () => {
+  store.nextCharacter()
+  if (store.currentCharacter) {
+    initWriter(store.currentCharacter)
   }
 }
 
-const previousCharacter = () => {
-  if (index.value > 0) {
-    index.value--
-    initWriter(characters[index.value]!)
+const goToPrevious = () => {
+  store.previousCharacter()
+  if (store.currentCharacter) {
+    initWriter(store.currentCharacter)
   }
 }
 
 const toggleConfig = () => {
   showConfig.value = !showConfig.value
-  if (showConfig.value) {
-    configOpen.value = true
-  } else {
-    configOpen.value = false
-  }
 }
 
+// 重新打乱字库并重置到第一个字
+const handleReshuffle = () => {
+  store.reshuffleCharacters()
+  
+  // 重新初始化当前字符的动画
+  if (store.currentCharacter) {
+    initWriter(store.currentCharacter)
+  }
+  
+  // 重置遮罩
+  hidePinyin.value = true
+  hideWords.value = true
+}
+
+// 手势和键盘事件
 const handleSwipe = (direction: 'left' | 'right') => {
-  if (!enableNavigation.value) return
+  if (!store.enableNavigation) return
+  
   if (direction === 'left') {
-    nextCharacter()
+    goToNext()
   } else {
-    previousCharacter()
+    goToPrevious()
   }
 }
 
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (!enableNavigation.value) return
+  if (!store.enableNavigation) return
+  
   if (e.key === 'ArrowRight') {
-    nextCharacter()
+    goToNext()
   }
   if (e.key === 'ArrowLeft') {
-    previousCharacter()
+    goToPrevious()
   }
 }
 
@@ -136,30 +147,35 @@ const handleTouchStart = (e: TouchEvent) => {
 
 const handleTouchEnd = (e: TouchEvent) => {
   if (!startX || !startY || e.changedTouches.length === 0) return
+  
   const endX = e.changedTouches[0]!.clientX
   const endY = e.changedTouches[0]!.clientY
   const diffX = startX - endX
   const diffY = startY - endY
+  
+  // 水平滑动距离大于垂直滑动且超过阈值
   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
     handleSwipe(diffX > 0 ? 'left' : 'right')
   }
+  
   startX = 0
   startY = 0
 }
 
 onMounted(() => {
-  // 初始化第一个字
-  initWriter(characters[0]!)
-
+  if (store.currentCharacter) {
+    initWriter(store.currentCharacter)
+  }
+  
   document.addEventListener('keydown', handleKeyDown)
   document.addEventListener('touchstart', handleTouchStart)
   document.addEventListener('touchend', handleTouchEnd)
 })
 
 // 监听循环动画设置变化
-watch(loopAnimation, (newVal) => {
-  if (writerRef.value && currentCharacter.value) {
-    writerRef.value.setCharacter(currentCharacter.value)
+watch(() => store.loopAnimation, (newVal) => {
+  if (writerRef.value && store.currentCharacter) {
+    writerRef.value.setCharacter(store.currentCharacter)
     if (newVal) {
       writerRef.value.loopCharacterAnimation()
     } else {
@@ -179,76 +195,101 @@ onUnmounted(() => {
   <div class="game">
     <div class="header">
       <div class="counter">第 {{ count }} 个</div>
-      <button class="config-btn" @click="toggleConfig" aria-label="Settings">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path
-            d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"
-          />
-        </svg>
-      </button>
-    </div>
-
-    <div :class="['config-panel', { open: showConfig }]">
-      <div class="config-header">
-        <span class="config-title">设置</span>
-        <button class="close-btn" @click="toggleConfig" aria-label="Close">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
+      <div class="header-actions">
+        <button class="config-btn" @click="handleReshuffle" aria-label="Reshuffle characters" title="重新打乱字库">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+          </svg>
+        </button>
+        <button class="config-btn" @click="toggleConfig" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path
+              d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"
+            />
           </svg>
         </button>
       </div>
+    </div>
+
+    <div :class="['config-panel', { open: showConfig }]">
+      <button class="close-btn" @click="toggleConfig" aria-label="Close settings">✕</button>
+      
+      <!-- 字库选择(默认折叠) -->
+      <div class="config-section">
+        <div class="section-header collapsible" @click="charSetsExpanded = !charSetsExpanded">
+          <h4 class="section-title">📚 字库选择</h4>
+          <span class="collapse-icon">{{ charSetsExpanded ? '▲' : '▼' }}</span>
+        </div>
+        <div v-show="charSetsExpanded" class="set-list">
+          <div class="header-actions">
+            <button class="select-all-btn" @click.stop="store.toggleAllSets">
+              {{ store.availableSets.every((set) => store.enabledSetIds.includes(set.id)) ? '取消全选' : '全选' }}
+            </button>
+          </div>
+          <div v-for="set in store.availableSets" :key="set.id" class="set-item">
+            <label class="config-label">
+              <input 
+                type="checkbox" 
+                :checked="store.enabledSetIds.includes(set.id)"
+                @change="() => store.toggleCharacterSet(set.id)"
+              />
+              <span>{{ set.name }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 其他设置项 -->
       <div class="config-item">
         <label class="config-label">
-          <input v-model="enableArrows" type="checkbox" data-testid="toggle-arrows" />
+          <input v-model="store.enableArrows" type="checkbox" data-testid="toggle-arrows" />
           <span>显示左右箭头按钮</span>
         </label>
       </div>
       <div class="config-item">
         <label class="config-label">
-          <input v-model="enableNavigation" type="checkbox" data-testid="toggle-navigation" />
+          <input v-model="store.enableNavigation" type="checkbox" data-testid="toggle-navigation" />
           <span>启用键盘和滑动操作</span>
         </label>
       </div>
       <div class="config-item">
         <label class="config-label">
-          <input v-model="showPinyin" type="checkbox" data-testid="toggle-pinyin" />
+          <input v-model="store.showPinyin" type="checkbox" data-testid="toggle-pinyin" />
           <span>显示拼音</span>
         </label>
       </div>
       <div class="config-item">
         <label class="config-label">
-          <input v-model="loopAnimation" type="checkbox" data-testid="toggle-loop" />
+          <input v-model="store.showWords" type="checkbox" data-testid="toggle-words" />
+          <span>显示词语</span>
+        </label>
+      </div>
+      <div class="config-item">
+        <label class="config-label">
+          <input v-model="store.loopAnimation" type="checkbox" data-testid="toggle-loop" />
           <span>循环播放动画</span>
         </label>
       </div>
     </div>
 
-    <div :class="['config-overlay', { active: configOpen }]" @click="toggleConfig"></div>
+    <div :class="['config-overlay', { active: showConfig }]" @click="toggleConfig"></div>
 
     <button
-      v-if="enableArrows"
+      v-if="store.enableArrows"
       class="nav-bar left"
-      @click="previousCharacter"
-      :disabled="index === 0"
+      @click="goToPrevious"
+      :disabled="store.currentIndex === 0"
       aria-label="Previous character"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
       </svg>
     </button>
-    <div :class="['question-area', { 'arrows-disabled': !enableArrows }]">
+    <div :class="['question-area', { 'arrows-disabled': !store.enableArrows }]">
       <div class="question-card">
         <div class="content-wrapper">
           <div
-            v-if="showPinyin && currentPinyin"
+            v-if="store.showPinyin && currentPinyin"
             class="pinyin-container"
             @click="hidePinyin = !hidePinyin"
           >
@@ -259,7 +300,7 @@ onUnmounted(() => {
 
           <!-- 组词显示区域 -->
           <div
-            v-if="wordGroups.length > 0"
+            v-if="store.showWords && wordGroups.length > 0"
             class="word-groups-container"
             @click="hideWords = !hideWords"
           >
@@ -281,10 +322,10 @@ onUnmounted(() => {
       </div>
     </div>
     <button
-      v-if="enableArrows"
+      v-if="store.enableArrows"
       class="nav-bar right"
-      @click="nextCharacter"
-      :disabled="index === characters.length - 1"
+      @click="goToNext"
+      :disabled="store.currentIndex === store.shuffledCharacters.length - 1"
       aria-label="Next character"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -320,6 +361,12 @@ onUnmounted(() => {
   font-weight: bold;
   color: #000;
   font-size: 1.3rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .config-btn {
@@ -421,6 +468,100 @@ onUnmounted(() => {
   cursor: pointer;
   width: 18px;
   height: 18px;
+}
+
+.config-section {
+  margin-top: 1.5rem;
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.section-header.collapsible {
+  cursor: pointer;
+  padding: 0.5rem;
+  margin: -0.5rem -0.5rem 0.5rem -0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  user-select: none;
+}
+
+.section-header.collapsible:hover {
+  background-color: #f5f5f5;
+}
+
+.section-title {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 600;
+  margin: 0;
+}
+
+.collapse-icon {
+  font-size: 0.8rem;
+  color: #999;
+  transition: transform 0.2s ease;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reshuffle-btn {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #555;
+}
+
+.reshuffle-btn:hover {
+  background: #e0e0e0;
+  border-color: #ccc;
+}
+
+.select-all-btn {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #555;
+}
+
+.select-all-btn:hover {
+  background: #e0e0e0;
+  border-color: #ccc;
+}
+
+.set-list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.set-list .header-actions {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.set-item {
+  padding: 0.25rem 0;
 }
 
 .close-btn {

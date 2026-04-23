@@ -62,8 +62,9 @@ describe('App.vue', () => {
     expect(wrapper.find('.nav-title').text()).toBe('菜单')
 
     const links = wrapper.findAll('.nav a')
-    expect(links).toHaveLength(2)
+    expect(links).toHaveLength(3)
     expect(links[0]?.text()).toBe('首页')
     expect(links[1]?.text()).toBe('加减法')
+    expect(links[2]?.text()).toBe('汉字')
   })
 })
