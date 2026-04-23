@@ -404,7 +404,7 @@ onUnmounted(() => {
   border-left: 1px solid #ddd;
   padding: 1rem;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 1000;
   transform: translateX(100%);
   transition: transform 0.3s ease;
 }
@@ -420,7 +420,7 @@ onUnmounted(() => {
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9;
+  z-index: 999;
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -645,7 +645,7 @@ onUnmounted(() => {
   display: inline-block;
   cursor: pointer;
   min-width: 200px;
-  z-index: 10;
+  z-index: 1;
 }
 
 .pinyin-display {
@@ -657,7 +657,7 @@ onUnmounted(() => {
   min-width: 200px;
   text-align: center;
   position: relative;
-  z-index: 11;
+  z-index: 2;
 }
 
 .pinyin-mask {
@@ -675,7 +675,7 @@ onUnmounted(() => {
   font-size: 2.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
-  z-index: 12;
+  z-index: 3;
 }
 
 .pinyin-mask:hover {
@@ -710,7 +710,7 @@ onUnmounted(() => {
   justify-content: center;
   font-size: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  z-index: 12;
+  z-index: 3;
   transition: all 0.2s ease;
 }
 
