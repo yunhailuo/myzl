@@ -9,7 +9,7 @@ const games = [
 
 <template>
   <main class="home">
-    <h1>快问快答</h1>
+    <h1>MYZL</h1>
     <div class="games-list">
       <RouterLink v-for="game in games" :key="game.route" :to="game.route" class="game-link">
         {{ game.name }}

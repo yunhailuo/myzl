@@ -1,6 +1,6 @@
 # Adding A New Game
 
-This guide explains how to add a new playable game mode to `快问快答`.
+This guide explains how to add a new playable game mode to `MYZL`.
 
 It is written for both human contributors and coding agents.
 

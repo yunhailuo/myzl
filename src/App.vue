@@ -124,7 +124,7 @@ const toggleMenu = () => {
   display: flex;
   flex-direction: column;
   transition: left 0.3s ease;
-  z-index: 1000;
+  z-index: 1002;
 }
 
 .nav.open {

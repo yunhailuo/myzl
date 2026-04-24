@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 test('home page loads and shows the title', async ({ page }) => {
   await page.goto('/')
 
-  await expect(page.getByRole('heading', { level: 1, name: '快问快答' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'MYZL' })).toBeVisible()
   await expect(page.getByRole('main').getByRole('link', { name: '加减法' })).toBeVisible()
 })
 

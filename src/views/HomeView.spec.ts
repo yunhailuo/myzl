@@ -29,7 +29,7 @@ describe('HomeView.vue', () => {
   it('displays the title', () => {
     const title = wrapper.find('h1')
     expect(title.exists()).toBe(true)
-    expect(title.text()).toBe('快问快答')
+    expect(title.text()).toBe('MYZL')
   })
 
   it('displays the games list', () => {

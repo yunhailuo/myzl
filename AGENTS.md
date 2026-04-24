@@ -6,7 +6,7 @@ Use it to understand the project quickly, choose the right commands, and make ch
 
 ## Project Snapshot
 
-- App name: `快问快答`
+- App name: `MYZL`
 - Product type: child-friendly arithmetic practice app
 - Framework: Vue 3 + TypeScript + Vite
 - Routing: Vue Router history mode
