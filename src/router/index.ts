@@ -8,16 +8,19 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { title: '首页' },
     },
     {
       path: '/addition-subtraction',
       name: 'addition-subtraction',
       component: () => import('../views/AdditionSubtractionView.vue'),
+      meta: { title: '加减法' },
     },
     {
       path: '/hanzi',
       name: 'hanzi',
       component: () => import('../views/HanziView.vue'),
+      meta: { title: '汉字' },
     },
   ],
 })

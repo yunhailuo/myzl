@@ -16,6 +16,19 @@ const swipeLeft = async () => {
   )
 }
 
+const swipeRight = async () => {
+  document.dispatchEvent(
+    new TouchEvent('touchstart', {
+      touches: [{ identifier: 1, clientX: 80, clientY: 100 } as Touch],
+    }),
+  )
+  document.dispatchEvent(
+    new TouchEvent('touchend', {
+      changedTouches: [{ identifier: 1, clientX: 180, clientY: 100 } as Touch],
+    }),
+  )
+}
+
 describe('AdditionSubtractionView.vue', () => {
   let wrapper: VueWrapper
 
@@ -41,6 +54,11 @@ describe('AdditionSubtractionView.vue', () => {
 
   it('disables the left button on the first question', () => {
     expect(wrapper.find('.nav-bar.left').attributes('disabled')).toBeDefined()
+  })
+
+  it('enables the right button on the first question', () => {
+    const rightButton = wrapper.find('.nav-bar.right')
+    expect(rightButton.attributes('disabled')).toBeUndefined()
   })
 
   it('navigates to the next and previous questions with buttons', async () => {
@@ -91,11 +109,27 @@ describe('AdditionSubtractionView.vue', () => {
     expect(wrapper.find('.counter').text()).toContain('第 2 题')
   })
 
+  it('moves backward with ArrowLeft when navigation is enabled', async () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
+    await wrapper.vm.$nextTick()
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }))
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.counter').text()).toContain('第 1 题')
+  })
+
   it('does not respond to keyboard navigation when navigation is disabled', async () => {
     const navigationCheckbox = wrapper.find('[data-testid="toggle-navigation"]')
 
     await navigationCheckbox.setValue(false)
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.counter').text()).toContain('第 1 题')
+  })
+
+  it('ignores irrelevant keyboard keys', async () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('.counter').text()).toContain('第 1 题')
@@ -108,11 +142,36 @@ describe('AdditionSubtractionView.vue', () => {
     expect(wrapper.find('.counter').text()).toContain('第 2 题')
   })
 
+  it('moves backward on a right swipe when navigation is enabled', async () => {
+    await swipeLeft()
+    await wrapper.vm.$nextTick()
+    await swipeRight()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.counter').text()).toContain('第 1 题')
+  })
+
   it('ignores swipe navigation when navigation is disabled', async () => {
     const navigationCheckbox = wrapper.find('[data-testid="toggle-navigation"]')
 
     await navigationCheckbox.setValue(false)
     await swipeLeft()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.counter').text()).toContain('第 1 题')
+  })
+
+  it('ignores small swipes below threshold', async () => {
+    document.dispatchEvent(
+      new TouchEvent('touchstart', {
+        touches: [{ identifier: 1, clientX: 100, clientY: 100 } as Touch],
+      }),
+    )
+    document.dispatchEvent(
+      new TouchEvent('touchend', {
+        changedTouches: [{ identifier: 1, clientX: 90, clientY: 100 } as Touch],
+      }),
+    )
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('.counter').text()).toContain('第 1 题')
@@ -130,5 +189,48 @@ describe('AdditionSubtractionView.vue', () => {
     const isNonNegativeSubtraction =
       latest?.[2] !== '-' || Number(latest[1]) >= Number(latest[3])
     expect(isNonNegativeSubtraction).toBe(true)
+  })
+
+  it('generates questions with numbers in valid range', async () => {
+    for (let i = 0; i < 20; i++) {
+      await wrapper.find('.nav-bar.right').trigger('click')
+      const questionText = wrapper.find('.question').text()
+      const match = questionText.match(/^(\d+) [+-] (\d+)$/)
+      
+      if (match) {
+        const num1 = parseInt(match[1])
+        const num2 = parseInt(match[2])
+        expect(num1).toBeGreaterThanOrEqual(1)
+        expect(num1).toBeLessThanOrEqual(19)
+        expect(num2).toBeGreaterThanOrEqual(1)
+        expect(num2).toBeLessThanOrEqual(19)
+      }
+    }
+  })
+
+  it('maintains question history when navigating back and forth', async () => {
+    await wrapper.find('.nav-bar.right').trigger('click')
+    await wrapper.find('.nav-bar.right').trigger('click')
+    const questionAt3 = wrapper.find('.question').text()
+
+    await wrapper.find('.nav-bar.left').trigger('click')
+    await wrapper.find('.nav-bar.left').trigger('click')
+    await wrapper.find('.nav-bar.right').trigger('click')
+    await wrapper.find('.nav-bar.right').trigger('click')
+
+    expect(wrapper.find('.question').text()).toBe(questionAt3)
+  })
+
+  it('config button has proper aria label', () => {
+    const configBtn = wrapper.find('.config-btn')
+    expect(configBtn.attributes('aria-label')).toBe('Settings')
+  })
+
+  it('navigation buttons have proper aria labels', () => {
+    const leftBtn = wrapper.find('.nav-bar.left')
+    const rightBtn = wrapper.find('.nav-bar.right')
+    
+    expect(leftBtn.attributes('aria-label')).toBe('Previous question')
+    expect(rightBtn.attributes('aria-label')).toBe('Next question')
   })
 })

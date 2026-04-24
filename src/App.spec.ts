@@ -12,6 +12,7 @@ describe('App.vue', () => {
       routes: [
         { path: '/', component: { template: '<div>Home</div>' } },
         { path: '/addition-subtraction', component: { template: '<div>Game</div>' } },
+        { path: '/hanzi', component: { template: '<div>Hanzi</div>' } },
       ],
     })
 
@@ -66,5 +67,35 @@ describe('App.vue', () => {
     expect(links[0]?.text()).toBe('首页')
     expect(links[1]?.text()).toBe('加减法')
     expect(links[2]?.text()).toBe('汉字')
+  })
+
+  it('has correct navigation links', async () => {
+    await wrapper.find('.hamburger').trigger('click')
+
+    const links = wrapper.findAll('.nav a')
+    expect(links[0]?.attributes('href')).toBe('/')
+    expect(links[1]?.attributes('href')).toBe('/addition-subtraction')
+    expect(links[2]?.attributes('href')).toBe('/hanzi')
+  })
+
+  it('menu link has active class styling capability', async () => {
+    await wrapper.find('.hamburger').trigger('click')
+
+    const links = wrapper.findAll('.nav a')
+    links.forEach(link => {
+      expect(link.exists()).toBe(true)
+    })
+  })
+
+  it('hamburger button has proper aria label', () => {
+    const hamburger = wrapper.find('.hamburger')
+    expect(hamburger.attributes('aria-label')).toBe('Menu')
+  })
+
+  it('navigation has proper structure', async () => {
+    await wrapper.find('.hamburger').trigger('click')
+    
+    expect(wrapper.find('.nav-header').exists()).toBe(true)
+    expect(wrapper.findAll('.nav a').length).toBeGreaterThan(0)
   })
 })

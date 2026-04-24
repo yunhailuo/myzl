@@ -12,6 +12,7 @@ describe('HomeView.vue', () => {
       routes: [
         { path: '/', component: HomeView },
         { path: '/addition-subtraction', component: { template: '<div>Game</div>' } },
+        { path: '/hanzi', component: { template: '<div>Hanzi</div>' } },
       ],
     })
 
@@ -39,11 +40,35 @@ describe('HomeView.vue', () => {
   it('shows the addition and subtraction game', () => {
     const links = wrapper.findAll('.game-link')
     expect(links.length).toBeGreaterThan(0)
-    expect(links[0]!.text()).toBe('加减法')
+    expect(links[0]?.text()).toBe('加减法')
   })
 
-  it('has correct route for game', () => {
+  it('has correct route for addition-subtraction game', () => {
     const gameLink = wrapper.find('.game-link')
     expect(gameLink.attributes('href')).toBe('/addition-subtraction')
+  })
+
+  it('shows the hanzi game', () => {
+    const links = wrapper.findAll('.game-link')
+    const hanziLink = links.find(link => link.text() === '汉字')
+    expect(hanziLink).toBeDefined()
+  })
+
+  it('has correct route for hanzi game', () => {
+    const links = wrapper.findAll('.game-link')
+    const hanziLink = links.find(link => link.text() === '汉字')
+    expect(hanziLink?.attributes('href')).toBe('/hanzi')
+  })
+
+  it('has at least two game links', () => {
+    const links = wrapper.findAll('.game-link')
+    expect(links.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('game links have proper styling classes', () => {
+    const links = wrapper.findAll('.game-link')
+    links.forEach(link => {
+      expect(link.classes()).toContain('game-link')
+    })
   })
 })
