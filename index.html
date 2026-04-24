@@ -24,6 +24,24 @@
         padding: 0;
       }
     </style>
+    <script>
+      // 处理从404.html重定向过来的请求
+      (function() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var redirectPath = urlParams.get('redirect');
+        
+        if (redirectPath) {
+          // 移除redirect参数，恢复原始URL
+          var newPath = redirectPath.replace(window.location.search, '');
+          var newUrl = window.location.pathname + window.location.hash;
+          
+          // 使用history.replaceState来更新URL，避免页面刷新
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', newPath);
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>
