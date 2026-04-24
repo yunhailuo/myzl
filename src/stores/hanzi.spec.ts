@@ -119,10 +119,9 @@ describe('hanzi Store', () => {
       const store = useHanziStore()
       const firstSetId = store.enabledSetIds[0]
       
-      if (firstSetId) {
-        store.toggleCharacterSet(firstSetId)
-        expect(store.enabledSetIds).not.toContain(firstSetId)
-      }
+      expect(firstSetId).toBeDefined()
+      store.toggleCharacterSet(firstSetId!)
+      expect(store.enabledSetIds).not.toContain(firstSetId)
     })
 
     it('should enable a disabled set', () => {
@@ -130,21 +129,28 @@ describe('hanzi Store', () => {
       const allIds = store.availableSets.map((set) => set.id)
       const disabledId = allIds.find((id) => !store.enabledSetIds.includes(id))
       
-      if (disabledId) {
-        store.toggleCharacterSet(disabledId)
-        expect(store.enabledSetIds).toContain(disabledId)
-      }
+      expect(disabledId).toBeDefined()
+      store.toggleCharacterSet(disabledId!)
+      expect(store.enabledSetIds).toContain(disabledId)
     })
 
     it('should reload characters after toggling', () => {
       const store = useHanziStore()
       const initialLength = store.shuffledCharacters.length
-      const firstSetId = store.enabledSetIds[0]
       
-      if (firstSetId && store.enabledSetIds.length > 1) {
-        store.toggleCharacterSet(firstSetId)
-        expect(store.shuffledCharacters.length).not.toBe(initialLength)
+      // Ensure at least 2 sets are enabled for this test
+      if (store.enabledSetIds.length < 2) {
+        const allIds = store.availableSets.map((set) => set.id)
+        const disabledId = allIds.find((id) => !store.enabledSetIds.includes(id))
+        if (disabledId) {
+          store.toggleCharacterSet(disabledId)
+        }
       }
+      
+      expect(store.enabledSetIds.length).toBeGreaterThanOrEqual(2)
+      const firstSetId = store.enabledSetIds[0]
+      store.toggleCharacterSet(firstSetId!)
+      expect(store.shuffledCharacters.length).not.toBe(initialLength)
     })
   })
 

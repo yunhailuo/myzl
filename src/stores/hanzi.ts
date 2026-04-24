@@ -9,6 +9,10 @@ interface CharacterSet {
   data: string
 }
 
+interface CharactersJson {
+  characterSets: CharacterSet[]
+}
+
 /** Fisher-Yates shuffle algorithm */
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array]
@@ -47,7 +51,7 @@ export const useHanziStore = defineStore('hanzi', () => {
   /** Available character sets */
   const availableSets = computed(() => {
     try {
-      return (charactersData as any).characterSets as CharacterSet[]
+      return (charactersData as CharactersJson).characterSets
     } catch (error) {
       console.error('Failed to load character sets:', error)
       return []

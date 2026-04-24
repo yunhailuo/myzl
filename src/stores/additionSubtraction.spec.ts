@@ -81,9 +81,8 @@ describe('additionSubtraction Store', () => {
       for (let i = 0; i < 50; i++) {
         store.nextQuestion()
         const question = store.currentQuestion
-        if (question && question.op === '-') {
-          expect(question.num1).toBeGreaterThanOrEqual(question.num2)
-        }
+        expect(question).toBeDefined()
+        expect(question!.op !== '-' || question!.num1 >= question!.num2).toBe(true)
       }
     })
 
@@ -93,12 +92,11 @@ describe('additionSubtraction Store', () => {
       for (let i = 0; i < 30; i++) {
         store.nextQuestion()
         const question = store.currentQuestion
-        if (question) {
-          expect(question.num1).toBeGreaterThanOrEqual(1)
-          expect(question.num1).toBeLessThanOrEqual(19)
-          expect(question.num2).toBeGreaterThanOrEqual(1)
-          expect(question.num2).toBeLessThanOrEqual(19)
-        }
+        expect(question).toBeDefined()
+        expect(question!.num1).toBeGreaterThanOrEqual(1)
+        expect(question!.num1).toBeLessThanOrEqual(19)
+        expect(question!.num2).toBeGreaterThanOrEqual(1)
+        expect(question!.num2).toBeLessThanOrEqual(19)
       }
     })
   })
