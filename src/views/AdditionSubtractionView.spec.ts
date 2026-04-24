@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import AdditionSubtractionView from './AdditionSubtractionView.vue'
 
 const swipeLeft = async () => {
@@ -19,6 +20,9 @@ describe('AdditionSubtractionView.vue', () => {
   let wrapper: VueWrapper
 
   beforeEach(() => {
+    // 初始化 Pinia
+    setActivePinia(createPinia())
+    
     wrapper = mount(AdditionSubtractionView)
   })
 

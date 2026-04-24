@@ -1,42 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useAdditionSubtractionStore } from '../stores/additionSubtraction'
 
-interface Question {
-  num1: number
-  num2: number
-  op: '+' | '-'
-}
-
-const generateQuestion = (): Question => {
-  const op = Math.random() < 0.5 ? '+' : '-'
-  let num1 = Math.floor(Math.random() * 19) + 1
-  let num2 = Math.floor(Math.random() * 19) + 1
-  if (op === '-') {
-    if (num1 < num2) {
-      ;[num1, num2] = [num2, num1]
-    }
-  }
-  return { num1, num2, op }
-}
-
-const history = ref<Question[]>([generateQuestion()])
-const index = ref(0)
+const store = useAdditionSubtractionStore()
 const showConfig = ref(false)
-const enableArrows = ref(true)
-const enableNavigation = ref(true)
 const configOpen = ref(false)
-
-const currentQuestion = computed(() => history.value[index.value])
-const count = computed(() => index.value + 1)
-
-const nextQuestion = () => {
-  if (index.value < history.value.length - 1) {
-    index.value++
-  } else {
-    history.value.push(generateQuestion())
-    index.value = history.value.length - 1
-  }
-}
 
 const toggleConfig = () => {
   showConfig.value = !showConfig.value
@@ -47,28 +15,22 @@ const toggleConfig = () => {
   }
 }
 
-const previousQuestion = () => {
-  if (index.value > 0) {
-    index.value--
-  }
-}
-
 const handleSwipe = (direction: 'left' | 'right') => {
-  if (!enableNavigation.value) return
+  if (!store.enableNavigation) return
   if (direction === 'left') {
-    nextQuestion()
+    store.nextQuestion()
   } else {
-    previousQuestion()
+    store.previousQuestion()
   }
 }
 
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (!enableNavigation.value) return
+  if (!store.enableNavigation) return
   if (e.key === 'ArrowRight') {
-    nextQuestion()
+    store.nextQuestion()
   }
   if (e.key === 'ArrowLeft') {
-    previousQuestion()
+    store.previousQuestion()
   }
 }
 
@@ -111,7 +73,7 @@ onUnmounted(() => {
 <template>
   <div class="game">
     <div class="header">
-      <div class="counter">第 {{ count }} 题</div>
+      <div class="counter">第 {{ store.count }} 题</div>
       <button class="config-btn" @click="toggleConfig" aria-label="Settings">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path
@@ -140,13 +102,13 @@ onUnmounted(() => {
       </div>
       <div class="config-item">
         <label class="config-label">
-          <input v-model="enableArrows" type="checkbox" data-testid="toggle-arrows" />
+          <input v-model="store.enableArrows" type="checkbox" data-testid="toggle-arrows" />
           <span>显示左右箭头按钮</span>
         </label>
       </div>
       <div class="config-item">
         <label class="config-label">
-          <input v-model="enableNavigation" type="checkbox" data-testid="toggle-navigation" />
+          <input v-model="store.enableNavigation" type="checkbox" data-testid="toggle-navigation" />
           <span>启用键盘和滑动操作</span>
         </label>
       </div>
@@ -155,27 +117,27 @@ onUnmounted(() => {
     <div :class="['config-overlay', { active: configOpen }]" @click="toggleConfig"></div>
 
     <button
-      v-if="enableArrows"
+      v-if="store.enableArrows"
       class="nav-bar left"
-      @click="previousQuestion"
-      :disabled="index === 0"
+      @click="store.previousQuestion"
+      :disabled="store.currentIndex === 0"
       aria-label="Previous question"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
       </svg>
     </button>
-    <div :class="['question-area', { 'arrows-disabled': !enableArrows }]">
+    <div :class="['question-area', { 'arrows-disabled': !store.enableArrows }]">
       <div class="question-card">
         <div class="question">
-          {{ currentQuestion!.num1 }} {{ currentQuestion!.op }} {{ currentQuestion!.num2 }}
+          {{ store.currentQuestion!.num1 }} {{ store.currentQuestion!.op }} {{ store.currentQuestion!.num2 }}
         </div>
       </div>
     </div>
     <button
-      v-if="enableArrows"
+      v-if="store.enableArrows"
       class="nav-bar right"
-      @click="nextQuestion"
+      @click="store.nextQuestion"
       aria-label="Next question"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -247,7 +209,7 @@ onUnmounted(() => {
   border-left: 1px solid #ddd;
   padding: 1rem;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 1000;
   transform: translateX(100%);
   transition: transform 0.3s ease;
 }
@@ -263,7 +225,7 @@ onUnmounted(() => {
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9;
+  z-index: 999;
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
