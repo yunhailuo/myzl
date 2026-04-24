@@ -198,12 +198,16 @@ describe('AdditionSubtractionView.vue', () => {
       const match = questionText.match(/^(\d+) [+-] (\d+)$/)
       
       if (match) {
-        const num1 = parseInt(match[1])
-        const num2 = parseInt(match[2])
-        expect(num1).toBeGreaterThanOrEqual(1)
-        expect(num1).toBeLessThanOrEqual(19)
-        expect(num2).toBeGreaterThanOrEqual(1)
-        expect(num2).toBeLessThanOrEqual(19)
+        const num1Str = match[1]
+        const num2Str = match[2]
+        if (num1Str && num2Str) {
+          const num1 = parseInt(num1Str)
+          const num2 = parseInt(num2Str)
+          expect(num1).toBeGreaterThanOrEqual(1)
+          expect(num1).toBeLessThanOrEqual(19)
+          expect(num2).toBeGreaterThanOrEqual(1)
+          expect(num2).toBeLessThanOrEqual(19)
+        }
       }
     }
   })

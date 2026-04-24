@@ -7,7 +7,7 @@ import 'cnchar-poly'
 import 'cnchar-words'
 import { useHanziStore } from '../stores/hanzi'
 
-// 组词配置常量
+// Word display constants
 const WORD_LENGTH_MIN = 2
 const WORD_LENGTH_MAX = 3
 const WORD_DISPLAY_COUNT = 3
@@ -17,20 +17,20 @@ const writerRef = ref<HanziWriter | null>(null)
 const containerId = 'hanzi-container'
 const showConfig = ref(false)
 
-// 字库选择折叠状态(默认折叠)
+// Character set selection collapsed state (default collapsed)
 const charSetsExpanded = ref(false)
 
-// 本地遮罩状态(翻页时自动重置)
+// Local mask state (reset on page flip)
 const hidePinyin = ref(true)
 const hideWords = ref(true)
 
-// 监听翻页,重置遮罩
+// Reset masks on page change
 watch(() => store.currentIndex, () => {
   hidePinyin.value = true
   hideWords.value = true
 })
 
-// 计算属性
+// Computed properties
 const currentPinyin = computed(() => 
   store.currentCharacter ? pinyin(store.currentCharacter, { toneType: 'symbol' }) : ''
 )
@@ -54,7 +54,7 @@ const wordGroups = computed(() => {
 
 const count = computed(() => store.currentIndex + 1)
 
-// Hanzi Writer 初始化
+// Initialize Hanzi Writer
 const initWriter = (char: string) => {
   if (!writerRef.value) {
     writerRef.value = HanziWriter.create(containerId, char, {
@@ -80,7 +80,7 @@ const initWriter = (char: string) => {
   }
 }
 
-// 导航函数
+// Navigation functions
 const goToNext = () => {
   store.nextCharacter()
   if (store.currentCharacter) {
@@ -99,21 +99,21 @@ const toggleConfig = () => {
   showConfig.value = !showConfig.value
 }
 
-// 重新打乱字库并重置到第一个字
+// Reshuffle characters and reset to first
 const handleReshuffle = () => {
   store.reshuffleCharacters()
   
-  // 重新初始化当前字符的动画
+  // Reinitialize animation for current character
   if (store.currentCharacter) {
     initWriter(store.currentCharacter)
   }
   
-  // 重置遮罩
+  // Reset masks
   hidePinyin.value = true
   hideWords.value = true
 }
 
-// 手势和键盘事件
+// Gesture and keyboard events
 const handleSwipe = (direction: 'left' | 'right') => {
   if (!store.enableNavigation) return
   
@@ -153,7 +153,7 @@ const handleTouchEnd = (e: TouchEvent) => {
   const diffX = startX - endX
   const diffY = startY - endY
   
-  // 水平滑动距离大于垂直滑动且超过阈值
+  // Horizontal swipe distance greater than vertical and exceeds threshold
   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
     handleSwipe(diffX > 0 ? 'left' : 'right')
   }
@@ -172,7 +172,7 @@ onMounted(() => {
   document.addEventListener('touchend', handleTouchEnd)
 })
 
-// 监听循环动画设置变化
+// Watch loop animation setting changes
 watch(() => store.loopAnimation, (newVal) => {
   if (writerRef.value && store.currentCharacter) {
     writerRef.value.setCharacter(store.currentCharacter)
@@ -214,7 +214,7 @@ onUnmounted(() => {
     <div :class="['config-panel', { open: showConfig }]">
       <button class="close-btn" @click="toggleConfig" aria-label="Close settings">✕</button>
       
-      <!-- 字库选择(默认折叠) -->
+      <!-- Character set selection (default collapsed) -->
       <div class="config-section">
         <div class="section-header collapsible" @click="charSetsExpanded = !charSetsExpanded">
           <h4 class="section-title">📚 字库选择</h4>
@@ -239,7 +239,7 @@ onUnmounted(() => {
         </div>
       </div>
       
-      <!-- 其他设置项 -->
+      <!-- Other settings -->
       <div class="config-item">
         <label class="config-label">
           <input v-model="store.enableArrows" type="checkbox" data-testid="toggle-arrows" />
@@ -298,7 +298,7 @@ onUnmounted(() => {
           </div>
           <div :id="containerId"></div>
 
-          <!-- 组词显示区域 -->
+          <!-- Word display area -->
           <div
             v-if="store.showWords && wordGroups.length > 0"
             class="word-groups-container"
@@ -335,7 +335,7 @@ onUnmounted(() => {
   </div>
 </template>
 
-<!-- 样式部分 -->
+<!-- Style section -->
 <style scoped>
 .game {
   display: grid;
@@ -691,7 +691,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   max-width: 600px;
-  min-height: 50px; /* 确保即使隐藏也有占位或点击区域 */
+  min-height: 50px; /* Ensure placeholder or click area even when hidden */
   display: flex;
   justify-content: center;
   cursor: pointer;

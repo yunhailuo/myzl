@@ -155,7 +155,10 @@ describe('hanzi Store', () => {
       
       // Disable one set first
       if (store.enabledSetIds.length > 0) {
-        store.toggleCharacterSet(store.enabledSetIds[0])
+        const firstId = store.enabledSetIds[0]
+        if (firstId) {
+          store.toggleCharacterSet(firstId)
+        }
       }
       
       store.toggleAllSets()

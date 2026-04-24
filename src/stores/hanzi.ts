@@ -9,11 +9,7 @@ interface CharacterSet {
   data: string
 }
 
-/**
- * Fisher-Yates 洗牌算法
- * @param array 要打乱的数组
- * @returns 打乱后的新数组
- */
+/** Fisher-Yates shuffle algorithm */
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array]
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -28,30 +24,37 @@ function shuffleArray<T>(array: T[]): T[] {
 export const useHanziStore = defineStore('hanzi', () => {
   // ========== State ==========
   
-  /** 已启用的字库ID列表 */
+  /** Enabled character set IDs */
   const enabledSetIds = ref<string[]>([])
-  /** 打乱后的汉字数组 */
+  /** Shuffled character array */
   const shuffledCharacters = ref<string[]>([])
-  /** 当前学习位置索引 */
+  /** Current character index */
   const currentIndex = ref(0)
   
-  /** 是否显示左右箭头按钮 */
+  /** Show navigation arrows */
   const enableArrows = ref(true)
-  /** 是否启用键盘和滑动手势导航 */
+  /** Enable keyboard and swipe navigation */
   const enableNavigation = ref(true)
-  /** 是否显示拼音 */
+  /** Show pinyin */
   const showPinyin = ref(true)
-  /** 是否显示组词 */
+  /** Show word examples */
   const showWords = ref(true)
-  /** 是否循环播放笔顺动画 */
+  /** Loop stroke animation */
   const loopAnimation = ref(true)
 
   // ========== Getters ==========
   
-  /** 所有可用的字库列表 */
-  const availableSets = computed(() => charactersData.characterSets as CharacterSet[])
+  /** Available character sets */
+  const availableSets = computed(() => {
+    try {
+      return (charactersData as any).characterSets as CharacterSet[]
+    } catch (error) {
+      console.error('Failed to load character sets:', error)
+      return []
+    }
+  })
   
-  /** 当前学习的汉字 */
+  /** Current character */
   const currentCharacter = computed(() => 
     shuffledCharacters.value[currentIndex.value] || ''
   )
@@ -59,82 +62,93 @@ export const useHanziStore = defineStore('hanzi', () => {
   // ========== Actions ==========
   
   /**
-   * 初始化启用的字库(仅在首次加载时调用)
-   * 如果没有保存的状态,使用数据文件中的默认配置
+   * Initialize enabled character sets (called only on first load)
+   * Uses default configuration from data file if no saved state
    */
   function initEnabledSets() {
-    if (enabledSetIds.value.length === 0) {
-      enabledSetIds.value = charactersData.characterSets
-        .filter((set: CharacterSet) => set.enabled)
-        .map((set: CharacterSet) => set.id)
+    try {
+      if (enabledSetIds.value.length === 0) {
+        enabledSetIds.value = availableSets.value
+          .filter((set: CharacterSet) => set.enabled)
+          .map((set: CharacterSet) => set.id)
+      }
+    } catch (error) {
+      console.error('Failed to initialize enabled sets:', error)
+      enabledSetIds.value = []
     }
   }
 
   /**
-   * 加载并打乱字库
-   * 会重置当前进度到第一个字
+   * Load and shuffle characters
+   * Resets progress to first character
    */
   function loadCharacters() {
-    const allChars = availableSets.value
-      .filter((set: CharacterSet) => enabledSetIds.value.includes(set.id))
-      .flatMap((set: CharacterSet) => set.data.split(''))
-    
-    shuffledCharacters.value = shuffleArray(allChars)
-    currentIndex.value = 0
+    try {
+      const allChars = availableSets.value
+        .filter((set: CharacterSet) => enabledSetIds.value.includes(set.id))
+        .flatMap((set: CharacterSet) => set.data.split(''))
+      
+      shuffledCharacters.value = shuffleArray(allChars)
+      currentIndex.value = 0
+    } catch (error) {
+      console.error('Failed to load characters:', error)
+      shuffledCharacters.value = []
+      currentIndex.value = 0
+    }
   }
 
-  /**
-   * 重新随机打乱字库
-   * 会自动重置进度到第一个字
-   */
+  /** Reshuffle characters and reset progress */
   function reshuffleCharacters() {
     loadCharacters()
   }
 
-  /**
-   * 切换单个字库的启用状态
-   * @param setId 字库ID
-   */
+  /** Toggle single character set */
   function toggleCharacterSet(setId: string) {
-    const index = enabledSetIds.value.indexOf(setId)
-    if (index > -1) {
-      enabledSetIds.value.splice(index, 1)
-    } else {
-      enabledSetIds.value.push(setId)
+    try {
+      const index = enabledSetIds.value.indexOf(setId)
+      if (index > -1) {
+        enabledSetIds.value.splice(index, 1)
+      } else {
+        enabledSetIds.value.push(setId)
+      }
+      loadCharacters()
+    } catch (error) {
+      console.error('Failed to toggle character set:', error)
     }
-    loadCharacters()
   }
 
-  /**
-   * 全选或取消全选所有字库
-   */
+  /** Toggle all character sets */
   function toggleAllSets() {
-    const allIds = availableSets.value.map((set: CharacterSet) => set.id)
-    const isAllEnabled = allIds.every(id => enabledSetIds.value.includes(id))
-    enabledSetIds.value = isAllEnabled ? [] : [...allIds]
-    loadCharacters()
+    try {
+      const allIds = availableSets.value.map((set: CharacterSet) => set.id)
+      const isAllEnabled = allIds.every(id => enabledSetIds.value.includes(id))
+      enabledSetIds.value = isAllEnabled ? [] : [...allIds]
+      loadCharacters()
+    } catch (error) {
+      console.error('Failed to toggle all sets:', error)
+    }
   }
 
-  /** 跳转到下一个汉字 */
+  /** Go to next character */
   function nextCharacter() {
     if (currentIndex.value < shuffledCharacters.value.length - 1) {
       currentIndex.value++
     }
   }
 
-  /** 跳转到上一个汉字 */
+  /** Go to previous character */
   function previousCharacter() {
     if (currentIndex.value > 0) {
       currentIndex.value--
     }
   }
 
-  /** 重置到第一个汉字 */
+  /** Reset to first character */
   function resetToFirst() {
     currentIndex.value = 0
   }
 
-  // ========== 初始化 ==========
+  // ========== Initialization ==========
   initEnabledSets()
   if (shuffledCharacters.value.length === 0) {
     loadCharacters()

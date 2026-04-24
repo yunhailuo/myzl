@@ -40,7 +40,8 @@ describe('HomeView.vue', () => {
   it('shows the addition and subtraction game', () => {
     const links = wrapper.findAll('.game-link')
     expect(links.length).toBeGreaterThan(0)
-    expect(links[0]?.text()).toBe('加减法')
+    // 游戏链接包含图标、标题和描述
+    expect(links[0]?.text()).toContain('加减法')
   })
 
   it('has correct route for addition-subtraction game', () => {
@@ -50,13 +51,14 @@ describe('HomeView.vue', () => {
 
   it('shows the hanzi game', () => {
     const links = wrapper.findAll('.game-link')
-    const hanziLink = links.find(link => link.text() === '汉字')
+    // 使用toContain来匹配包含图标的文本
+    const hanziLink = links.find(link => link.text().includes('汉字'))
     expect(hanziLink).toBeDefined()
   })
 
   it('has correct route for hanzi game', () => {
     const links = wrapper.findAll('.game-link')
-    const hanziLink = links.find(link => link.text() === '汉字')
+    const hanziLink = links.find(link => link.text().includes('汉字'))
     expect(hanziLink?.attributes('href')).toBe('/hanzi')
   })
 

@@ -4,19 +4,13 @@ import { useAdditionSubtractionStore } from '../stores/additionSubtraction'
 
 const store = useAdditionSubtractionStore()
 const showConfig = ref(false)
-const configOpen = ref(false)
 
 const toggleConfig = () => {
   showConfig.value = !showConfig.value
-  if (showConfig.value) {
-    configOpen.value = true
-  } else {
-    configOpen.value = false
-  }
 }
 
 const handleSwipe = (direction: 'left' | 'right') => {
-  if (!store.enableNavigation) return
+  if (!store.enableNavigation || showConfig.value) return
   if (direction === 'left') {
     store.nextQuestion()
   } else {
@@ -25,7 +19,7 @@ const handleSwipe = (direction: 'left' | 'right') => {
 }
 
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (!store.enableNavigation) return
+  if (!store.enableNavigation || showConfig.value) return
   if (e.key === 'ArrowRight') {
     store.nextQuestion()
   }
@@ -114,7 +108,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div :class="['config-overlay', { active: configOpen }]" @click="toggleConfig"></div>
+    <div :class="['config-overlay', { active: showConfig }]" @click="toggleConfig"></div>
 
     <button
       v-if="store.enableArrows"

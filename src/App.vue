@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
+import { GAMES_REGISTRY } from '@/data/games'
 
 const menuOpen = ref(false)
 
@@ -47,8 +48,15 @@ const toggleMenu = () => {
         </button>
       </div>
       <RouterLink to="/" @click="menuOpen = false">首页</RouterLink>
-      <RouterLink to="/addition-subtraction" @click="menuOpen = false">加减法</RouterLink>
-      <RouterLink to="/hanzi" @click="menuOpen = false">汉字</RouterLink>
+      <RouterLink 
+        v-for="game in GAMES_REGISTRY" 
+        :key="game.path" 
+        :to="game.path" 
+        @click="menuOpen = false"
+      >
+        <span v-if="game.icon" class="nav-icon">{{ game.icon }}</span>
+        {{ game.title }}
+      </RouterLink>
     </nav>
 
     <div v-if="menuOpen" class="overlay" @click="menuOpen = false"></div>
@@ -184,6 +192,9 @@ const toggleMenu = () => {
   text-decoration: none;
   color: #333;
   border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .nav a:last-child {
@@ -192,6 +203,10 @@ const toggleMenu = () => {
 
 .nav a:hover {
   background: #e9ecef;
+}
+
+.nav-icon {
+  font-size: 1.2rem;
 }
 
 .main {

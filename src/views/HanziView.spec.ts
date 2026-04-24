@@ -322,7 +322,8 @@ describe('HanziView.vue', () => {
       const loopToggle = wrapper.find('[data-testid="toggle-loop"]')
       await loopToggle.setValue(false)
       
-      expect(loopToggle.element.checked).toBe(false)
+      const inputElement = loopToggle.element as HTMLInputElement
+      expect(inputElement.checked).toBe(false)
     })
   })
 })

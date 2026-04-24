@@ -6,174 +6,146 @@ It is written for both human contributors and coding agents.
 
 ## Overview
 
-Adding a new game usually means touching these areas:
+Adding a new game now requires modifying only **one configuration file**: [`src/data/games.ts`](../src/data/games.ts)
 
-1. Create a new view component in `src/views/`
-2. Register a new route in `src/router/index.ts`
-3. Add a visible entry on the home page in `src/views/HomeView.vue`
-4. Add a navigation link in `src/App.vue`
-5. Add unit tests and E2E coverage
-6. Update docs if the product surface changed
+The system automatically:
+- ✅ Generates route configurations
+- ✅ Adds navigation menu entries
+- ✅ Displays the game on the home page
 
-## Current Pattern
+## Quick Start
 
-The existing game uses this structure:
+### Step 1. Create the View Component
 
-- View: `src/views/AdditionSubtractionView.vue`
-- Route: `/addition-subtraction`
-- Home screen link: `src/views/HomeView.vue`
-- App menu link: `src/App.vue`
-- Unit test: `src/views/AdditionSubtractionView.spec.ts`
-- E2E coverage: `e2e/vue.spec.ts`
+Create a new Vue component in the `src/views/` directory, for example: `MyNewGameView.vue`
 
-Use that flow as the baseline for a new game.
+```vue
+<script setup lang="ts">
+// Your game logic here
+</script>
 
-## Step 1. Create the new view
+<template>
+  <div class="game">
+    <h1>My New Game</h1>
+  </div>
+</template>
 
-Add a new view file in `src/views/`.
-
-Example:
-
-```text
-src/views/MultiplicationView.vue
+<style scoped>
+/* Styles */
+</style>
 ```
 
-Recommended expectations:
+### Step 2. Register the Game
 
-- keep the component self-contained at first
-- use TypeScript
-- prefer local state unless shared state is clearly needed
-- keep visible labels easy to test
-- if the game has settings or controls, give them stable accessible names
+Open [`src/data/games.ts`](../src/data/games.ts) and add a new entry to the [GAMES_REGISTRY](../src/data/games.ts#L20-L45) array:
 
-If the game has meaningful logic, also consider adding a matching test file right away:
-
-```text
-src/views/MultiplicationView.spec.ts
-```
-
-## Step 2. Register the route
-
-Open `src/router/index.ts` and add a new route entry.
-
-Example:
-
-```ts
-{
-  path: '/multiplication',
-  name: 'multiplication',
-  component: () => import('../views/MultiplicationView.vue'),
-}
-```
-
-Notes:
-
-- keep route names simple and stable
-- prefer lazy-loaded view imports for game views
-- use lowercase kebab-case for paths
-
-## Step 3. Add the game to the home screen
-
-Open `src/views/HomeView.vue` and add the new game to the `games` list.
-
-Current pattern:
-
-```ts
-const games = [{ name: '加减法', route: '/addition-subtraction' }]
-```
-
-Example update:
-
-```ts
-const games = [
-  { name: '加减法', route: '/addition-subtraction' },
-  { name: '乘法', route: '/multiplication' },
+```typescript
+export const GAMES_REGISTRY: GameMeta[] = [
+  // ... existing games
+  
+  {
+    path: '/my-new-game',           // Route path
+    name: 'my-new-game',            // Route name (should match component name)
+    title: 'My New Game',           // Display title
+    description: 'Game description', // Optional: short description
+    icon: '🎮',                     // Optional: Emoji icon
+    component: 'MyNewGameView',     // Component filename (without .vue extension)
+  },
 ]
 ```
 
-This controls what users see on the home screen.
+### Step 3. Done! ✅
 
-## Step 4. Add the game to the app menu
+That's it! The system will automatically:
+- Generate the route configuration
+- Add it to the navigation menu
+- Display it on the home page game list
 
-Open `src/App.vue` and add a new `RouterLink` inside the side menu.
+**No need to modify any other files!**
 
-Example:
+## Field Reference
 
-```vue
-<RouterLink to="/multiplication" @click="menuOpen = false">乘法</RouterLink>
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `path` | string | ✅ | Route path, must start with `/` |
+| `name` | string | ✅ | Route name, recommended to match component name |
+| `title` | string | ✅ | Game display title |
+| `description` | string | ❌ | Short game description |
+| `icon` | string | ❌ | Emoji or icon identifier |
+| `component` | string | ✅ | Component filename (without `.vue` extension) |
+
+## Examples
+
+### Example 1: Adding a Pinyin Practice Game
+
+```typescript
+{
+  path: '/pinyin',
+  name: 'pinyin',
+  title: 'Pinyin',
+  description: 'Pinyin recognition practice',
+  icon: '🔤',
+  component: 'PinyinView',
+}
 ```
 
-This keeps the menu aligned with the home screen.
+Then create the `src/views/PinyinView.vue` file.
 
-## Step 5. Add tests
+### Example 2: Adding an English Words Game
 
-### Unit tests
-
-Add a unit test file for the new view:
-
-```text
-src/views/MultiplicationView.spec.ts
+```typescript
+{
+  path: '/english-words',
+  name: 'english-words',
+  title: 'English Words',
+  description: 'English vocabulary memory practice',
+  icon: '🇬🇧',
+  component: 'EnglishWordsView',
+}
 ```
 
-Recommended minimum coverage:
+Then create the `src/views/EnglishWordsView.vue` file.
 
-- the screen renders
-- the main game prompt or UI appears
-- main controls work
-- any settings toggles work
-- core game invariants hold
+## Benefits
 
-Examples of invariants:
+1. **Single Source of Truth** - Only maintain one file: [games.ts](file:///media/yunhai-luo/Life/GitHub/myzl/src/data/games.ts)
+2. **Automated Routing** - Route configurations are generated automatically
+3. **Type Safety** - Full TypeScript support with type checking
+4. **Easy to Extend** - Adding a new game requires just 3 steps: create component → register config → done
 
-- generated values stay inside expected bounds
-- disabled controls do not trigger behavior
-- history or score state updates correctly
+## Important Notes
 
-### E2E tests
+1. Component filenames must exactly match the `component` field (case-sensitive)
+2. Component files must be placed in the `src/views/` directory
+3. Route paths should be unique to avoid conflicts
+4. Use kebab-case for route paths (e.g., `/my-game`)
+5. Use PascalCase for component names (e.g., `MyGameView`)
 
-Update `e2e/vue.spec.ts` or add another E2E spec if the flow gets large.
+## Testing Requirements
 
-Recommended minimum coverage:
+After adding a new game, ensure you:
 
-- the new game appears on the home page
-- clicking it navigates to the correct route
-- the game’s main interaction works once end-to-end
+### Unit Tests
+- Create a test file: `src/views/MyNewGameView.spec.ts`
+- Test that the component renders correctly
+- Test main game interactions and controls
+- Verify core game logic and invariants
 
-Prefer Playwright queries like:
+### E2E Tests
+- Update `e2e/vue.spec.ts` to include the new game
+- Test navigation from home page to the game
+- Test basic game functionality end-to-end
 
-- `getByRole`
-- `getByLabel`
-- accessible button and link names
-
-Use `data-testid` only when accessible queries are not enough.
-
-## Step 6. Update documentation
-
-Update docs when a new game changes the product surface.
-
-At minimum, review:
-
-- `README.md`
-- `AGENTS.md`
-
-Things to update:
-
-- current experience or supported modes
-- roadmap notes if the new game changes direction
-- testing notes if the game introduces a new pattern
-
-## Suggested Checklist
+## Checklist
 
 Use this before considering the work complete:
 
 ```md
-- [ ] Added new view in `src/views/`
-- [ ] Added route in `src/router/index.ts`
-- [ ] Added home screen entry in `src/views/HomeView.vue`
-- [ ] Added app menu entry in `src/App.vue`
-- [ ] Added or updated unit tests
+- [ ] Created new view in `src/views/`
+- [ ] Added game registration in `src/data/games.ts`
+- [ ] Added unit tests for the new view
 - [ ] Added or updated E2E tests
-- [ ] Updated `README.md`
+- [ ] Updated `README.md` if needed
 - [ ] Updated `AGENTS.md` if agent guidance changed
 - [ ] Ran `npm run type-check`
 - [ ] Ran `npm run lint`
@@ -181,12 +153,13 @@ Use this before considering the work complete:
 - [ ] Ran `npm run build`
 ```
 
-## Recommended Next Improvement
+## Architecture
 
-Right now the repo repeats game metadata in:
+The game registry system works as follows:
 
-- `src/views/HomeView.vue`
-- `src/App.vue`
-- `src/router/index.ts`
+1. **Central Configuration**: All game metadata is defined in [`src/data/games.ts`](../src/data/games.ts)
+2. **Automatic Route Generation**: The [`generateRoutes()`](../src/data/games.ts#L60-L68) function creates Vue Router configurations dynamically
+3. **Dynamic Imports**: Routes use lazy-loading via `import()` for better performance
+4. **Consistent Navigation**: Both the home page and app menu pull from the same registry, ensuring consistency
 
-If you add more games, consider introducing a shared game registry so routes, menus, and home cards stay in sync more easily.
+This eliminates the need to manually synchronize routes, menus, and home page entries across multiple files.

@@ -47,7 +47,8 @@ describe('additionSubtraction Store', () => {
       // Generate multiple questions to ensure we get an addition
       for (let i = 0; i < 20; i++) {
         store.nextQuestion()
-        if (store.currentQuestion.op === '+') {
+        const question = store.currentQuestion
+        if (question && question.op === '+') {
           hasAddition = true
           break
         }
@@ -63,7 +64,8 @@ describe('additionSubtraction Store', () => {
       // Generate multiple questions to ensure we get a subtraction
       for (let i = 0; i < 20; i++) {
         store.nextQuestion()
-        if (store.currentQuestion.op === '-') {
+        const question = store.currentQuestion
+        if (question && question.op === '-') {
           hasSubtraction = true
           break
         }
@@ -78,8 +80,9 @@ describe('additionSubtraction Store', () => {
       // Generate many questions and check all subtractions
       for (let i = 0; i < 50; i++) {
         store.nextQuestion()
-        if (store.currentQuestion.op === '-') {
-          expect(store.currentQuestion.num1).toBeGreaterThanOrEqual(store.currentQuestion.num2)
+        const question = store.currentQuestion
+        if (question && question.op === '-') {
+          expect(question.num1).toBeGreaterThanOrEqual(question.num2)
         }
       }
     })
@@ -89,10 +92,13 @@ describe('additionSubtraction Store', () => {
       
       for (let i = 0; i < 30; i++) {
         store.nextQuestion()
-        expect(store.currentQuestion.num1).toBeGreaterThanOrEqual(1)
-        expect(store.currentQuestion.num1).toBeLessThanOrEqual(19)
-        expect(store.currentQuestion.num2).toBeGreaterThanOrEqual(1)
-        expect(store.currentQuestion.num2).toBeLessThanOrEqual(19)
+        const question = store.currentQuestion
+        if (question) {
+          expect(question.num1).toBeGreaterThanOrEqual(1)
+          expect(question.num1).toBeLessThanOrEqual(19)
+          expect(question.num2).toBeGreaterThanOrEqual(1)
+          expect(question.num2).toBeLessThanOrEqual(19)
+        }
       }
     })
   })

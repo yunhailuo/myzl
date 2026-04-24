@@ -13,7 +13,7 @@ export default mergeConfig(
         provider: 'v8',
         reporter: ['text', 'json', 'html'],
         exclude: [
-          ...configDefaults.coverage.exclude,
+          ...(configDefaults.coverage.exclude || []),
           'e2e/**',
           '**/*.d.ts',
           '**/*.spec.ts',
