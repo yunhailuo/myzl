@@ -7,22 +7,27 @@ Use it to understand the project quickly, choose the right commands, and make ch
 ## Project Snapshot
 
 - App name: `MYZL`
-- Product type: child-friendly arithmetic practice app
+- Product type: child-friendly educational practice app
 - Framework: Vue 3 + TypeScript + Vite
 - Routing: Vue Router history mode
-- Current game: addition and subtraction practice within `1-19`
+- Current games: 
+  - Addition and subtraction practice (1-19)
+  - Chinese character learning (Hanzi recognition and stroke animation)
 - Hosting targets: GitHub Pages and Cloudflare Pages
 
 ## What the App Does Today
 
 - Shows a home screen with game selection
-- Supports one playable mode: `加减法`
-- Generates random addition and subtraction questions
-- Keeps question history so users can move backward and forward
+- Supports two playable modes:
+  - **加减法**: Random addition/subtraction questions with navigation history
+  - **汉字**: Character learning with pinyin, word examples, and stroke order animation
+- Question/character generation with randomization
+- Keeps history so users can move backward and forward
 - Supports arrow-button navigation
 - Supports keyboard arrow navigation
 - Supports touch swipe navigation
-- Includes a settings drawer for toggling arrows and keyboard/swipe controls
+- Includes settings drawers for toggling UI options and controls
+- Settings persist across page reloads via localStorage
 
 ## Key Files
 
@@ -33,10 +38,25 @@ Use it to understand the project quickly, choose the right commands, and make ch
   Purpose: home screen with game links
 
 - `src/views/AdditionSubtractionView.vue`
-  Purpose: main practice experience, question generation, navigation behavior, settings drawer
+  Purpose: arithmetic practice experience, question generation, navigation behavior, settings drawer
+
+- `src/views/HanziView.vue`
+  Purpose: Chinese character learning experience, character display, pinyin/word toggles, stroke animation, settings drawer
 
 - `src/router/index.ts`
   Purpose: application routes
+
+- `src/data/games.ts`
+  Purpose: game registry and route generation system
+
+- `src/stores/additionSubtraction.ts`
+  Purpose: Pinia store for arithmetic game state and logic
+
+- `src/stores/hanzi.ts`
+  Purpose: Pinia store for Hanzi game state, character sets, and logic
+
+- `src/data/characters.json`
+  Purpose: Chinese character dataset organized by grade levels
 
 - `src/assets/base.css`
   Purpose: global design tokens and base styles
@@ -49,6 +69,9 @@ Use it to understand the project quickly, choose the right commands, and make ch
 
 - `src/views/AdditionSubtractionView.spec.ts`
   Purpose: unit tests for arithmetic game behavior
+
+- `src/views/HanziView.spec.ts`
+  Purpose: unit tests for Hanzi learning behavior
 
 - `e2e/vue.spec.ts`
   Purpose: Playwright smoke coverage for core user flows
@@ -129,8 +152,9 @@ npm run build
 
 ### When changing gameplay
 
-- Start in `src/views/AdditionSubtractionView.vue`.
-- Keep the random question generator behavior easy to test.
+- Start in the relevant view component (`AdditionSubtractionView.vue` or `HanziView.vue`).
+- Game logic is managed in corresponding Pinia stores (`additionSubtraction.ts` or `hanzi.ts`).
+- Keep the random question/character generator behavior easy to test.
 - Add or update tests for any behavior changes.
 - Prefer small, explicit state changes over deeply nested logic.
 
@@ -151,9 +175,10 @@ npm run build
 ### When adding a new game
 
 - Follow `docs/ADDING_GAME.md` as the default workflow.
-- Add the route in `src/router/index.ts`.
-- Add a visible entry point in `src/views/HomeView.vue`.
-- Update navigation links in `src/App.vue`.
+- Add the game entry to `src/data/games.ts` GAMES_REGISTRY array.
+- The system automatically generates routes and adds navigation entries.
+- Create the view component in `src/views/` following the naming convention.
+- Create a Pinia store in `src/stores/` if the game needs shared/persistent state.
 - Add unit and E2E coverage for the new flow.
 - Update `README.md` and this file if the product surface changes.
 
@@ -163,6 +188,7 @@ npm run build
 - Prefer assertions about user-visible behavior rather than internal implementation details.
 - Use stable selectors where needed, such as `data-testid`, but favor accessible queries in Playwright.
 - If a test depends on current DOM after a UI transition, re-query the DOM instead of reusing stale wrappers.
+- Initialize Pinia in unit tests before mounting components that use stores.
 
 ## Deployment Notes
 
@@ -182,18 +208,19 @@ npm run build
 
 These are useful to know before changing behavior:
 
-- The app currently shows questions but does not accept or grade answers.
-- Settings are not persisted across reloads.
-- Game logic still lives inside the main game view component.
-- There is only one playable mode today.
+- The app currently shows questions/characters but does not accept or grade answers.
+- There is no correctness tracking or review system for missed questions.
+- Game difficulty is not configurable (fixed range for arithmetic).
+- No adaptive difficulty based on user performance.
 
 ## Good Next Improvements
 
-- Add answer reveal or answer entry
+- Add answer reveal or answer entry for arithmetic practice
 - Track correctness and review missed questions
-- Persist settings in local storage
-- Extract gameplay logic into a composable
-- Add configurable difficulty or operation filters
+- Add configurable difficulty or operation filters for arithmetic
+- Extract reusable navigation logic into composables
+- Add more character sets or learning modes for Hanzi
+- Implement spaced repetition or progress tracking
 
 ## Agent Checklist Before Finishing
 
