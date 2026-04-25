@@ -7,12 +7,7 @@
   --text-primary: #1f2933;
   --text-secondary: #52606d;
   --shadow-soft: 0 18px 50px rgba(15, 23, 42, 0.08);
-  --font-body:
-    'Noto Sans SC',
-    'PingFang SC',
-    'Hiragino Sans GB',
-    'Microsoft YaHei',
-    sans-serif;
+  --font-body: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 }
 
 *,

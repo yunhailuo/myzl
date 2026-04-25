@@ -37,6 +37,14 @@ export const GAMES_REGISTRY: GameMeta[] = [
     icon: '🀄',
     component: 'HanziView',
   },
+  {
+    path: '/distributive-law',
+    name: 'distributive-law',
+    title: '分配律',
+    description: '乘法分配律简便计算练习',
+    icon: '✖️',
+    component: 'DistributiveLawView',
+  },
 ]
 
 /** Get game metadata by path */

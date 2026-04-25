@@ -43,7 +43,7 @@ describe('additionSubtraction Store', () => {
     it('should generate addition questions', () => {
       const store = useAdditionSubtractionStore()
       let hasAddition = false
-      
+
       // Generate multiple questions to ensure we get an addition
       for (let i = 0; i < 20; i++) {
         store.nextQuestion()
@@ -53,14 +53,14 @@ describe('additionSubtraction Store', () => {
           break
         }
       }
-      
+
       expect(hasAddition).toBe(true)
     })
 
     it('should generate subtraction questions', () => {
       const store = useAdditionSubtractionStore()
       let hasSubtraction = false
-      
+
       // Generate multiple questions to ensure we get a subtraction
       for (let i = 0; i < 20; i++) {
         store.nextQuestion()
@@ -70,13 +70,13 @@ describe('additionSubtraction Store', () => {
           break
         }
       }
-      
+
       expect(hasSubtraction).toBe(true)
     })
 
     it('should ensure subtraction results are non-negative', () => {
       const store = useAdditionSubtractionStore()
-      
+
       // Generate many questions and check all subtractions
       for (let i = 0; i < 50; i++) {
         store.nextQuestion()
@@ -88,7 +88,7 @@ describe('additionSubtraction Store', () => {
 
     it('should generate numbers between 1 and 19', () => {
       const store = useAdditionSubtractionStore()
-      
+
       for (let i = 0; i < 30; i++) {
         store.nextQuestion()
         const question = store.currentQuestion
@@ -105,9 +105,9 @@ describe('additionSubtraction Store', () => {
     it('should move to next question and create new one if at end', () => {
       const store = useAdditionSubtractionStore()
       const initialLength = store.history.length
-      
+
       store.nextQuestion()
-      
+
       expect(store.currentIndex).toBe(1)
       expect(store.history.length).toBe(initialLength + 1)
       expect(store.count).toBe(2)
@@ -115,26 +115,26 @@ describe('additionSubtraction Store', () => {
 
     it('should move to existing next question without creating new one', () => {
       const store = useAdditionSubtractionStore()
-      
+
       // Create a few questions
       store.nextQuestion()
       store.nextQuestion()
       const historyLength = store.history.length
-      
+
       // Go back and then forward
       store.previousQuestion()
       store.nextQuestion()
-      
+
       expect(store.history.length).toBe(historyLength) // No new question created
     })
 
     it('should move to previous question', () => {
       const store = useAdditionSubtractionStore()
-      
+
       store.nextQuestion()
       store.nextQuestion()
       expect(store.currentIndex).toBe(2)
-      
+
       store.previousQuestion()
       expect(store.currentIndex).toBe(1)
       expect(store.count).toBe(2)
@@ -142,19 +142,19 @@ describe('additionSubtraction Store', () => {
 
     it('should not go below index 0', () => {
       const store = useAdditionSubtractionStore()
-      
+
       store.previousQuestion()
       expect(store.currentIndex).toBe(0)
     })
 
     it('should reset to first question', () => {
       const store = useAdditionSubtractionStore()
-      
+
       store.nextQuestion()
       store.nextQuestion()
       store.nextQuestion()
       expect(store.currentIndex).toBe(3)
-      
+
       store.resetToFirst()
       expect(store.currentIndex).toBe(0)
       expect(store.count).toBe(1)
@@ -164,10 +164,10 @@ describe('additionSubtraction Store', () => {
   describe('persistence configuration', () => {
     it('should persist enableArrows and enableNavigation settings', () => {
       const store = useAdditionSubtractionStore()
-      
+
       store.enableArrows = false
       store.enableNavigation = false
-      
+
       expect(store.$state.enableArrows).toBe(false)
       expect(store.$state.enableNavigation).toBe(false)
     })

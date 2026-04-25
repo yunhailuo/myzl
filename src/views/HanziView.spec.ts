@@ -27,9 +27,9 @@ vi.mock('cnchar', () => ({
 vi.mock('pinyin-pro', () => ({
   pinyin: vi.fn((char) => {
     const pinyinMap: Record<string, string> = {
-      '汉': 'hàn',
-      '字': 'zì',
-      '文': 'wén',
+      汉: 'hàn',
+      字: 'zì',
+      文: 'wén',
     }
     return pinyinMap[char] || 'test'
   }),
@@ -40,7 +40,7 @@ describe('HanziView.vue', () => {
 
   beforeEach(() => {
     setActivePinia(createPinia())
-    
+
     wrapper = mount(HanziView, {
       global: {
         stubs: {
@@ -86,7 +86,7 @@ describe('HanziView.vue', () => {
     it('opens config panel when settings button is clicked', async () => {
       const configBtn = wrapper.findAll('.config-btn')[1]
       await configBtn?.trigger('click')
-      
+
       expect(wrapper.find('.config-panel').classes()).toContain('open')
       expect(wrapper.find('.config-overlay').classes()).toContain('active')
     })
@@ -95,7 +95,7 @@ describe('HanziView.vue', () => {
       const configBtn = wrapper.findAll('.config-btn')[1]
       await configBtn?.trigger('click')
       await wrapper.find('.close-btn').trigger('click')
-      
+
       expect(wrapper.find('.config-panel').classes()).not.toContain('open')
     })
 
@@ -103,14 +103,14 @@ describe('HanziView.vue', () => {
       const configBtn = wrapper.findAll('.config-btn')[1]
       await configBtn?.trigger('click')
       await wrapper.find('.config-overlay').trigger('click')
-      
+
       expect(wrapper.find('.config-panel').classes()).not.toContain('open')
     })
 
     it('shows all configuration options', async () => {
       const configBtn = wrapper.findAll('.config-btn')[1]
       await configBtn?.trigger('click')
-      
+
       expect(wrapper.find('[data-testid="toggle-arrows"]').exists()).toBe(true)
       expect(wrapper.find('[data-testid="toggle-navigation"]').exists()).toBe(true)
       expect(wrapper.find('[data-testid="toggle-pinyin"]').exists()).toBe(true)
@@ -123,17 +123,17 @@ describe('HanziView.vue', () => {
     it('has collapsible character sets section', async () => {
       const configBtn = wrapper.findAll('.config-btn')[1]
       await configBtn?.trigger('click')
-      
+
       expect(wrapper.find('.section-header.collapsible').exists()).toBe(true)
     })
 
     it('toggles character sets visibility', async () => {
       const configBtn = wrapper.findAll('.config-btn')[1]
       await configBtn?.trigger('click')
-      
+
       const header = wrapper.find('.section-header.collapsible')
       await header.trigger('click')
-      
+
       // Should expand/collapse (v-show toggles display)
       expect(wrapper.find('.set-list').exists()).toBe(true)
     })
@@ -143,7 +143,7 @@ describe('HanziView.vue', () => {
       await configBtn?.trigger('click')
       const header = wrapper.find('.section-header.collapsible')
       await header.trigger('click')
-      
+
       expect(wrapper.find('.select-all-btn').exists()).toBe(true)
     })
 
@@ -152,7 +152,7 @@ describe('HanziView.vue', () => {
       await configBtn?.trigger('click')
       const header = wrapper.find('.section-header.collapsible')
       await header.trigger('click')
-      
+
       const setItems = wrapper.findAll('.set-item')
       expect(setItems.length).toBeGreaterThan(0)
     })
@@ -170,7 +170,7 @@ describe('HanziView.vue', () => {
 
     it('toggles pinyin visibility when clicked', async () => {
       await wrapper.find('.pinyin-container').trigger('click')
-      
+
       expect(wrapper.find('.pinyin-mask').exists()).toBe(false)
       expect(wrapper.find('.pinyin-display').classes()).not.toContain('hidden')
     })
@@ -192,7 +192,7 @@ describe('HanziView.vue', () => {
 
     it('toggles words visibility when clicked', async () => {
       await wrapper.find('.word-groups-container').trigger('click')
-      
+
       expect(wrapper.find('.word-groups-mask').exists()).toBe(false)
     })
 
@@ -211,7 +211,7 @@ describe('HanziView.vue', () => {
     it('calls reshuffle when button is clicked', async () => {
       const reshuffleBtn = wrapper.findAll('.config-btn')[0]
       await reshuffleBtn?.trigger('click')
-      
+
       // After reshuffle, should still be on first character
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
@@ -221,7 +221,7 @@ describe('HanziView.vue', () => {
     it('moves to next character with ArrowRight', async () => {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.find('.counter').text()).toContain('第 2 个')
     })
 
@@ -230,7 +230,7 @@ describe('HanziView.vue', () => {
       await wrapper.vm.$nextTick()
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }))
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
 
@@ -238,7 +238,7 @@ describe('HanziView.vue', () => {
       await wrapper.find('[data-testid="toggle-navigation"]').setValue(false)
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
   })
@@ -260,7 +260,7 @@ describe('HanziView.vue', () => {
     it('moves to next character on swipe left', async () => {
       simulateSwipe(180, 80)
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.find('.counter').text()).toContain('第 2 个')
     })
 
@@ -269,7 +269,7 @@ describe('HanziView.vue', () => {
       await wrapper.vm.$nextTick()
       simulateSwipe(80, 180) // Then go back
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
 
@@ -277,14 +277,14 @@ describe('HanziView.vue', () => {
       await wrapper.find('[data-testid="toggle-navigation"]').setValue(false)
       simulateSwipe(180, 80)
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
 
     it('ignores small swipes below threshold', async () => {
       simulateSwipe(100, 90) // Only 10px difference
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
   })
@@ -294,11 +294,11 @@ describe('HanziView.vue', () => {
       // First reveal pinyin
       await wrapper.find('.pinyin-container').trigger('click')
       expect(wrapper.find('.pinyin-mask').exists()).toBe(false)
-      
+
       // Navigate to next
       await wrapper.find('.nav-bar.right').trigger('click')
       await wrapper.vm.$nextTick()
-      
+
       // Mask should be reset
       expect(wrapper.find('.pinyin-mask').exists()).toBe(true)
     })
@@ -307,11 +307,11 @@ describe('HanziView.vue', () => {
       // First reveal words
       await wrapper.find('.word-groups-container').trigger('click')
       expect(wrapper.find('.word-groups-mask').exists()).toBe(false)
-      
+
       // Navigate to next
       await wrapper.find('.nav-bar.right').trigger('click')
       await wrapper.vm.$nextTick()
-      
+
       // Mask should be reset
       expect(wrapper.find('.word-groups-mask').exists()).toBe(true)
     })
@@ -321,7 +321,7 @@ describe('HanziView.vue', () => {
     it('updates animation when loop toggle changes', async () => {
       const loopToggle = wrapper.find('[data-testid="toggle-loop"]')
       await loopToggle.setValue(false)
-      
+
       const inputElement = loopToggle.element as HTMLInputElement
       expect(inputElement.checked).toBe(false)
     })

@@ -48,10 +48,10 @@ const toggleMenu = () => {
         </button>
       </div>
       <RouterLink to="/" @click="menuOpen = false">首页</RouterLink>
-      <RouterLink 
-        v-for="game in GAMES_REGISTRY" 
-        :key="game.path" 
-        :to="game.path" 
+      <RouterLink
+        v-for="game in GAMES_REGISTRY"
+        :key="game.path"
+        :to="game.path"
         @click="menuOpen = false"
       >
         <span v-if="game.icon" class="nav-icon">{{ game.icon }}</span>

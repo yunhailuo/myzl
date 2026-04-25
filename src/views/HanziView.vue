@@ -25,14 +25,17 @@ const hidePinyin = ref(true)
 const hideWords = ref(true)
 
 // Reset masks on page change
-watch(() => store.currentIndex, () => {
-  hidePinyin.value = true
-  hideWords.value = true
-})
+watch(
+  () => store.currentIndex,
+  () => {
+    hidePinyin.value = true
+    hideWords.value = true
+  },
+)
 
 // Computed properties
-const currentPinyin = computed(() => 
-  store.currentCharacter ? pinyin(store.currentCharacter, { toneType: 'symbol' }) : ''
+const currentPinyin = computed(() =>
+  store.currentCharacter ? pinyin(store.currentCharacter, { toneType: 'symbol' }) : '',
 )
 
 const wordGroups = computed(() => {
@@ -40,11 +43,11 @@ const wordGroups = computed(() => {
 
   const words = cnchar.words(store.currentCharacter, 'array') as string[]
   return words
-    .filter(word => word.length >= WORD_LENGTH_MIN && word.length <= WORD_LENGTH_MAX)
+    .filter((word) => word.length >= WORD_LENGTH_MIN && word.length <= WORD_LENGTH_MAX)
     .slice(0, WORD_DISPLAY_COUNT)
-    .map(word => ({
+    .map((word) => ({
       word,
-      chars: word.split('').map(char => ({
+      chars: word.split('').map((char) => ({
         char,
         pinyin: char === store.currentCharacter ? '' : pinyin(char, { toneType: 'symbol' }),
         isCurrent: char === store.currentCharacter,
@@ -102,12 +105,12 @@ const toggleConfig = () => {
 // Reshuffle characters and reset to first
 const handleReshuffle = () => {
   store.reshuffleCharacters()
-  
+
   // Reinitialize animation for current character
   if (store.currentCharacter) {
     initWriter(store.currentCharacter)
   }
-  
+
   // Reset masks
   hidePinyin.value = true
   hideWords.value = true
@@ -116,7 +119,7 @@ const handleReshuffle = () => {
 // Gesture and keyboard events
 const handleSwipe = (direction: 'left' | 'right') => {
   if (!store.enableNavigation) return
-  
+
   if (direction === 'left') {
     goToNext()
   } else {
@@ -126,7 +129,7 @@ const handleSwipe = (direction: 'left' | 'right') => {
 
 const handleKeyDown = (e: KeyboardEvent) => {
   if (!store.enableNavigation) return
-  
+
   if (e.key === 'ArrowRight') {
     goToNext()
   }
@@ -147,17 +150,17 @@ const handleTouchStart = (e: TouchEvent) => {
 
 const handleTouchEnd = (e: TouchEvent) => {
   if (!startX || !startY || e.changedTouches.length === 0) return
-  
+
   const endX = e.changedTouches[0]!.clientX
   const endY = e.changedTouches[0]!.clientY
   const diffX = startX - endX
   const diffY = startY - endY
-  
+
   // Horizontal swipe distance greater than vertical and exceeds threshold
   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
     handleSwipe(diffX > 0 ? 'left' : 'right')
   }
-  
+
   startX = 0
   startY = 0
 }
@@ -166,23 +169,26 @@ onMounted(() => {
   if (store.currentCharacter) {
     initWriter(store.currentCharacter)
   }
-  
+
   document.addEventListener('keydown', handleKeyDown)
   document.addEventListener('touchstart', handleTouchStart)
   document.addEventListener('touchend', handleTouchEnd)
 })
 
 // Watch loop animation setting changes
-watch(() => store.loopAnimation, (newVal) => {
-  if (writerRef.value && store.currentCharacter) {
-    writerRef.value.setCharacter(store.currentCharacter)
-    if (newVal) {
-      writerRef.value.loopCharacterAnimation()
-    } else {
-      writerRef.value.animateCharacter()
+watch(
+  () => store.loopAnimation,
+  (newVal) => {
+    if (writerRef.value && store.currentCharacter) {
+      writerRef.value.setCharacter(store.currentCharacter)
+      if (newVal) {
+        writerRef.value.loopCharacterAnimation()
+      } else {
+        writerRef.value.animateCharacter()
+      }
     }
-  }
-})
+  },
+)
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
@@ -196,9 +202,16 @@ onUnmounted(() => {
     <div class="header">
       <div class="counter">第 {{ count }} 个</div>
       <div class="header-actions">
-        <button class="config-btn" @click="handleReshuffle" aria-label="Reshuffle characters" title="重新打乱字库">
+        <button
+          class="config-btn"
+          @click="handleReshuffle"
+          aria-label="Reshuffle characters"
+          title="重新打乱字库"
+        >
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+            <path
+              d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"
+            />
           </svg>
         </button>
         <button class="config-btn" @click="toggleConfig" aria-label="Settings">
@@ -213,7 +226,7 @@ onUnmounted(() => {
 
     <div :class="['config-panel', { open: showConfig }]">
       <button class="close-btn" @click="toggleConfig" aria-label="Close settings">✕</button>
-      
+
       <!-- Character set selection (default collapsed) -->
       <div class="config-section">
         <div class="section-header collapsible" @click="charSetsExpanded = !charSetsExpanded">
@@ -223,13 +236,17 @@ onUnmounted(() => {
         <div v-show="charSetsExpanded" class="set-list">
           <div class="header-actions">
             <button class="select-all-btn" @click.stop="store.toggleAllSets">
-              {{ store.availableSets.every((set) => store.enabledSetIds.includes(set.id)) ? '取消全选' : '全选' }}
+              {{
+                store.availableSets.every((set) => store.enabledSetIds.includes(set.id))
+                  ? '取消全选'
+                  : '全选'
+              }}
             </button>
           </div>
           <div v-for="set in store.availableSets" :key="set.id" class="set-item">
             <label class="config-label">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 :checked="store.enabledSetIds.includes(set.id)"
                 @change="() => store.toggleCharacterSet(set.id)"
               />
@@ -238,7 +255,7 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-      
+
       <!-- Other settings -->
       <div class="config-item">
         <label class="config-label">
@@ -667,7 +684,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   min-width: 200px;
-  background: linear-gradient(135deg, #B3E5FC 0%, #C8E6F9 100%);
+  background: linear-gradient(135deg, #b3e5fc 0%, #c8e6f9 100%);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -679,7 +696,7 @@ onUnmounted(() => {
 }
 
 .pinyin-mask:hover {
-  background: linear-gradient(135deg, #C8E6F9 0%, #B3E5FC 100%);
+  background: linear-gradient(135deg, #c8e6f9 0%, #b3e5fc 100%);
   transform: scale(1.05);
 }
 
@@ -703,7 +720,7 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #B3E5FC 0%, #C8E6F9 100%);
+  background: linear-gradient(135deg, #b3e5fc 0%, #c8e6f9 100%);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -715,7 +732,7 @@ onUnmounted(() => {
 }
 
 .word-groups-mask:hover {
-  background: linear-gradient(135deg, #C8E6F9 0%, #B3E5FC 100%);
+  background: linear-gradient(135deg, #c8e6f9 0%, #b3e5fc 100%);
   transform: scale(1.02);
 }
 

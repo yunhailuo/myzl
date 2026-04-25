@@ -1,31 +1,25 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useAdditionSubtractionStore } from '../stores/additionSubtraction'
+import { useDistributiveLawStore } from '../stores/distributiveLaw'
 
-const store = useAdditionSubtractionStore()
+const store = useDistributiveLawStore()
 const showConfig = ref(false)
 
-const toggleConfig = () => {
-  showConfig.value = !showConfig.value
-}
+const toggleConfig = () => (showConfig.value = !showConfig.value)
 
-const handleSwipe = (direction: 'left' | 'right') => {
+const navigate = (direction: 'left' | 'right') => {
   if (!store.enableNavigation || showConfig.value) return
   if (direction === 'left') {
-    store.nextQuestion()
+    store.nextProblem()
   } else {
-    store.previousQuestion()
+    store.previousProblem()
   }
 }
 
 const handleKeyDown = (e: KeyboardEvent) => {
   if (!store.enableNavigation || showConfig.value) return
-  if (e.key === 'ArrowRight') {
-    store.nextQuestion()
-  }
-  if (e.key === 'ArrowLeft') {
-    store.previousQuestion()
-  }
+  if (e.key === 'ArrowRight') store.nextProblem()
+  else if (e.key === 'ArrowLeft') store.previousProblem()
 }
 
 let startX = 0
@@ -40,15 +34,12 @@ const handleTouchStart = (e: TouchEvent) => {
 
 const handleTouchEnd = (e: TouchEvent) => {
   if (!startX || !startY || e.changedTouches.length === 0) return
-  const endX = e.changedTouches[0]!.clientX
-  const endY = e.changedTouches[0]!.clientY
-  const diffX = startX - endX
-  const diffY = startY - endY
+  const diffX = startX - e.changedTouches[0]!.clientX
+  const diffY = startY - e.changedTouches[0]!.clientY
   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-    handleSwipe(diffX > 0 ? 'left' : 'right')
+    navigate(diffX > 0 ? 'left' : 'right')
   }
-  startX = 0
-  startY = 0
+  startX = startY = 0
 }
 
 onMounted(() => {
@@ -106,34 +97,71 @@ onUnmounted(() => {
           <span>启用键盘和滑动操作</span>
         </label>
       </div>
+      <div class="config-item">
+        <label class="config-label">
+          <input v-model="store.enableTrap" type="checkbox" @change="store.toggleTrap" />
+          <span>包含陷阱题</span>
+        </label>
+      </div>
+      <div class="config-item">
+        <label class="config-label">
+          <input v-model="store.enableSwap" type="checkbox" @change="store.toggleSwap" />
+          <span>包含干扰项</span>
+        </label>
+      </div>
+      <div class="config-item">
+        <label class="config-label">
+          <span>数量级 (10^{{ store.maxPower }})</span>
+          <input
+            v-model.number="store.maxPower"
+            type="number"
+            min="2"
+            max="4"
+            step="1"
+            class="number-input"
+            @change="store.updateMaxPower(store.maxPower)"
+          />
+        </label>
+      </div>
+      <div class="config-item">
+        <label class="config-label">
+          <span>小数位数</span>
+          <input
+            v-model.number="store.decimalPlaces"
+            type="number"
+            min="0"
+            max="2"
+            step="1"
+            class="number-input"
+            @change="store.updateDecimalPlaces(store.decimalPlaces)"
+          />
+        </label>
+      </div>
     </div>
 
     <div :class="['config-overlay', { active: showConfig }]" @click="toggleConfig"></div>
 
     <button
       v-if="store.enableArrows"
-      class="nav-bar left"
-      @click="store.previousQuestion"
+      class="nav-btn left"
+      @click="store.previousProblem"
       :disabled="store.currentIndex === 0"
-      aria-label="Previous question"
+      aria-label="Previous problem"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
       </svg>
     </button>
-    <div :class="['question-area', { 'arrows-disabled': !store.enableArrows }]">
+    <div :class="['question-area', { 'full-width': !store.enableArrows }]">
       <div class="question-card">
-        <div class="question">
-          {{ store.currentQuestion!.num1 }} {{ store.currentQuestion!.op }}
-          {{ store.currentQuestion!.num2 }}
-        </div>
+        <div class="expression">{{ store.currentProblem }}</div>
       </div>
     </div>
     <button
       v-if="store.enableArrows"
-      class="nav-bar right"
-      @click="store.nextQuestion"
-      aria-label="Next question"
+      class="nav-btn right"
+      @click="store.nextProblem"
+      aria-label="Next problem"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" />
@@ -231,12 +259,6 @@ onUnmounted(() => {
   pointer-events: auto;
 }
 
-.config-panel h3 {
-  margin: 0;
-  font-size: 1rem;
-  color: #333;
-}
-
 .config-header {
   display: flex;
   justify-content: space-between;
@@ -264,10 +286,26 @@ onUnmounted(() => {
   gap: 0.5rem;
 }
 
-.config-label input {
+.config-label input[type='checkbox'] {
   cursor: pointer;
   width: 18px;
   height: 18px;
+  margin-right: 0.5rem;
+}
+
+.number-input {
+  width: 100px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-left: auto;
+}
+
+.number-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
 .close-btn {
@@ -294,28 +332,6 @@ onUnmounted(() => {
   stroke: currentColor;
 }
 
-.close-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
-}
-
-.question-area {
-  grid-column: 2;
-  grid-row: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1.5rem;
-  width: 100%;
-  min-height: 0;
-  transition: grid-column 0.2s ease;
-}
-
-.question-area.arrows-disabled {
-  grid-column: 1 / -1;
-}
-
 .question-card {
   width: 100%;
   max-width: 100%;
@@ -326,19 +342,60 @@ onUnmounted(() => {
   border-radius: 24px;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1.5rem;
 }
 
-.question {
-  font-size: clamp(3rem, 7vw, 5rem);
+.expression {
+  font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 700;
   margin: 0;
   text-align: center;
-  line-height: 1.1;
+  line-height: 1.2;
+  color: #333;
 }
 
-.nav-bar {
+.show-answer-btn {
+  padding: 0.6rem 1.5rem;
+  background: #4a90e2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.show-answer-btn:hover {
+  background: #357abd;
+}
+
+.answer-section {
+  width: 100%;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #4a90e2;
+}
+
+.answer {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.steps {
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.nav-btn {
   border: none;
   background: rgba(0, 0, 0, 0.04);
   cursor: pointer;
@@ -353,27 +410,43 @@ onUnmounted(() => {
   color: #333;
 }
 
-.nav-bar svg {
+.nav-btn svg {
   width: 20px;
   height: 20px;
   fill: currentColor;
 }
 
-.nav-bar:hover:not(:disabled) {
+.nav-btn:hover:not(:disabled) {
   background: rgba(0, 0, 0, 0.1);
 }
 
-.nav-bar:disabled {
+.nav-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.nav-bar.left {
+.nav-btn.left {
   grid-column: 1;
 }
 
-.nav-bar.right {
+.nav-btn.right {
   grid-column: 3;
+}
+
+.question-area {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  width: 100%;
+  min-height: 0;
+  transition: grid-column 0.2s ease;
+}
+
+.question-area.full-width {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 600px) {
@@ -381,13 +454,17 @@ onUnmounted(() => {
     grid-template-columns: 40px 1fr 40px;
   }
 
-  .nav-bar {
+  .nav-btn {
     width: 40px;
   }
 
   .config-btn {
     width: 36px;
     height: 36px;
+  }
+
+  .expression {
+    font-size: clamp(2rem, 5vw, 3rem);
   }
 }
 </style>

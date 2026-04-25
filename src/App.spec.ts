@@ -64,11 +64,12 @@ describe('App.vue', () => {
     expect(wrapper.find('.nav-title').text()).toBe('菜单')
 
     const links = wrapper.findAll('.nav a')
-    expect(links).toHaveLength(3)
+    expect(links).toHaveLength(4)
     expect(links[0]?.text()).toBe('首页')
-    // 导航链接包含图标和标题
+    // Navigation links contain icon and title
     expect(links[1]?.text()).toContain('加减法')
     expect(links[2]?.text()).toContain('汉字')
+    expect(links[3]?.text()).toContain('分配律')
   })
 
   it('has correct navigation links', async () => {
@@ -84,7 +85,7 @@ describe('App.vue', () => {
     await wrapper.find('.hamburger').trigger('click')
 
     const links = wrapper.findAll('.nav a')
-    links.forEach(link => {
+    links.forEach((link) => {
       expect(link.exists()).toBe(true)
     })
   })
@@ -96,7 +97,7 @@ describe('App.vue', () => {
 
   it('navigation has proper structure', async () => {
     await wrapper.find('.hamburger').trigger('click')
-    
+
     expect(wrapper.find('.nav-header').exists()).toBe(true)
     expect(wrapper.findAll('.nav a').length).toBeGreaterThan(0)
   })

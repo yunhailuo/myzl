@@ -52,13 +52,13 @@ describe('HomeView.vue', () => {
   it('shows the hanzi game', () => {
     const links = wrapper.findAll('.game-link')
     // 使用toContain来匹配包含图标的文本
-    const hanziLink = links.find(link => link.text().includes('汉字'))
+    const hanziLink = links.find((link) => link.text().includes('汉字'))
     expect(hanziLink).toBeDefined()
   })
 
   it('has correct route for hanzi game', () => {
     const links = wrapper.findAll('.game-link')
-    const hanziLink = links.find(link => link.text().includes('汉字'))
+    const hanziLink = links.find((link) => link.text().includes('汉字'))
     expect(hanziLink?.attributes('href')).toBe('/hanzi')
   })
 
@@ -69,7 +69,7 @@ describe('HomeView.vue', () => {
 
   it('game links have proper styling classes', () => {
     const links = wrapper.findAll('.game-link')
-    links.forEach(link => {
+    links.forEach((link) => {
       expect(link.classes()).toContain('game-link')
     })
   })

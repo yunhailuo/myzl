@@ -35,7 +35,7 @@ describe('AdditionSubtractionView.vue', () => {
   beforeEach(() => {
     // 初始化 Pinia
     setActivePinia(createPinia())
-    
+
     wrapper = mount(AdditionSubtractionView)
   })
 
@@ -184,10 +184,12 @@ describe('AdditionSubtractionView.vue', () => {
 
     const questions = wrapper.findAll('.question').map((node) => node.text())
     expect(questions.length).toBeGreaterThan(0)
-    const latest = wrapper.find('.question').text().match(/^(\d+) ([+-]) (\d+)$/)
+    const latest = wrapper
+      .find('.question')
+      .text()
+      .match(/^(\d+) ([+-]) (\d+)$/)
     expect(latest).not.toBeNull()
-    const isNonNegativeSubtraction =
-      latest?.[2] !== '-' || Number(latest[1]) >= Number(latest[3])
+    const isNonNegativeSubtraction = latest?.[2] !== '-' || Number(latest[1]) >= Number(latest[3])
     expect(isNonNegativeSubtraction).toBe(true)
   })
 
@@ -196,7 +198,7 @@ describe('AdditionSubtractionView.vue', () => {
       await wrapper.find('.nav-bar.right').trigger('click')
       const questionText = wrapper.find('.question').text()
       const match = questionText.match(/^(\d+) [+-] (\d+)$/)
-      
+
       expect(match).not.toBeNull()
       const num1Str = match![1]!
       const num2Str = match![2]!
@@ -230,7 +232,7 @@ describe('AdditionSubtractionView.vue', () => {
   it('navigation buttons have proper aria labels', () => {
     const leftBtn = wrapper.find('.nav-bar.left')
     const rightBtn = wrapper.find('.nav-bar.right')
-    
+
     expect(leftBtn.attributes('aria-label')).toBe('Previous question')
     expect(rightBtn.attributes('aria-label')).toBe('Next question')
   })

@@ -5,7 +5,7 @@ describe('Router Configuration', () => {
   it('should have home route', () => {
     const routes = router.getRoutes()
     const homeRoute = routes.find((route) => route.path === '/')
-    
+
     expect(homeRoute).toBeDefined()
     expect(homeRoute?.name).toBe('home')
   })
@@ -13,7 +13,7 @@ describe('Router Configuration', () => {
   it('should have addition-subtraction route', () => {
     const routes = router.getRoutes()
     const gameRoute = routes.find((route) => route.path === '/addition-subtraction')
-    
+
     expect(gameRoute).toBeDefined()
     expect(gameRoute?.name).toBe('addition-subtraction')
   })
@@ -21,18 +21,18 @@ describe('Router Configuration', () => {
   it('should have hanzi route', () => {
     const routes = router.getRoutes()
     const hanziRoute = routes.find((route) => route.path === '/hanzi')
-    
+
     expect(hanziRoute).toBeDefined()
     expect(hanziRoute?.name).toBe('hanzi')
   })
 
   it('should have correct titles for all routes', () => {
     const routes = router.getRoutes()
-    
+
     const homeRoute = routes.find((route) => route.name === 'home')
     const additionRoute = routes.find((route) => route.name === 'addition-subtraction')
     const hanziRoute = routes.find((route) => route.name === 'hanzi')
-    
+
     expect(homeRoute?.meta?.title).toBe('首页')
     expect(additionRoute?.meta?.title).toBe('加减法')
     expect(hanziRoute?.meta?.title).toBe('汉字')
