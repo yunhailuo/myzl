@@ -25,7 +25,7 @@ describe('Linear Equation Store', () => {
     const store = useLinearEquationStore()
     const problem = store.currentProblem
     if (!problem) return
-    
+
     const letters = problem.match(/[a-z]/g) || []
     letters.forEach((letter) => {
       expect(letter).not.toBe('x')
@@ -86,14 +86,14 @@ describe('Linear Equation Store', () => {
   it('should generate multiple unique problems', () => {
     const store = useLinearEquationStore()
     const problems = new Set<string>()
-    
+
     for (let i = 0; i < 10; i++) {
       store.nextProblem()
       if (store.currentProblem) {
         problems.add(store.currentProblem)
       }
     }
-    
+
     // Should have generated different problems
     expect(problems.size).toBeGreaterThan(1)
   })

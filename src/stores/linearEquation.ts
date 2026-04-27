@@ -32,7 +32,7 @@ type Term = [number, boolean]
 function validSplit(val: number): Array<[number, number]> {
   const splits: Array<[number, number]> = []
   const limit = Math.min(Math.abs(val) + 1, 10)
-  
+
   for (let a = -limit; a <= limit; a++) {
     if (a === 0) continue
     const b = val - a
@@ -40,18 +40,20 @@ function validSplit(val: number): Array<[number, number]> {
       splits.push([a, b])
     }
   }
-  
+
   return splits
 }
 
 /** Format a side of the equation into a string */
 function formatSide(terms: Term[], variable: string): string {
-  return terms.map(([val, isVar], i) => {
-    const sign = i === 0 ? (val > 0 ? '' : '-') : (val > 0 ? ' + ' : ' - ')
-    const absVal = Math.abs(val)
-    const item = isVar ? (absVal === 1 ? variable : `${absVal}${variable}`) : String(absVal)
-    return `${sign}${item}`
-  }).join('')
+  return terms
+    .map(([val, isVar], i) => {
+      const sign = i === 0 ? (val > 0 ? '' : '-') : val > 0 ? ' + ' : ' - '
+      const absVal = Math.abs(val)
+      const item = isVar ? (absVal === 1 ? variable : `${absVal}${variable}`) : String(absVal)
+      return `${sign}${item}`
+    })
+    .join('')
 }
 
 export const useLinearEquationStore = defineStore(
@@ -63,23 +65,26 @@ export const useLinearEquationStore = defineStore(
     const enableNavigation = ref(true)
 
     function generateProblem(): LinearEquationProblem {
-      const target = Math.max(4, Math.min(12, Math.floor(Math.random() * (maxTerms.value - 4 + 1)) + 4))
-      
+      const target = Math.max(
+        4,
+        Math.min(12, Math.floor(Math.random() * (maxTerms.value - 4 + 1)) + 4),
+      )
+
       // Select variable and solution
       const variable = pickRandom(LETTERS)
       const sol = pickRandom(SOL_SET)
-      
+
       // Select coefficients A (left) and C (right), ensure A ≠ C
       let A: number, C: number
       do {
         A = pickRandom(COEFF_RANGE)
         C = pickRandom(COEFF_RANGE)
       } while (A === C)
-      
+
       // Select left constant B, calculate right constant D
       let B = pickRandom(CONST_RANGE)
       let D = B + (A - C) * sol
-      
+
       // Retry with different values if D is invalid
       let attempts = 0
       while ((D < -10 || D > 10 || D === 0) && attempts < MAX_RETRY_ATTEMPTS) {
@@ -87,7 +92,7 @@ export const useLinearEquationStore = defineStore(
         D = B + (A - C) * sol
         attempts++
       }
-      
+
       // Fallback: adjust coefficients if still invalid
       if (D < -10 || D > 10 || D === 0) {
         A = 2
@@ -95,35 +100,44 @@ export const useLinearEquationStore = defineStore(
         B = 1
         D = B + (A - C) * sol
       }
-      
+
       // Build base terms (4 terms)
-      const leftTerms: Term[] = [[A, true], [B, false]]
-      const rightTerms: Term[] = [[C, true], [D, false]]
-      
+      const leftTerms: Term[] = [
+        [A, true],
+        [B, false],
+      ]
+      const rightTerms: Term[] = [
+        [C, true],
+        [D, false],
+      ]
+
       // Expand terms until reaching target
       let expandAttempts = 0
-      while (leftTerms.length + rightTerms.length < target && expandAttempts < MAX_EXPAND_ATTEMPTS) {
+      while (
+        leftTerms.length + rightTerms.length < target &&
+        expandAttempts < MAX_EXPAND_ATTEMPTS
+      ) {
         expandAttempts++
         const side = Math.random() < 0.5 ? 'L' : 'R'
         const terms = side === 'L' ? leftTerms : rightTerms
-        
+
         if (terms.length === 0) continue
-        
+
         const idx = Math.floor(Math.random() * terms.length)
         const [val, isVar] = terms[idx]!
         const splits = validSplit(val)
-        
+
         if (splits.length > 0) {
           const [a1, a2] = pickRandom(splits)
           terms.splice(idx, 1)
           terms.splice(idx, 0, [a1, isVar], [a2, isVar])
         }
       }
-      
+
       // Shuffle and format
       shuffleArray(leftTerms)
       shuffleArray(rightTerms)
-      
+
       return `${formatSide(leftTerms, variable)} = ${formatSide(rightTerms, variable)}`
     }
 

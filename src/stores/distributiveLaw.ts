@@ -34,7 +34,7 @@ function generateExpand(maxValue: number, dp: number, trapRate: number): Distrib
     // Trap problem: parentheses can be calculated directly
     const a = pickRandom([0.5, 2, 3, 10, 0.2, 5])
     const target = pickRandom([10, 20, 50, 100, 1, 2, 5])
-    
+
     let b: number
     if (target > 2) {
       b = Math.floor(Math.random() * (target - 1)) + 1
@@ -71,7 +71,9 @@ function generateExpand(maxValue: number, dp: number, trapRate: number): Distrib
     }
 
     // Pick two distinct indices
-    const indices = (pairs.length === 2 ? [0, 1] : shuffleArray([...Array(pairs.length).keys()]).slice(0, 2)) as [number, number]
+    const indices = (
+      pairs.length === 2 ? [0, 1] : shuffleArray([...Array(pairs.length).keys()]).slice(0, 2)
+    ) as [number, number]
     const b = pairs[indices[0]]!
     const c = pairs[indices[1]]!
 
