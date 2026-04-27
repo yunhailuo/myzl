@@ -2,18 +2,25 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
 import HomeView from './HomeView.vue'
 import { createRouter, createMemoryHistory } from 'vue-router'
+import { GAMES_REGISTRY } from '../data/games'
 
 describe('HomeView.vue', () => {
   let wrapper: VueWrapper
 
   beforeEach(() => {
+    // Create routes for all games in the registry
+    const routes = [
+      { path: '/', component: HomeView },
+      ...GAMES_REGISTRY.map((game) => ({
+        path: game.path,
+        name: game.name,
+        component: { template: `<div>${game.title}</div>` },
+      })),
+    ]
+
     const router = createRouter({
       history: createMemoryHistory(),
-      routes: [
-        { path: '/', component: HomeView },
-        { path: '/addition-subtraction', component: { template: '<div>Game</div>' } },
-        { path: '/hanzi', component: { template: '<div>Hanzi</div>' } },
-      ],
+      routes,
     })
 
     wrapper = mount(HomeView, {

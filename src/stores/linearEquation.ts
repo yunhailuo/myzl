@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import { safeStorage } from '../utils/storage'
+import { pickRandom, shuffleArray } from '../utils/math'
+import { useQuestionHistory } from '../composables/useQuestionHistory'
 
 /** Problem expression string */
 type LinearEquationProblem = string
@@ -24,20 +27,6 @@ const MAX_EXPAND_ATTEMPTS = 100
 
 /** Term representation: [value, isVariable] */
 type Term = [number, boolean]
-
-/** Pick a random element from an array */
-function pickRandom<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]!
-}
-
-/** Shuffle an array using Fisher-Yates algorithm */
-function shuffleArray<T>(arr: T[]): T[] {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[arr[i], arr[j]] = [arr[j]!, arr[i]!]
-  }
-  return arr
-}
 
 /** Split integer val into two non-zero integers that sum to val */
 function validSplit(val: number): Array<[number, number]> {
@@ -65,131 +54,86 @@ function formatSide(terms: Term[], variable: string): string {
   }).join('')
 }
 
-/** Generate a linear equation problem */
-function generateProblem(maxTerms: number): LinearEquationProblem {
-  const target = Math.max(4, Math.min(12, Math.floor(Math.random() * (maxTerms - 4 + 1)) + 4))
-  
-  // Select variable and solution
-  const variable = pickRandom(LETTERS)
-  const sol = pickRandom(SOL_SET)
-  
-  // Select coefficients A (left) and C (right), ensure A ≠ C
-  let A: number, C: number
-  do {
-    A = pickRandom(COEFF_RANGE)
-    C = pickRandom(COEFF_RANGE)
-  } while (A === C)
-  
-  // Select left constant B, calculate right constant D
-  let B = pickRandom(CONST_RANGE)
-  let D = B + (A - C) * sol
-  
-  // Retry with different values if D is invalid
-  let attempts = 0
-  while ((D < -10 || D > 10 || D === 0) && attempts < MAX_RETRY_ATTEMPTS) {
-    B = pickRandom(CONST_RANGE)
-    D = B + (A - C) * sol
-    attempts++
-  }
-  
-  // Fallback: adjust coefficients if still invalid
-  if (D < -10 || D > 10 || D === 0) {
-    A = 2
-    C = 1
-    B = 1
-    D = B + (A - C) * sol
-  }
-  
-  // Build base terms (4 terms)
-  const leftTerms: Term[] = [[A, true], [B, false]]
-  const rightTerms: Term[] = [[C, true], [D, false]]
-  
-  // Expand terms until reaching target
-  let expandAttempts = 0
-  while (leftTerms.length + rightTerms.length < target && expandAttempts < MAX_EXPAND_ATTEMPTS) {
-    expandAttempts++
-    const side = Math.random() < 0.5 ? 'L' : 'R'
-    const terms = side === 'L' ? leftTerms : rightTerms
-    
-    if (terms.length === 0) continue
-    
-    const idx = Math.floor(Math.random() * terms.length)
-    const [val, isVar] = terms[idx]!
-    const splits = validSplit(val)
-    
-    if (splits.length > 0) {
-      const [a1, a2] = pickRandom(splits)
-      terms.splice(idx, 1)
-      terms.splice(idx, 0, [a1, isVar], [a2, isVar])
-    }
-  }
-  
-  // Shuffle and format
-  shuffleArray(leftTerms)
-  shuffleArray(rightTerms)
-  
-  return `${formatSide(leftTerms, variable)} = ${formatSide(rightTerms, variable)}`
-}
-
-/** Custom storage with error handling */
-const safeStorage = {
-  getItem: (key: string): string | null => {
-    try {
-      return localStorage.getItem(key)
-    } catch {
-      return null
-    }
-  },
-  setItem: (key: string, value: string): void => {
-    try {
-      localStorage.setItem(key, value)
-    } catch {}
-  },
-  removeItem: (key: string): void => {
-    try {
-      localStorage.removeItem(key)
-    } catch {}
-  },
-}
-
 export const useLinearEquationStore = defineStore(
   'linearEquation',
   () => {
     // State
-    const history = ref<LinearEquationProblem[]>([])
-    const currentIndex = ref(0)
     const maxTerms = ref(8)
     const enableArrows = ref(true)
     const enableNavigation = ref(true)
 
-    // Initialize with first problem
-    if (history.value.length === 0) {
-      history.value.push(generateProblem(maxTerms.value))
+    function generateProblem(): LinearEquationProblem {
+      const target = Math.max(4, Math.min(12, Math.floor(Math.random() * (maxTerms.value - 4 + 1)) + 4))
+      
+      // Select variable and solution
+      const variable = pickRandom(LETTERS)
+      const sol = pickRandom(SOL_SET)
+      
+      // Select coefficients A (left) and C (right), ensure A ≠ C
+      let A: number, C: number
+      do {
+        A = pickRandom(COEFF_RANGE)
+        C = pickRandom(COEFF_RANGE)
+      } while (A === C)
+      
+      // Select left constant B, calculate right constant D
+      let B = pickRandom(CONST_RANGE)
+      let D = B + (A - C) * sol
+      
+      // Retry with different values if D is invalid
+      let attempts = 0
+      while ((D < -10 || D > 10 || D === 0) && attempts < MAX_RETRY_ATTEMPTS) {
+        B = pickRandom(CONST_RANGE)
+        D = B + (A - C) * sol
+        attempts++
+      }
+      
+      // Fallback: adjust coefficients if still invalid
+      if (D < -10 || D > 10 || D === 0) {
+        A = 2
+        C = 1
+        B = 1
+        D = B + (A - C) * sol
+      }
+      
+      // Build base terms (4 terms)
+      const leftTerms: Term[] = [[A, true], [B, false]]
+      const rightTerms: Term[] = [[C, true], [D, false]]
+      
+      // Expand terms until reaching target
+      let expandAttempts = 0
+      while (leftTerms.length + rightTerms.length < target && expandAttempts < MAX_EXPAND_ATTEMPTS) {
+        expandAttempts++
+        const side = Math.random() < 0.5 ? 'L' : 'R'
+        const terms = side === 'L' ? leftTerms : rightTerms
+        
+        if (terms.length === 0) continue
+        
+        const idx = Math.floor(Math.random() * terms.length)
+        const [val, isVar] = terms[idx]!
+        const splits = validSplit(val)
+        
+        if (splits.length > 0) {
+          const [a1, a2] = pickRandom(splits)
+          terms.splice(idx, 1)
+          terms.splice(idx, 0, [a1, isVar], [a2, isVar])
+        }
+      }
+      
+      // Shuffle and format
+      shuffleArray(leftTerms)
+      shuffleArray(rightTerms)
+      
+      return `${formatSide(leftTerms, variable)} = ${formatSide(rightTerms, variable)}`
     }
 
-    // Getters
-    const currentProblem = computed(() => history.value[currentIndex.value])
-    const count = computed(() => currentIndex.value + 1)
+    const { history, currentIndex, currentItem, count, next, previous, resetToFirst } =
+      useQuestionHistory(generateProblem)
 
     // Actions
-    function nextProblem() {
-      if (currentIndex.value < history.value.length - 1) {
-        currentIndex.value++
-      } else {
-        history.value.push(generateProblem(maxTerms.value))
-        currentIndex.value = history.value.length - 1
-      }
-    }
-
-    function previousProblem() {
-      if (currentIndex.value > 0) {
-        currentIndex.value--
-      }
-    }
-
     function updateMaxTerms(value: number) {
       maxTerms.value = Math.max(4, Math.min(12, value))
-      history.value[currentIndex.value] = generateProblem(maxTerms.value)
+      history.value[currentIndex.value] = generateProblem()
     }
 
     return {
@@ -198,10 +142,11 @@ export const useLinearEquationStore = defineStore(
       maxTerms,
       enableArrows,
       enableNavigation,
-      currentProblem,
+      currentProblem: currentItem,
       count,
-      nextProblem,
-      previousProblem,
+      nextProblem: next,
+      previousProblem: previous,
+      resetToFirst,
       updateMaxTerms,
     }
   },

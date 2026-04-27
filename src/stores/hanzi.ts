@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import charactersData from '../data/characters.json'
+import { shuffleArray } from '../utils/math'
 
 interface CharacterSet {
   id: string
@@ -11,18 +12,6 @@ interface CharacterSet {
 
 interface CharactersJson {
   characterSets: CharacterSet[]
-}
-
-/** Fisher-Yates shuffle algorithm */
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    const temp = shuffled[i]
-    shuffled[i] = shuffled[j]!
-    shuffled[j] = temp!
-  }
-  return shuffled
 }
 
 export const useHanziStore = defineStore(

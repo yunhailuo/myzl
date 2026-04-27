@@ -49,23 +49,23 @@ describe('AdditionSubtractionView.vue', () => {
   })
 
   it('has left and right navigation buttons', () => {
-    expect(wrapper.findAll('.nav-bar')).toHaveLength(2)
+    expect(wrapper.findAll('.nav-btn')).toHaveLength(2)
   })
 
   it('disables the left button on the first question', () => {
-    expect(wrapper.find('.nav-bar.left').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('.nav-btn.left').attributes('disabled')).toBeDefined()
   })
 
   it('enables the right button on the first question', () => {
-    const rightButton = wrapper.find('.nav-bar.right')
+    const rightButton = wrapper.find('.nav-btn.right')
     expect(rightButton.attributes('disabled')).toBeUndefined()
   })
 
   it('navigates to the next and previous questions with buttons', async () => {
-    await wrapper.find('.nav-bar.right').trigger('click')
+    await wrapper.find('.nav-btn.right').trigger('click')
     expect(wrapper.find('.counter').text()).toContain('第 2 题')
 
-    await wrapper.find('.nav-bar.left').trigger('click')
+    await wrapper.find('.nav-btn.left').trigger('click')
     expect(wrapper.find('.counter').text()).toContain('第 1 题')
   })
 
@@ -91,15 +91,15 @@ describe('AdditionSubtractionView.vue', () => {
   it('toggles arrow visibility with the arrow checkbox', async () => {
     const arrowCheckbox = wrapper.find('[data-testid="toggle-arrows"]')
 
-    expect(wrapper.findAll('.nav-bar')).toHaveLength(2)
+    expect(wrapper.findAll('.nav-btn')).toHaveLength(2)
 
     await arrowCheckbox.setValue(false)
-    expect(wrapper.findAll('.nav-bar')).toHaveLength(0)
-    expect(wrapper.find('.question-area').classes()).toContain('arrows-disabled')
+    expect(wrapper.findAll('.nav-btn')).toHaveLength(0)
+    expect(wrapper.find('.question-area').classes()).toContain('full-width')
 
     await arrowCheckbox.setValue(true)
-    expect(wrapper.findAll('.nav-bar')).toHaveLength(2)
-    expect(wrapper.find('.question-area').classes()).not.toContain('arrows-disabled')
+    expect(wrapper.findAll('.nav-btn')).toHaveLength(2)
+    expect(wrapper.find('.question-area').classes()).not.toContain('full-width')
   })
 
   it('moves forward with ArrowRight when navigation is enabled', async () => {
@@ -179,7 +179,7 @@ describe('AdditionSubtractionView.vue', () => {
 
   it('keeps subtraction questions non-negative while generating new history', async () => {
     for (let i = 0; i < 30; i++) {
-      await wrapper.find('.nav-bar.right').trigger('click')
+      await wrapper.find('.nav-btn.right').trigger('click')
     }
 
     const questions = wrapper.findAll('.question').map((node) => node.text())
@@ -195,7 +195,7 @@ describe('AdditionSubtractionView.vue', () => {
 
   it('generates questions with numbers in valid range', async () => {
     for (let i = 0; i < 20; i++) {
-      await wrapper.find('.nav-bar.right').trigger('click')
+      await wrapper.find('.nav-btn.right').trigger('click')
       const questionText = wrapper.find('.question').text()
       const match = questionText.match(/^(\d+) [+-] (\d+)$/)
 
@@ -212,14 +212,14 @@ describe('AdditionSubtractionView.vue', () => {
   })
 
   it('maintains question history when navigating back and forth', async () => {
-    await wrapper.find('.nav-bar.right').trigger('click')
-    await wrapper.find('.nav-bar.right').trigger('click')
+    await wrapper.find('.nav-btn.right').trigger('click')
+    await wrapper.find('.nav-btn.right').trigger('click')
     const questionAt3 = wrapper.find('.question').text()
 
-    await wrapper.find('.nav-bar.left').trigger('click')
-    await wrapper.find('.nav-bar.left').trigger('click')
-    await wrapper.find('.nav-bar.right').trigger('click')
-    await wrapper.find('.nav-bar.right').trigger('click')
+    await wrapper.find('.nav-btn.left').trigger('click')
+    await wrapper.find('.nav-btn.left').trigger('click')
+    await wrapper.find('.nav-btn.right').trigger('click')
+    await wrapper.find('.nav-btn.right').trigger('click')
 
     expect(wrapper.find('.question').text()).toBe(questionAt3)
   })
@@ -230,10 +230,10 @@ describe('AdditionSubtractionView.vue', () => {
   })
 
   it('navigation buttons have proper aria labels', () => {
-    const leftBtn = wrapper.find('.nav-bar.left')
-    const rightBtn = wrapper.find('.nav-bar.right')
+    const leftBtn = wrapper.find('.nav-btn.left')
+    const rightBtn = wrapper.find('.nav-btn.right')
 
-    expect(leftBtn.attributes('aria-label')).toBe('Previous question')
-    expect(rightBtn.attributes('aria-label')).toBe('Next question')
+    expect(leftBtn.attributes('aria-label')).toBe('Previous')
+    expect(rightBtn.attributes('aria-label')).toBe('Next')
   })
 })

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import HanziView from './HanziView.vue'
+import { useHanziStore } from '../stores/hanzi'
 
 // Mock HanziWriter
 vi.mock('hanzi-writer', () => {
@@ -63,53 +64,53 @@ describe('HanziView.vue', () => {
   })
 
   it('has config button', () => {
-    expect(wrapper.findAll('.config-btn')).toHaveLength(2)
+    expect(wrapper.findAll('.config-btn')).toHaveLength(1)
   })
 
   describe('navigation buttons', () => {
     it('has left and right navigation buttons when enabled', () => {
-      expect(wrapper.findAll('.nav-bar')).toHaveLength(2)
+      expect(wrapper.findAll('.nav-btn')).toHaveLength(2)
     })
 
     it('disables left button on first character', () => {
-      const leftButton = wrapper.find('.nav-bar.left')
+      const leftButton = wrapper.find('.nav-btn.left')
       expect(leftButton.attributes('disabled')).toBeDefined()
     })
 
     it('hides navigation buttons when disabled', async () => {
       await wrapper.find('[data-testid="toggle-arrows"]').setValue(false)
-      expect(wrapper.findAll('.nav-bar')).toHaveLength(0)
+      expect(wrapper.findAll('.nav-btn')).toHaveLength(0)
     })
   })
 
   describe('config panel', () => {
     it('opens config panel when settings button is clicked', async () => {
-      const configBtn = wrapper.findAll('.config-btn')[1]
-      await configBtn?.trigger('click')
+      const configBtn = wrapper.find('.config-btn')
+      await configBtn.trigger('click')
 
       expect(wrapper.find('.config-panel').classes()).toContain('open')
       expect(wrapper.find('.config-overlay').classes()).toContain('active')
     })
 
     it('closes config panel when close button is clicked', async () => {
-      const configBtn = wrapper.findAll('.config-btn')[1]
-      await configBtn?.trigger('click')
+      const configBtn = wrapper.find('.config-btn')
+      await configBtn.trigger('click')
       await wrapper.find('.close-btn').trigger('click')
 
       expect(wrapper.find('.config-panel').classes()).not.toContain('open')
     })
 
     it('closes config panel when overlay is clicked', async () => {
-      const configBtn = wrapper.findAll('.config-btn')[1]
-      await configBtn?.trigger('click')
+      const configBtn = wrapper.find('.config-btn')
+      await configBtn.trigger('click')
       await wrapper.find('.config-overlay').trigger('click')
 
       expect(wrapper.find('.config-panel').classes()).not.toContain('open')
     })
 
     it('shows all configuration options', async () => {
-      const configBtn = wrapper.findAll('.config-btn')[1]
-      await configBtn?.trigger('click')
+      const configBtn = wrapper.find('.config-btn')
+      await configBtn.trigger('click')
 
       expect(wrapper.find('[data-testid="toggle-arrows"]').exists()).toBe(true)
       expect(wrapper.find('[data-testid="toggle-navigation"]').exists()).toBe(true)
@@ -121,15 +122,15 @@ describe('HanziView.vue', () => {
 
   describe('character sets selection', () => {
     it('has collapsible character sets section', async () => {
-      const configBtn = wrapper.findAll('.config-btn')[1]
-      await configBtn?.trigger('click')
+      const configBtn = wrapper.find('.config-btn')
+      await configBtn.trigger('click')
 
       expect(wrapper.find('.section-header.collapsible').exists()).toBe(true)
     })
 
     it('toggles character sets visibility', async () => {
-      const configBtn = wrapper.findAll('.config-btn')[1]
-      await configBtn?.trigger('click')
+      const configBtn = wrapper.find('.config-btn')
+      await configBtn.trigger('click')
 
       const header = wrapper.find('.section-header.collapsible')
       await header.trigger('click')
@@ -139,8 +140,8 @@ describe('HanziView.vue', () => {
     })
 
     it('has select all button', async () => {
-      const configBtn = wrapper.findAll('.config-btn')[1]
-      await configBtn?.trigger('click')
+      const configBtn = wrapper.find('.config-btn')
+      await configBtn.trigger('click')
       const header = wrapper.find('.section-header.collapsible')
       await header.trigger('click')
 
@@ -148,8 +149,8 @@ describe('HanziView.vue', () => {
     })
 
     it('lists available character sets', async () => {
-      const configBtn = wrapper.findAll('.config-btn')[1]
-      await configBtn?.trigger('click')
+      const configBtn = wrapper.find('.config-btn')
+      await configBtn.trigger('click')
       const header = wrapper.find('.section-header.collapsible')
       await header.trigger('click')
 
@@ -203,17 +204,19 @@ describe('HanziView.vue', () => {
   })
 
   describe('reshuffle functionality', () => {
-    it('has reshuffle button', () => {
-      const reshuffleBtn = wrapper.findAll('.config-btn')[0]
-      expect(reshuffleBtn?.exists()).toBe(true)
+    it('has reshuffle button in header', () => {
+      const reshuffleBtn = wrapper.find('.reshuffle-btn')
+      expect(reshuffleBtn.exists()).toBe(true)
     })
 
-    it('calls reshuffle when button is clicked', async () => {
-      const reshuffleBtn = wrapper.findAll('.config-btn')[0]
-      await reshuffleBtn?.trigger('click')
+    it('calls reshuffleCharacters when button is clicked', async () => {
+      const store = useHanziStore()
+      const reshuffleSpy = vi.spyOn(store, 'reshuffleCharacters')
 
-      // After reshuffle, should still be on first character
-      expect(wrapper.find('.counter').text()).toContain('第 1 个')
+      const reshuffleBtn = wrapper.find('.reshuffle-btn')
+      await reshuffleBtn.trigger('click')
+
+      expect(reshuffleSpy).toHaveBeenCalled()
     })
   })
 
@@ -296,7 +299,7 @@ describe('HanziView.vue', () => {
       expect(wrapper.find('.pinyin-mask').exists()).toBe(false)
 
       // Navigate to next
-      await wrapper.find('.nav-bar.right').trigger('click')
+      await wrapper.find('.nav-btn.right').trigger('click')
       await wrapper.vm.$nextTick()
 
       // Mask should be reset
@@ -309,7 +312,7 @@ describe('HanziView.vue', () => {
       expect(wrapper.find('.word-groups-mask').exists()).toBe(false)
 
       // Navigate to next
-      await wrapper.find('.nav-bar.right').trigger('click')
+      await wrapper.find('.nav-btn.right').trigger('click')
       await wrapper.vm.$nextTick()
 
       // Mask should be reset

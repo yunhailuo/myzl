@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import { safeStorage } from '../utils/storage'
+import { useQuestionHistory } from '../composables/useQuestionHistory'
 
 interface Question {
   num1: number
@@ -20,78 +22,18 @@ function generateQuestion(): Question {
   return { num1, num2, op }
 }
 
-// Custom storage with error handling
-const safeStorage = {
-  getItem: (key: string): string | null => {
-    try {
-      return localStorage.getItem(key)
-    } catch (error) {
-      console.error('Failed to get item from localStorage:', error)
-      return null
-    }
-  },
-  setItem: (key: string, value: string): void => {
-    try {
-      localStorage.setItem(key, value)
-    } catch (error) {
-      console.error('Failed to set item in localStorage:', error)
-    }
-  },
-  removeItem: (key: string): void => {
-    try {
-      localStorage.removeItem(key)
-    } catch (error) {
-      console.error('Failed to remove item from localStorage:', error)
-    }
-  },
-}
-
 export const useAdditionSubtractionStore = defineStore(
   'additionSubtraction',
   () => {
     // ========== State ==========
 
-    /** Question history */
-    const history = ref<Question[]>([generateQuestion()])
-    /** Current question index */
-    const currentIndex = ref(0)
+    const { history, currentIndex, currentItem, count, next, previous, resetToFirst } =
+      useQuestionHistory(generateQuestion)
 
     /** Show navigation arrows */
     const enableArrows = ref(true)
     /** Enable keyboard and swipe navigation */
     const enableNavigation = ref(true)
-
-    // ========== Getters ==========
-
-    /** Current question */
-    const currentQuestion = computed(() => history.value[currentIndex.value])
-
-    /** Current question number */
-    const count = computed(() => currentIndex.value + 1)
-
-    // ========== Actions ==========
-
-    /** Go to next question (generates new one if at the end) */
-    function nextQuestion() {
-      if (currentIndex.value < history.value.length - 1) {
-        currentIndex.value++
-      } else {
-        history.value.push(generateQuestion())
-        currentIndex.value = history.value.length - 1
-      }
-    }
-
-    /** Go to previous question */
-    function previousQuestion() {
-      if (currentIndex.value > 0) {
-        currentIndex.value--
-      }
-    }
-
-    /** Reset to first question */
-    function resetToFirst() {
-      currentIndex.value = 0
-    }
 
     return {
       // State
@@ -101,12 +43,12 @@ export const useAdditionSubtractionStore = defineStore(
       enableNavigation,
 
       // Getters
-      currentQuestion,
+      currentQuestion: currentItem,
       count,
 
       // Actions
-      nextQuestion,
-      previousQuestion,
+      nextQuestion: next,
+      previousQuestion: previous,
       resetToFirst,
     }
   },

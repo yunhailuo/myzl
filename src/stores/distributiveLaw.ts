@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import { safeStorage } from '../utils/storage'
+import { pickRandom, shuffleArray, roundTo } from '../utils/math'
+import { useQuestionHistory } from '../composables/useQuestionHistory'
 
 /** Problem expression string */
 type DistributiveProblem = string
@@ -15,25 +18,6 @@ const SPECIAL_PAIRS: Record<number, number[]> = {
   0.2: [5, 50],
   0.8: [5, 25, 125],
   0.4: [25, 250],
-}
-
-/** Round to specified decimal places */
-function roundTo(val: number, dp: number): number {
-  return Number(val.toFixed(dp))
-}
-
-/** Pick a random element from an array */
-function pickRandom<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]!
-}
-
-/** Shuffle an array using Fisher-Yates algorithm */
-function shuffleArray<T>(arr: T[]): T[] {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[arr[i], arr[j]] = [arr[j]!, arr[i]!]
-  }
-  return arr
 }
 
 /** Split a total into two positive numbers */
@@ -177,36 +161,11 @@ function generateFactor(maxValue: number, dp: number, swapRate: number): Distrib
   return expression
 }
 
-/** Custom storage with error handling */
-const safeStorage = {
-  getItem: (key: string): string | null => {
-    try {
-      return localStorage.getItem(key)
-    } catch {
-      return null
-    }
-  },
-  setItem: (key: string, value: string): void => {
-    try {
-      localStorage.setItem(key, value)
-    } catch {}
-  },
-  removeItem: (key: string): void => {
-    try {
-      localStorage.removeItem(key)
-    } catch {}
-  },
-}
-
 export const useDistributiveLawStore = defineStore(
   'distributiveLaw',
   () => {
     // ========== State ==========
 
-    /** Problem history */
-    const history = ref<DistributiveProblem[]>([])
-    /** Current problem index */
-    const currentIndex = ref(0)
     /** Enable trap problems */
     const enableTrap = ref(false)
     /** Enable swap interference */
@@ -221,13 +180,6 @@ export const useDistributiveLawStore = defineStore(
     /** Enable keyboard and swipe navigation */
     const enableNavigation = ref(true)
 
-    // Initialize with first problem
-    function initFirstProblem() {
-      if (history.value.length === 0) {
-        history.value.push(generateRandomProblem())
-      }
-    }
-
     /** Generate random problem (mix expand and factor) */
     function generateRandomProblem(): DistributiveProblem {
       const maxValue = Math.pow(10, maxPower.value)
@@ -237,39 +189,10 @@ export const useDistributiveLawStore = defineStore(
         : generateFactor(maxValue, decimalPlaces.value, enableSwap.value ? 0.2 : 0)
     }
 
-    initFirstProblem()
-
-    // ========== Getters ==========
-
-    /** Current problem */
-    const currentProblem = computed(() => history.value[currentIndex.value])
-
-    /** Current problem number */
-    const count = computed(() => currentIndex.value + 1)
+    const { history, currentIndex, currentItem, count, next, previous, resetToFirst } =
+      useQuestionHistory(generateRandomProblem)
 
     // ========== Actions ==========
-
-    /** Go to next problem (generates new one if at the end) */
-    function nextProblem() {
-      if (currentIndex.value < history.value.length - 1) {
-        currentIndex.value++
-      } else {
-        history.value.push(generateRandomProblem())
-        currentIndex.value = history.value.length - 1
-      }
-    }
-
-    /** Go to previous problem */
-    function previousProblem() {
-      if (currentIndex.value > 0) {
-        currentIndex.value--
-      }
-    }
-
-    /** Reset to first problem */
-    function resetToFirst() {
-      currentIndex.value = 0
-    }
 
     /** Toggle setting (trap or swap) and regenerate problem */
     function toggleSetting(setting: 'trap' | 'swap') {
@@ -297,12 +220,12 @@ export const useDistributiveLawStore = defineStore(
       enableNavigation,
 
       // Getters
-      currentProblem,
+      currentProblem: currentItem,
       count,
 
       // Actions
-      nextProblem,
-      previousProblem,
+      nextProblem: next,
+      previousProblem: previous,
       resetToFirst,
       toggleTrap: () => toggleSetting('trap'),
       toggleSwap: () => toggleSetting('swap'),

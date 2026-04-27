@@ -20,17 +20,23 @@ test('can navigate between questions with the arrow buttons', async ({ page }) =
 
   await expect(page.locator('.counter')).toContainText('第 1 题')
 
-  await page.getByRole('button', { name: 'Next question' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
   await expect(page.locator('.counter')).toContainText('第 2 题')
 
-  await page.getByRole('button', { name: 'Previous question' }).click()
+  await page.getByRole('button', { name: 'Previous' }).click()
   await expect(page.locator('.counter')).toContainText('第 1 题')
 })
 
 test('supports keyboard navigation when enabled', async ({ page }) => {
   await page.goto('/addition-subtraction')
 
+  // Wait for the Vue app to be fully mounted and event listeners registered
+  await expect(page.locator('.counter')).toContainText('第 1 题')
+
+  // Press ArrowRight to navigate to next question
   await page.keyboard.press('ArrowRight')
+  
+  // Wait for the counter to update (this implicitly waits for the state change)
   await expect(page.locator('.counter')).toContainText('第 2 题')
 })
 
@@ -77,8 +83,8 @@ test('config panel checkboxes can be toggled', async ({ page }) => {
   await expect(navigationCheckbox).toBeChecked()
 
   await arrowCheckbox.uncheck()
-  await expect(page.locator('.nav-bar')).toHaveCount(0)
+  await expect(page.locator('.nav-btn')).toHaveCount(0)
 
   await arrowCheckbox.check()
-  await expect(page.locator('.nav-bar')).toHaveCount(2)
+  await expect(page.locator('.nav-btn')).toHaveCount(2)
 })
