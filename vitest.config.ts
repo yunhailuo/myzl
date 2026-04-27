@@ -7,7 +7,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: 'jsdom',
-      exclude: [...configDefaults.exclude, 'e2e/**'],
+      exclude: [...configDefaults.exclude, 'e2e/**', '.stryker-tmp/**', 'reports/**'],
       root: fileURLToPath(new URL('./', import.meta.url)),
       coverage: {
         provider: 'v8',
@@ -15,6 +15,8 @@ export default mergeConfig(
         exclude: [
           ...(configDefaults.coverage.exclude || []),
           'e2e/**',
+          '.stryker-tmp/**',
+          'reports/**',
           '**/*.d.ts',
           '**/*.spec.ts',
           '**/*.test.ts',

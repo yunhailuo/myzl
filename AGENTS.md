@@ -13,14 +13,18 @@ Use it to understand the project quickly, choose the right commands, and make ch
 - Current games: 
   - Addition and subtraction practice (1-19)
   - Chinese character learning (Hanzi recognition and stroke animation)
+  - Distributive law practice (multiplication distribution)
+  - Linear equation solving (term rearrangement)
 - Hosting targets: GitHub Pages and Cloudflare Pages
 
 ## What the App Does Today
 
 - Shows a home screen with game selection
-- Supports two playable modes:
+- Supports four playable modes:
   - **加减法**: Random addition/subtraction questions with navigation history
   - **汉字**: Character learning with pinyin, word examples, and stroke order animation
+  - **分配律**: Multiplication distributive law practice with expand/factor problems
+  - **一元一次方程**: Linear equation solving with variable term rearrangement
 - Question/character generation with randomization
 - Keeps history so users can move backward and forward
 - Supports arrow-button navigation
@@ -31,17 +35,12 @@ Use it to understand the project quickly, choose the right commands, and make ch
 
 ## Key Files
 
+### Application Core
 - `src/App.vue`
   Purpose: app shell, slide-out navigation menu, router outlet
 
 - `src/views/HomeView.vue`
   Purpose: home screen with game links
-
-- `src/views/AdditionSubtractionView.vue`
-  Purpose: arithmetic practice experience, question generation, navigation behavior, settings drawer
-
-- `src/views/HanziView.vue`
-  Purpose: Chinese character learning experience, character display, pinyin/word toggles, stroke animation, settings drawer
 
 - `src/router/index.ts`
   Purpose: application routes
@@ -49,35 +48,79 @@ Use it to understand the project quickly, choose the right commands, and make ch
 - `src/data/games.ts`
   Purpose: game registry and route generation system
 
+### Game Modules
+Each game module consists of:
+- **View Component** (`src/views/*.vue`): UI presentation and user interaction
+- **Pinia Store** (`src/stores/*.ts`): State management and business logic
+- **Tests** (`*.spec.ts`): Unit tests for views and stores
+
+#### Addition & Subtraction
+- `src/views/AdditionSubtractionView.vue`
 - `src/stores/additionSubtraction.ts`
-  Purpose: Pinia store for arithmetic game state and logic
 
+#### Hanzi Learning
+- `src/views/HanziView.vue`
 - `src/stores/hanzi.ts`
-  Purpose: Pinia store for Hanzi game state, character sets, and logic
+- `src/data/characters.json`: Character dataset organized by grade levels
 
-- `src/data/characters.json`
-  Purpose: Chinese character dataset organized by grade levels
+#### Distributive Law
+- `src/views/DistributiveLawView.vue`
+- `src/stores/distributiveLaw.ts`
 
+#### Linear Equation
+- `src/views/LinearEquationView.vue`
+- `src/stores/linearEquation.ts`
+
+### Shared Utilities
+- `src/components/GameLayout.vue`
+  Purpose: Reusable game layout component with navigation buttons and config panel
+
+- `src/composables/useGameNavigation.ts`
+  Purpose: Keyboard and swipe navigation logic
+
+- `src/composables/useQuestionHistory.ts`
+  Purpose: Question history stack management
+
+- `src/utils/math.ts`
+  Purpose: Math helper functions (random selection, array shuffle, rounding)
+
+- `src/utils/storage.ts`
+  Purpose: Safe localStorage wrapper with error handling
+
+### Styling
 - `src/assets/base.css`
-  Purpose: global design tokens and base styles
+  Purpose: Global design tokens and base styles
 
 - `src/assets/main.css`
-  Purpose: app-wide layout foundation
+  Purpose: App-wide layout foundation
 
+- `src/assets/game-layout.css`
+  Purpose: Shared game component styles
+
+### Testing
 - `src/App.spec.ts`
-  Purpose: unit tests for app shell behavior
+  Purpose: Unit tests for app shell behavior
 
-- `src/views/AdditionSubtractionView.spec.ts`
-  Purpose: unit tests for arithmetic game behavior
+- `src/views/*.spec.ts`
+  Purpose: Unit tests for game view components
 
-- `src/views/HanziView.spec.ts`
-  Purpose: unit tests for Hanzi learning behavior
+- `src/stores/*.spec.ts`
+  Purpose: Unit tests for Pinia stores
+
+- `src/utils/*.spec.ts`
+  Purpose: Unit tests for utility functions
+
+- `src/composables/*.spec.ts`
+  Purpose: Unit tests for composables
+
+- `src/data/*.spec.ts`
+  Purpose: Unit tests for data utilities
 
 - `e2e/vue.spec.ts`
   Purpose: Playwright smoke coverage for core user flows
 
 - `docs/ADDING_GAME.md`
-  Purpose: step-by-step guide for adding a new playable game
+  Purpose: Step-by-step guide for adding a new playable game
 
 ## Recommended Workflow
 
@@ -145,6 +188,9 @@ npm run build
 - `CI=1 npm run test:unit -- --run`
   Best command for a non-watch, CI-style unit test run.
 
+- `CI=1 npm run test:unit -- --run --coverage`
+  Run unit tests with coverage report. Target: >90% statement coverage.
+
 - `npm run test:e2e`
   Runs Playwright end-to-end tests.
 
@@ -152,8 +198,7 @@ npm run build
 
 ### When changing gameplay
 
-- Start in the relevant view component (`AdditionSubtractionView.vue` or `HanziView.vue`).
-- Game logic is managed in corresponding Pinia stores (`additionSubtraction.ts` or `hanzi.ts`).
+- Start in the relevant view component and Pinia store.
 - Keep the random question/character generator behavior easy to test.
 - Add or update tests for any behavior changes.
 - Prefer small, explicit state changes over deeply nested logic.
@@ -170,6 +215,7 @@ npm run build
 
 - Keep global styles small and intentional.
 - Prefer component-scoped styles for view-specific UI.
+- Use `src/assets/game-layout.css` for shared game component styles.
 - Avoid reintroducing starter-template CSS that is not used by the app.
 
 ### When adding a new game
@@ -179,16 +225,45 @@ npm run build
 - The system automatically generates routes and adds navigation entries.
 - Create the view component in `src/views/` following the naming convention.
 - Create a Pinia store in `src/stores/` if the game needs shared/persistent state.
-- Add unit and E2E coverage for the new flow.
+- Add unit tests for:
+  - Store logic (state initialization, actions, getters)
+  - View rendering and user interactions
+  - Any new utility functions or composables
+- Add E2E coverage for the new flow.
 - Update `README.md` and this file if the product surface changes.
+
+### When modifying shared utilities
+
+- Update corresponding test files in `src/utils/*.spec.ts` or `src/composables/*.spec.ts`.
+- Ensure all dependent modules still pass their tests.
+- Consider backward compatibility if the utility is widely used.
 
 ## Testing Expectations
 
+### Coverage Targets
+- **Statement coverage**: >90%
+- **Branch coverage**: >85%
+- **Function coverage**: >90%
+
+### Test Quality Guidelines
 - Behavior changes should include tests.
 - Prefer assertions about user-visible behavior rather than internal implementation details.
 - Use stable selectors where needed, such as `data-testid`, but favor accessible queries in Playwright.
 - If a test depends on current DOM after a UI transition, re-query the DOM instead of reusing stale wrappers.
 - Initialize Pinia in unit tests before mounting components that use stores.
+
+### Test Organization
+- **Store tests**: Focus on state management, business logic, and edge cases.
+- **View tests**: Focus on rendering, user interactions, and integration with stores.
+- **Utility tests**: Cover both normal operation and error handling paths.
+- **Composable tests**: Test pure logic without relying on Vue lifecycle hooks.
+- **E2E tests**: Cover critical user journeys and cross-component workflows.
+
+### What NOT to Test
+- Pure CSS styling (visual regression is better suited for E2E).
+- Third-party library internals (assume they work as documented).
+- Trivial getters or passthrough functions without logic.
+- Generated code or auto-generated files.
 
 ## Deployment Notes
 
@@ -210,22 +285,27 @@ These are useful to know before changing behavior:
 
 - The app currently shows questions/characters but does not accept or grade answers.
 - There is no correctness tracking or review system for missed questions.
-- Game difficulty is not configurable (fixed range for arithmetic).
+- Game difficulty is partially configurable (arithmetic has fixed range, others have settings).
 - No adaptive difficulty based on user performance.
+- No progress tracking or achievement system.
 
 ## Good Next Improvements
 
 - Add answer reveal or answer entry for arithmetic practice
 - Track correctness and review missed questions
 - Add configurable difficulty or operation filters for arithmetic
-- Extract reusable navigation logic into composables
-- Add more character sets or learning modes for Hanzi
 - Implement spaced repetition or progress tracking
+- Add more character sets or learning modes for Hanzi
+- Add hints or step-by-step solutions for distributive law and equations
+- Export/import progress data
 
 ## Agent Checklist Before Finishing
 
 - Run `npm run type-check`
 - Run `npm run lint`
 - Run `CI=1 npm run test:unit -- --run`
+- Check coverage with `CI=1 npm run test:unit -- --run --coverage` (target: >90%)
 - Run `npm run build` if build behavior may be affected
 - Update `README.md` and `AGENTS.md` when workflows or product behavior change
+- Ensure new features have corresponding unit tests
+- Verify E2E tests still pass for modified user flows

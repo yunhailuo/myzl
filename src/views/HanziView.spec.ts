@@ -51,24 +51,23 @@ describe('HanziView.vue', () => {
     })
   })
 
-  it('renders the game component', () => {
-    expect(wrapper.find('.game').exists()).toBe(true)
-  })
+  describe('basic rendering', () => {
+    it('renders the game component', () => {
+      expect(wrapper.find('.game').exists()).toBe(true)
+    })
 
-  it('displays the counter', () => {
-    expect(wrapper.find('.counter').text()).toContain('第 1 个')
-  })
+    it('displays the counter', () => {
+      expect(wrapper.find('.counter').text()).toContain('第 1 个')
+    })
 
-  it('has hanzi container for character display', () => {
-    expect(wrapper.find('#hanzi-container').exists()).toBe(true)
-  })
-
-  it('has config button', () => {
-    expect(wrapper.findAll('.config-btn')).toHaveLength(1)
+    it('has hanzi container and config button', () => {
+      expect(wrapper.find('#hanzi-container').exists()).toBe(true)
+      expect(wrapper.findAll('.config-btn')).toHaveLength(1)
+    })
   })
 
   describe('navigation buttons', () => {
-    it('has left and right navigation buttons when enabled', () => {
+    it('has navigation buttons when enabled', () => {
       expect(wrapper.findAll('.nav-btn')).toHaveLength(2)
     })
 
@@ -84,33 +83,26 @@ describe('HanziView.vue', () => {
   })
 
   describe('config panel', () => {
-    it('opens config panel when settings button is clicked', async () => {
+    it('opens and closes config panel', async () => {
       const configBtn = wrapper.find('.config-btn')
+      
+      // Open
       await configBtn.trigger('click')
-
       expect(wrapper.find('.config-panel').classes()).toContain('open')
       expect(wrapper.find('.config-overlay').classes()).toContain('active')
-    })
 
-    it('closes config panel when close button is clicked', async () => {
-      const configBtn = wrapper.find('.config-btn')
-      await configBtn.trigger('click')
+      // Close via close button
       await wrapper.find('.close-btn').trigger('click')
-
       expect(wrapper.find('.config-panel').classes()).not.toContain('open')
-    })
 
-    it('closes config panel when overlay is clicked', async () => {
-      const configBtn = wrapper.find('.config-btn')
+      // Open again and close via overlay
       await configBtn.trigger('click')
       await wrapper.find('.config-overlay').trigger('click')
-
       expect(wrapper.find('.config-panel').classes()).not.toContain('open')
     })
 
     it('shows all configuration options', async () => {
-      const configBtn = wrapper.find('.config-btn')
-      await configBtn.trigger('click')
+      await wrapper.find('.config-btn').trigger('click')
 
       expect(wrapper.find('[data-testid="toggle-arrows"]').exists()).toBe(true)
       expect(wrapper.find('[data-testid="toggle-navigation"]').exists()).toBe(true)
@@ -121,50 +113,25 @@ describe('HanziView.vue', () => {
   })
 
   describe('character sets selection', () => {
-    it('has collapsible character sets section', async () => {
-      const configBtn = wrapper.find('.config-btn')
-      await configBtn.trigger('click')
+    it('has collapsible character sets section with select all', async () => {
+      await wrapper.find('.config-btn').trigger('click')
 
       expect(wrapper.find('.section-header.collapsible').exists()).toBe(true)
-    })
-
-    it('toggles character sets visibility', async () => {
-      const configBtn = wrapper.find('.config-btn')
-      await configBtn.trigger('click')
-
+      
       const header = wrapper.find('.section-header.collapsible')
       await header.trigger('click')
 
-      // Should expand/collapse (v-show toggles display)
       expect(wrapper.find('.set-list').exists()).toBe(true)
-    })
-
-    it('has select all button', async () => {
-      const configBtn = wrapper.find('.config-btn')
-      await configBtn.trigger('click')
-      const header = wrapper.find('.section-header.collapsible')
-      await header.trigger('click')
-
       expect(wrapper.find('.select-all-btn').exists()).toBe(true)
-    })
-
-    it('lists available character sets', async () => {
-      const configBtn = wrapper.find('.config-btn')
-      await configBtn.trigger('click')
-      const header = wrapper.find('.section-header.collapsible')
-      await header.trigger('click')
-
+      
       const setItems = wrapper.findAll('.set-item')
       expect(setItems.length).toBeGreaterThan(0)
     })
   })
 
   describe('pinyin display', () => {
-    it('shows pinyin container when enabled', () => {
+    it('shows pinyin with mask by default', () => {
       expect(wrapper.find('.pinyin-container').exists()).toBe(true)
-    })
-
-    it('hides pinyin by default with mask', () => {
       expect(wrapper.find('.pinyin-mask').exists()).toBe(true)
       expect(wrapper.find('.pinyin-display').classes()).toContain('hidden')
     })
@@ -183,17 +150,13 @@ describe('HanziView.vue', () => {
   })
 
   describe('word groups display', () => {
-    it('shows word groups container when enabled', () => {
+    it('shows word groups with mask by default', () => {
       expect(wrapper.find('.word-groups-container').exists()).toBe(true)
-    })
-
-    it('hides words by default with mask', () => {
       expect(wrapper.find('.word-groups-mask').exists()).toBe(true)
     })
 
     it('toggles words visibility when clicked', async () => {
       await wrapper.find('.word-groups-container').trigger('click')
-
       expect(wrapper.find('.word-groups-mask').exists()).toBe(false)
     })
 
@@ -204,36 +167,26 @@ describe('HanziView.vue', () => {
   })
 
   describe('reshuffle functionality', () => {
-    it('has reshuffle button in header', () => {
-      const reshuffleBtn = wrapper.find('.reshuffle-btn')
-      expect(reshuffleBtn.exists()).toBe(true)
-    })
-
-    it('calls reshuffleCharacters when button is clicked', async () => {
+    it('has reshuffle button and calls store method', async () => {
       const store = useHanziStore()
       const reshuffleSpy = vi.spyOn(store, 'reshuffleCharacters')
 
       const reshuffleBtn = wrapper.find('.reshuffle-btn')
+      expect(reshuffleBtn.exists()).toBe(true)
+      
       await reshuffleBtn.trigger('click')
-
       expect(reshuffleSpy).toHaveBeenCalled()
     })
   })
 
   describe('keyboard navigation', () => {
-    it('moves to next character with ArrowRight', async () => {
+    it('navigates with arrow keys when enabled', async () => {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
       await wrapper.vm.$nextTick()
-
       expect(wrapper.find('.counter').text()).toContain('第 2 个')
-    })
 
-    it('moves to previous character with ArrowLeft', async () => {
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
-      await wrapper.vm.$nextTick()
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }))
       await wrapper.vm.$nextTick()
-
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
 
@@ -241,7 +194,6 @@ describe('HanziView.vue', () => {
       await wrapper.find('[data-testid="toggle-navigation"]').setValue(false)
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
       await wrapper.vm.$nextTick()
-
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
   })
@@ -260,68 +212,53 @@ describe('HanziView.vue', () => {
       )
     }
 
-    it('moves to next character on swipe left', async () => {
+    it('navigates with swipe gestures when enabled', async () => {
+      // Swipe left (forward)
       simulateSwipe(180, 80)
       await wrapper.vm.$nextTick()
-
       expect(wrapper.find('.counter').text()).toContain('第 2 个')
-    })
 
-    it('moves to previous character on swipe right', async () => {
-      simulateSwipe(180, 80) // First go forward
+      // Swipe right (backward)
+      simulateSwipe(80, 180)
       await wrapper.vm.$nextTick()
-      simulateSwipe(80, 180) // Then go back
-      await wrapper.vm.$nextTick()
-
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
 
-    it('ignores swipe when navigation is disabled', async () => {
+    it('ignores swipe when navigation is disabled or swipe is too small', async () => {
       await wrapper.find('[data-testid="toggle-navigation"]').setValue(false)
       simulateSwipe(180, 80)
       await wrapper.vm.$nextTick()
-
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
-    })
 
-    it('ignores small swipes below threshold', async () => {
+      // Re-enable and test small swipe
+      await wrapper.find('[data-testid="toggle-navigation"]').setValue(true)
       simulateSwipe(100, 90) // Only 10px difference
       await wrapper.vm.$nextTick()
-
       expect(wrapper.find('.counter').text()).toContain('第 1 个')
     })
   })
 
   describe('mask reset on navigation', () => {
-    it('resets pinyin mask when navigating to next character', async () => {
-      // First reveal pinyin
+    it('resets masks when navigating to next character', async () => {
+      // Reveal both pinyin and words
       await wrapper.find('.pinyin-container').trigger('click')
-      expect(wrapper.find('.pinyin-mask').exists()).toBe(false)
-
-      // Navigate to next
-      await wrapper.find('.nav-btn.right').trigger('click')
-      await wrapper.vm.$nextTick()
-
-      // Mask should be reset
-      expect(wrapper.find('.pinyin-mask').exists()).toBe(true)
-    })
-
-    it('resets words mask when navigating to next character', async () => {
-      // First reveal words
       await wrapper.find('.word-groups-container').trigger('click')
+      
+      expect(wrapper.find('.pinyin-mask').exists()).toBe(false)
       expect(wrapper.find('.word-groups-mask').exists()).toBe(false)
 
       // Navigate to next
       await wrapper.find('.nav-btn.right').trigger('click')
       await wrapper.vm.$nextTick()
 
-      // Mask should be reset
+      // Both masks should be reset
+      expect(wrapper.find('.pinyin-mask').exists()).toBe(true)
       expect(wrapper.find('.word-groups-mask').exists()).toBe(true)
     })
   })
 
   describe('loop animation toggle', () => {
-    it('updates animation when loop toggle changes', async () => {
+    it('updates loop animation setting', async () => {
       const loopToggle = wrapper.find('[data-testid="toggle-loop"]')
       await loopToggle.setValue(false)
 

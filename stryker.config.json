@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "reporters": ["html", "clear-text"],
+  "testRunner": "vitest",
+  "testRunner_comment": "Using Vitest as the test runner for mutation testing",
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "src/stores/**/*.ts",
+    "src/utils/**/*.ts",
+    "src/composables/**/*.ts"
+  ],
+  "ignoreStatic": true,
+  "thresholds": {
+    "high": 90,
+    "low": 70,
+    "break": 50
+  },
+  "timeoutMS": 10000,
+  "dryRunTimeoutMinutes": 5
+}

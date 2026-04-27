@@ -41,6 +41,10 @@ __screenshots__/
 test-results/
 playwright-report/
 
+# Stryker Mutation Testing
+reports/
+.stryker-tmp/
+
 # Agents
 .codex
 .codex/

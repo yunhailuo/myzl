@@ -130,17 +130,38 @@ After adding a new game, ensure you:
 - Test that the component renders correctly
 - Test main game interactions and controls
 - Verify core game logic and invariants
+- Use test data factories from `src/test/factories.ts` for consistent test data
+
+### Store Tests (if applicable)
+- Create a test file: `src/stores/myNewGame.spec.ts`
+- Test state initialization with correct defaults
+- Test all actions and state mutations
+- Test getters and computed values
+- Test persistence configuration
+- Cover edge cases and error paths
 
 ### E2E Tests
 - Update `e2e/vue.spec.ts` to include the new game
 - Test navigation from home page to the game
 - Test basic game functionality end-to-end
+- Consider visual regression tests for key UI states
+
+### Performance Tests (for question generators)
+- Add performance benchmarks in `src/test/performance.spec.ts`
+- Ensure question generation completes within acceptable time (< 100ms for 10k iterations)
+- Monitor memory usage for potential leaks
+
+### Coverage Targets
+- **Store**: >85% statement coverage
+- **View**: >90% statement coverage
+- **Utilities**: 100% coverage (including error paths)
+- Run `npm run test:unit -- --run --coverage` to verify
 
 ## Checklist
 
 Use this before considering the work complete:
 
-```md
+```
 - [ ] Created new view in `src/views/`
 - [ ] Added game registration in `src/data/games.ts`
 - [ ] Added unit tests for the new view
