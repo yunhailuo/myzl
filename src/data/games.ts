@@ -45,6 +45,14 @@ export const GAMES_REGISTRY: GameMeta[] = [
     icon: '✖️',
     component: 'DistributiveLawView',
   },
+  {
+    path: '/linear-equation',
+    name: 'linear-equation',
+    title: '一元一次方程',
+    description: '移项与合并同类项练习',
+    icon: '📐',
+    component: 'LinearEquationView',
+  },
 ]
 
 /** Get game metadata by path */
