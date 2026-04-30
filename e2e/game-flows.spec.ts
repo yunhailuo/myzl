@@ -11,37 +11,37 @@ test.describe('Complete Game Flow Tests', () => {
       await page.getByRole('main').getByRole('link', { name: '加减法' }).click()
       
       // Verify game loaded
-      await expect(page.locator('.question')).toBeVisible()
+      await expect(page.locator('.expression')).toBeVisible()
       
       // Test next question navigation
-      const initialQuestion = await page.locator('.question').textContent()
+      const initialQuestion = await page.locator('.expression').textContent()
       await page.locator('.nav-btn.right').click()
       
-      const nextQuestion = page.locator('.question')
+      const nextQuestion = page.locator('.expression')
       await expect(nextQuestion).not.toHaveText(initialQuestion)
       
       // Test previous question navigation
       await page.locator('.nav-btn.left').click()
       
-      const prevQuestion = page.locator('.question')
+      const prevQuestion = page.locator('.expression')
       await expect(prevQuestion).toHaveText(initialQuestion)
     })
 
     test('keyboard navigation works correctly', async ({ page }) => {
       await page.getByRole('main').getByRole('link', { name: '加减法' }).click()
       
-      const initialQuestion = await page.locator('.question').textContent()
+      const initialQuestion = await page.locator('.expression').textContent()
       
       // Use right arrow key
       await page.keyboard.press('ArrowRight')
       
-      const nextQuestion = page.locator('.question')
+      const nextQuestion = page.locator('.expression')
       await expect(nextQuestion).not.toHaveText(initialQuestion)
       
       // Use left arrow key
       await page.keyboard.press('ArrowLeft')
       
-      const backQuestion = page.locator('.question')
+      const backQuestion = page.locator('.expression')
       await expect(backQuestion).toHaveText(initialQuestion)
     })
 
@@ -100,7 +100,7 @@ test.describe('Complete Game Flow Tests', () => {
     test('navigate between different games', async ({ page }) => {
       // Start with Addition/Subtraction
       await page.getByRole('main').getByRole('link', { name: '加减法' }).click()
-      await expect(page.locator('.question')).toBeVisible()
+      await expect(page.locator('.expression')).toBeVisible()
       
       // Go back to home using browser back button
       await page.goBack()
@@ -135,13 +135,13 @@ test.describe('Complete Game Flow Tests', () => {
       await page.getByRole('main').getByRole('link', { name: '加减法' }).click()
       
       // Verify game is usable on mobile
-      await expect(page.locator('.question')).toBeVisible()
+      await expect(page.locator('.expression')).toBeVisible()
       await expect(page.locator('.nav-btn')).toHaveCount(2)
       
       // Test touch navigation
       await page.locator('.nav-btn.right').tap()
       
-      const questionChanged = page.locator('.question')
+      const questionChanged = page.locator('.expression')
       await expect(questionChanged).toBeVisible()
     })
 
@@ -167,8 +167,8 @@ test.describe('Complete Game Flow Tests', () => {
       const overlay = page.locator('.config-overlay.active')
       await expect(overlay).toBeVisible()
       
-      // Close by tapping the overlay (more reliable on mobile than Escape key)
-      await page.locator('.config-overlay.active').tap()
+      // Close using Escape key (more stable across browsers than tap)
+      await page.keyboard.press('Escape')
       
       const overlayClosed = page.locator('.config-overlay.active')
       await expect(overlayClosed).toHaveCount(0)
@@ -185,7 +185,7 @@ test.describe('Complete Game Flow Tests', () => {
       }
       
       // App should still be functional
-      await expect(page.locator('.question')).toBeVisible()
+      await expect(page.locator('.expression')).toBeVisible()
     })
 
     test('settings drawer closes on outside click', async ({ page }) => {

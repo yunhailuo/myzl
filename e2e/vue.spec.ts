@@ -12,7 +12,7 @@ test('can navigate from the home page to the game', async ({ page }) => {
   await page.getByRole('main').getByRole('link', { name: '加减法' }).click()
 
   await expect(page.locator('.counter')).toContainText('第 1 题')
-  await expect(page.locator('.question')).toBeVisible()
+  await expect(page.locator('.expression')).toBeVisible()
 })
 
 test('can navigate between questions with the arrow buttons', async ({ page }) => {

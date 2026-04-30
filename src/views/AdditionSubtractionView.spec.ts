@@ -41,7 +41,7 @@ describe('AdditionSubtractionView.vue', () => {
     it('renders the game with counter and question', () => {
       expect(wrapper.find('.game').exists()).toBe(true)
       expect(wrapper.find('.counter').text()).toContain('第 1 题')
-      expect(wrapper.find('.question').text()).toMatch(/^\d+ [+-] \d+$/)
+      expect(wrapper.find('.expression').text()).toMatch(/^\d+ [+-] \d+$/)
     })
 
     it('has navigation buttons with proper state', () => {
@@ -65,14 +65,14 @@ describe('AdditionSubtractionView.vue', () => {
     it('maintains question history when navigating back and forth', async () => {
       await wrapper.find('.nav-btn.right').trigger('click')
       await wrapper.find('.nav-btn.right').trigger('click')
-      const questionAt3 = wrapper.find('.question').text()
+      const questionAt3 = wrapper.find('.expression').text()
 
       await wrapper.find('.nav-btn.left').trigger('click')
       await wrapper.find('.nav-btn.left').trigger('click')
       await wrapper.find('.nav-btn.right').trigger('click')
       await wrapper.find('.nav-btn.right').trigger('click')
 
-      expect(wrapper.find('.question').text()).toBe(questionAt3)
+      expect(wrapper.find('.expression').text()).toBe(questionAt3)
     })
   })
 
@@ -172,7 +172,7 @@ describe('AdditionSubtractionView.vue', () => {
     it('generates valid questions in range', async () => {
       for (let i = 0; i < 20; i++) {
         await wrapper.find('.nav-btn.right').trigger('click')
-        const questionText = wrapper.find('.question').text()
+        const questionText = wrapper.find('.expression').text()
         const match = questionText.match(/^(\d+) [+-] (\d+)$/)
 
         expect(match).not.toBeNull()
@@ -191,7 +191,7 @@ describe('AdditionSubtractionView.vue', () => {
       }
 
       const latest = wrapper
-        .find('.question')
+        .find('.expression')
         .text()
         .match(/^(\d+) ([+-]) (\d+)$/)
       expect(latest).not.toBeNull()

@@ -8,7 +8,7 @@ describe('additionSubtraction Store', () => {
   })
 
   describe('initial state', () => {
-    it('should initialize with one question in history', () => {
+    it('should initialize with one problem in history', () => {
       const store = useAdditionSubtractionStore()
       expect(store.history.length).toBe(1)
     })
@@ -28,9 +28,9 @@ describe('additionSubtraction Store', () => {
       expect(store.enableNavigation).toBe(true)
     })
 
-    it('should have currentQuestion matching first history item', () => {
+    it('should have currentProblem matching first history item', () => {
       const store = useAdditionSubtractionStore()
-      expect(store.currentQuestion).toEqual(store.history[0])
+      expect(store.currentProblem).toBe(store.history[0])
     })
 
     it('should have count equal to 1 initially', () => {
@@ -39,16 +39,15 @@ describe('additionSubtraction Store', () => {
     })
   })
 
-  describe('generateQuestion', () => {
-    it('should generate addition questions', () => {
+  describe('problem generation', () => {
+    it('should generate addition problems', () => {
       const store = useAdditionSubtractionStore()
       let hasAddition = false
 
-      // Generate multiple questions to ensure we get an addition
+      // Generate multiple problems to ensure we get an addition
       for (let i = 0; i < 20; i++) {
-        store.nextQuestion()
-        const question = store.currentQuestion
-        if (question && question.op === '+') {
+        store.nextProblem()
+        if (store.currentProblem?.includes('+')) {
           hasAddition = true
           break
         }
@@ -57,15 +56,14 @@ describe('additionSubtraction Store', () => {
       expect(hasAddition).toBe(true)
     })
 
-    it('should generate subtraction questions', () => {
+    it('should generate subtraction problems', () => {
       const store = useAdditionSubtractionStore()
       let hasSubtraction = false
 
-      // Generate multiple questions to ensure we get a subtraction
+      // Generate multiple problems to ensure we get a subtraction
       for (let i = 0; i < 20; i++) {
-        store.nextQuestion()
-        const question = store.currentQuestion
-        if (question && question.op === '-') {
+        store.nextProblem()
+        if (store.currentProblem?.includes('-')) {
           hasSubtraction = true
           break
         }
@@ -74,68 +72,51 @@ describe('additionSubtraction Store', () => {
       expect(hasSubtraction).toBe(true)
     })
 
-    it('should ensure subtraction results are non-negative', () => {
-      const store = useAdditionSubtractionStore()
-
-      // Generate many questions and check all subtractions
-      for (let i = 0; i < 50; i++) {
-        store.nextQuestion()
-        const question = store.currentQuestion
-        expect(question).toBeDefined()
-        expect(question!.op !== '-' || question!.num1 >= question!.num2).toBe(true)
-      }
-    })
-
-    it('should generate numbers between 1 and 19', () => {
+    it('should generate valid problem format', () => {
       const store = useAdditionSubtractionStore()
 
       for (let i = 0; i < 30; i++) {
-        store.nextQuestion()
-        const question = store.currentQuestion
-        expect(question).toBeDefined()
-        expect(question!.num1).toBeGreaterThanOrEqual(1)
-        expect(question!.num1).toBeLessThanOrEqual(19)
-        expect(question!.num2).toBeGreaterThanOrEqual(1)
-        expect(question!.num2).toBeLessThanOrEqual(19)
+        store.nextProblem()
+        expect(store.currentProblem).toMatch(/^\d+ [+-] \d+$/)
       }
     })
   })
 
   describe('navigation', () => {
-    it('should move to next question and create new one if at end', () => {
+    it('should move to next problem and create new one if at end', () => {
       const store = useAdditionSubtractionStore()
       const initialLength = store.history.length
 
-      store.nextQuestion()
+      store.nextProblem()
 
       expect(store.currentIndex).toBe(1)
       expect(store.history.length).toBe(initialLength + 1)
       expect(store.count).toBe(2)
     })
 
-    it('should move to existing next question without creating new one', () => {
+    it('should move to existing next problem without creating new one', () => {
       const store = useAdditionSubtractionStore()
 
-      // Create a few questions
-      store.nextQuestion()
-      store.nextQuestion()
+      // Create a few problems
+      store.nextProblem()
+      store.nextProblem()
       const historyLength = store.history.length
 
       // Go back and then forward
-      store.previousQuestion()
-      store.nextQuestion()
+      store.previousProblem()
+      store.nextProblem()
 
-      expect(store.history.length).toBe(historyLength) // No new question created
+      expect(store.history.length).toBe(historyLength) // No new problem created
     })
 
-    it('should move to previous question', () => {
+    it('should move to previous problem', () => {
       const store = useAdditionSubtractionStore()
 
-      store.nextQuestion()
-      store.nextQuestion()
+      store.nextProblem()
+      store.nextProblem()
       expect(store.currentIndex).toBe(2)
 
-      store.previousQuestion()
+      store.previousProblem()
       expect(store.currentIndex).toBe(1)
       expect(store.count).toBe(2)
     })
@@ -143,16 +124,16 @@ describe('additionSubtraction Store', () => {
     it('should not go below index 0', () => {
       const store = useAdditionSubtractionStore()
 
-      store.previousQuestion()
+      store.previousProblem()
       expect(store.currentIndex).toBe(0)
     })
 
-    it('should reset to first question', () => {
+    it('should reset to first problem', () => {
       const store = useAdditionSubtractionStore()
 
-      store.nextQuestion()
-      store.nextQuestion()
-      store.nextQuestion()
+      store.nextProblem()
+      store.nextProblem()
+      store.nextProblem()
       expect(store.currentIndex).toBe(3)
 
       store.resetToFirst()

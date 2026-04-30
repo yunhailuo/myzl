@@ -7,8 +7,8 @@ import '../assets/game-layout.css'
 const store = useAdditionSubtractionStore()
 
 useGameNavigation(
-  () => store.nextQuestion(),
-  () => store.previousQuestion(),
+  () => store.nextProblem(),
+  () => store.previousProblem(),
   () => store.enableNavigation,
 )
 </script>
@@ -18,8 +18,8 @@ useGameNavigation(
     :counter-text="`第 ${store.count} 题`"
     :show-arrows="store.enableArrows"
     :disable-left-arrow="store.currentIndex === 0"
-    @next="store.nextQuestion"
-    @prev="store.previousQuestion"
+    @next="store.nextProblem"
+    @prev="store.previousProblem"
   >
     <template #settings>
       <div class="config-item">
@@ -37,10 +37,7 @@ useGameNavigation(
     </template>
 
     <div class="question-card">
-      <div class="question">
-        {{ store.currentQuestion!.num1 }} {{ store.currentQuestion!.op }}
-        {{ store.currentQuestion!.num2 }}
-      </div>
+      <div class="expression">{{ store.currentProblem }}</div>
     </div>
   </GameLayout>
 </template>
@@ -60,7 +57,7 @@ useGameNavigation(
   justify-content: center;
 }
 
-.question {
+.expression {
   font-size: clamp(3rem, 7vw, 5rem);
   font-weight: 700;
   margin: 0;

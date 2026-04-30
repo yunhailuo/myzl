@@ -3,14 +3,11 @@ import { ref } from 'vue'
 import { safeStorage } from '../utils/storage'
 import { useQuestionHistory } from '../composables/useQuestionHistory'
 
-interface Question {
-  num1: number
-  num2: number
-  op: '+' | '-'
-}
+/** Problem expression string */
+type AdditionSubtractionProblem = string
 
-/** Generate a random addition/subtraction question */
-function generateQuestion(): Question {
+/** Generate a random addition/subtraction problem */
+function generateProblem(): AdditionSubtractionProblem {
   const op = Math.random() < 0.5 ? '+' : '-'
   let num1 = Math.floor(Math.random() * 19) + 1
   let num2 = Math.floor(Math.random() * 19) + 1
@@ -19,7 +16,7 @@ function generateQuestion(): Question {
       ;[num1, num2] = [num2, num1]
     }
   }
-  return { num1, num2, op }
+  return `${num1} ${op} ${num2}`
 }
 
 export const useAdditionSubtractionStore = defineStore(
@@ -28,7 +25,7 @@ export const useAdditionSubtractionStore = defineStore(
     // ========== State ==========
 
     const { history, currentIndex, currentItem, count, next, previous, resetToFirst } =
-      useQuestionHistory(generateQuestion)
+      useQuestionHistory(generateProblem)
 
     /** Show navigation arrows */
     const enableArrows = ref(true)
@@ -43,12 +40,12 @@ export const useAdditionSubtractionStore = defineStore(
       enableNavigation,
 
       // Getters
-      currentQuestion: currentItem,
+      currentProblem: currentItem,
       count,
 
       // Actions
-      nextQuestion: next,
-      previousQuestion: previous,
+      nextProblem: next,
+      previousProblem: previous,
       resetToFirst,
     }
   },
