@@ -35,7 +35,7 @@ describe('Distributive Law Store', () => {
 
     it('should generate expand problems with parentheses', () => {
       const store = useDistributiveLawStore()
-      
+
       // Generate multiple problems to ensure we get expand type
       let hasExpand = false
       for (let i = 0; i < 20; i++) {
@@ -45,33 +45,35 @@ describe('Distributive Law Store', () => {
           break
         }
       }
-      
+
       expect(hasExpand).toBe(true)
     })
 
     it('should generate factor problems without parentheses', () => {
       const store = useDistributiveLawStore()
-      
+
       // Generate multiple problems to ensure we get factor type
       let hasFactor = false
       for (let i = 0; i < 30; i++) {
         store.nextProblem()
         const problem = store.currentProblem
         // Factor problems have pattern: a×b + a×c or a×b - a×c (no parentheses)
-        if (problem && !problem.includes('(') && problem.includes('+') || 
-            problem && !problem.includes('(') && problem.includes('-')) {
+        if (
+          (problem && !problem.includes('(') && problem.includes('+')) ||
+          (problem && !problem.includes('(') && problem.includes('-'))
+        ) {
           hasFactor = true
           break
         }
       }
-      
+
       expect(hasFactor).toBe(true)
     })
 
     it('should respect maxPower setting', () => {
       const store = useDistributiveLawStore()
       store.updateMaxPower(2) // 10^2 = 100
-      
+
       // All generated values should be within reasonable range
       for (let i = 0; i < 10; i++) {
         store.nextProblem()
@@ -82,9 +84,9 @@ describe('Distributive Law Store', () => {
     it('should respect decimalPlaces setting', () => {
       const store = useDistributiveLawStore()
       store.updateDecimalPlaces(2)
-      
+
       expect(store.decimalPlaces).toBe(2)
-      
+
       // Generate problem with new setting
       store.nextProblem()
       expect(store.currentProblem).toBeDefined()
@@ -101,9 +103,9 @@ describe('Distributive Law Store', () => {
 
     it('should regenerate problem when trap mode changes', () => {
       const store = useDistributiveLawStore()
-      
+
       store.toggleTrap()
-      
+
       // Problem should be regenerated
       expect(store.currentProblem).toBeDefined()
     })
@@ -111,7 +113,7 @@ describe('Distributive Law Store', () => {
     it('should generate trap problems when enabled', () => {
       const store = useDistributiveLawStore()
       store.toggleTrap()
-      
+
       // Generate multiple problems to check for trap patterns
       let foundTrapPattern = false
       for (let i = 0; i < 30; i++) {
@@ -123,7 +125,7 @@ describe('Distributive Law Store', () => {
           break
         }
       }
-      
+
       expect(foundTrapPattern).toBe(true)
     })
   })
@@ -138,9 +140,9 @@ describe('Distributive Law Store', () => {
 
     it('should regenerate problem when swap mode changes', () => {
       const store = useDistributiveLawStore()
-      
+
       store.toggleSwap()
-      
+
       // Problem should be regenerated
       expect(store.currentProblem).toBeDefined()
     })
@@ -148,7 +150,7 @@ describe('Distributive Law Store', () => {
     it('should generate swapped problems when enabled', () => {
       const store = useDistributiveLawStore()
       store.toggleSwap()
-      
+
       // Generate multiple problems to check for swap patterns
       let foundSwapped = false
       for (let i = 0; i < 30; i++) {
@@ -160,7 +162,7 @@ describe('Distributive Law Store', () => {
           break
         }
       }
-      
+
       expect(foundSwapped).toBe(true)
     })
   })
@@ -189,16 +191,16 @@ describe('Distributive Law Store', () => {
 
     it('should maintain history when navigating back and forth', () => {
       const store = useDistributiveLawStore()
-      
+
       store.nextProblem()
       store.nextProblem()
       const problemAt2 = store.currentProblem
-      
+
       store.previousProblem()
       store.previousProblem()
       store.nextProblem()
       store.nextProblem()
-      
+
       expect(store.currentProblem).toBe(problemAt2)
     })
   })
@@ -206,18 +208,18 @@ describe('Distributive Law Store', () => {
   describe('settings update', () => {
     it('should update maxPower and regenerate problem', () => {
       const store = useDistributiveLawStore()
-      
+
       store.updateMaxPower(4)
-      
+
       expect(store.maxPower).toBe(4)
       expect(store.currentProblem).toBeDefined()
     })
 
     it('should update decimalPlaces and regenerate problem', () => {
       const store = useDistributiveLawStore()
-      
+
       store.updateDecimalPlaces(2)
-      
+
       expect(store.decimalPlaces).toBe(2)
       expect(store.currentProblem).toBeDefined()
     })
@@ -226,14 +228,14 @@ describe('Distributive Law Store', () => {
   describe('persistence', () => {
     it('should persist all configuration settings', () => {
       const store = useDistributiveLawStore()
-      
+
       store.enableTrap = true
       store.enableSwap = true
       store.maxPower = 4
       store.decimalPlaces = 2
       store.enableArrows = false
       store.enableNavigation = false
-      
+
       expect(store.$state.enableTrap).toBe(true)
       expect(store.$state.enableSwap).toBe(true)
       expect(store.$state.maxPower).toBe(4)
@@ -253,21 +255,21 @@ describe('Distributive Law Store', () => {
     it('should generate multiple unique problems', () => {
       const store = useDistributiveLawStore()
       const problems = new Set<string>()
-      
+
       for (let i = 0; i < 10; i++) {
         store.nextProblem()
         if (store.currentProblem) {
           problems.add(store.currentProblem)
         }
       }
-      
+
       // Should have generated different problems
       expect(problems.size).toBeGreaterThan(1)
     })
 
     it('should contain multiplication operator', () => {
       const store = useDistributiveLawStore()
-      
+
       for (let i = 0; i < 10; i++) {
         store.nextProblem()
         expect(store.currentProblem).toContain('×')

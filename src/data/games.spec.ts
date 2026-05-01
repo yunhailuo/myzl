@@ -66,21 +66,53 @@ describe('Games Registry', () => {
   })
 
   describe('generateRoutes', () => {
-    it('should generate routes for all games', () => {
+    it('should generate routes for all games (main + conditional batch)', () => {
       const routes = generateRoutes()
 
-      expect(routes).toHaveLength(GAMES_REGISTRY.length)
+      // Count expected routes: each game has main route, plus batch if batchStoreLoader is provided
+      const expectedRouteCount = GAMES_REGISTRY.reduce((count, game) => {
+        return count + 1 + (game.batchStoreLoader ? 1 : 0)
+      }, 0)
+
+      expect(routes).toHaveLength(expectedRouteCount)
     })
 
-    it('should generate routes with correct structure', () => {
+    it('should generate main routes for all games', () => {
       const routes = generateRoutes()
 
-      routes.forEach((route, index) => {
-        const game = GAMES_REGISTRY[index]
-        expect(route.path).toBe(game?.path)
-        expect(route.name).toBe(game?.name)
-        expect(route.meta?.title).toBe(game?.title)
-        expect(route.component).toBeDefined()
+      GAMES_REGISTRY.forEach((game) => {
+        const mainRoute = routes.find((r) => r.name === game.name)
+        expect(mainRoute).toBeDefined()
+        expect(mainRoute?.path).toBe(game.path)
+        expect(mainRoute?.meta?.title).toBe(game.title)
+        expect(mainRoute?.component).toBeDefined()
+      })
+    })
+
+    it('should generate batch routes for games with batchStoreLoader', () => {
+      const routes = generateRoutes()
+
+      // Filter games that have batchStoreLoader
+      const gamesWithBatch = GAMES_REGISTRY.filter((game) => game.batchStoreLoader)
+
+      gamesWithBatch.forEach((game) => {
+        const batchRoute = routes.find((r) => r.name === `${game.name}-batch`)
+        expect(batchRoute).toBeDefined()
+        expect(batchRoute?.path).toBe(`${game.path}/batch`)
+        expect(batchRoute?.meta?.title).toBe(`${game.title} - 批量生成`)
+        expect(batchRoute?.component).toBeDefined()
+      })
+    })
+
+    it('should not generate batch routes for games without batchStoreLoader', () => {
+      const routes = generateRoutes()
+
+      // Filter games that don't have batchStoreLoader
+      const gamesWithoutBatch = GAMES_REGISTRY.filter((game) => !game.batchStoreLoader)
+
+      gamesWithoutBatch.forEach((game) => {
+        const batchRoute = routes.find((r) => r.name === `${game.name}-batch`)
+        expect(batchRoute).toBeUndefined()
       })
     })
 

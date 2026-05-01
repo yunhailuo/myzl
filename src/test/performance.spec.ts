@@ -1,7 +1,11 @@
 /// <reference types="node" />
 
 import { describe, it, expect } from 'vitest'
-import { generateArithmeticQuestion, createDistributiveProblem, createLinearEquation } from './factories'
+import {
+  generateArithmeticQuestion,
+  createDistributiveProblem,
+  createLinearEquation,
+} from './factories'
 
 describe('Performance Tests', () => {
   describe('Question Generation Performance', () => {

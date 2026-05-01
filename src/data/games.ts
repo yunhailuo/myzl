@@ -12,6 +12,10 @@ export interface GameMeta {
   icon?: string
   /** Component filename (without .vue extension) */
   component: string
+  /** Store module loader for batch generation (if provided, enables batch mode) */
+  batchStoreLoader?: () => Promise<{
+    generateProblem: () => string
+  }>
 }
 
 /**
@@ -28,6 +32,7 @@ export const GAMES_REGISTRY: GameMeta[] = [
     description: '加减法闪卡练习',
     icon: '🔢',
     component: 'AdditionSubtractionView',
+    batchStoreLoader: () => import('../stores/additionSubtraction'),
   },
   {
     path: '/hanzi',
@@ -67,10 +72,37 @@ export function getGameByName(name: string): GameMeta | undefined {
 
 /** Generate Vue Router configurations from game registry */
 export function generateRoutes() {
-  return GAMES_REGISTRY.map((game) => ({
-    path: game.path,
-    name: game.name,
-    component: () => import(`../views/${game.component}.vue`),
-    meta: { title: game.title },
-  }))
+  return GAMES_REGISTRY.flatMap((game) => {
+    const routes: Array<{
+      path: string
+      name: string
+      component: () => Promise<{ default: unknown }>
+      meta: { title: string; supportsBatch?: boolean }
+    }> = [
+      // Main view for single question practice
+      {
+        path: game.path,
+        name: game.name,
+        component: () => import(`../views/${game.component}.vue`),
+        meta: {
+          title: game.title,
+          supportsBatch: !!game.batchStoreLoader,
+        },
+      },
+    ]
+
+    // Add batch route if store loader is provided
+    if (game.batchStoreLoader) {
+      routes.push({
+        path: `${game.path}/batch`,
+        name: `${game.name}-batch`,
+        component: () => import('../views/BatchView.vue'),
+        meta: {
+          title: `${game.title} - 批量生成`,
+        },
+      })
+    }
+
+    return routes
+  })
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 interface Props {
   title?: string
@@ -9,9 +10,14 @@ interface Props {
   disableRightArrow?: boolean
 }
 
+const route = useRoute()
+const router = useRouter()
 defineProps<Props>()
 
-defineEmits<{
+// Auto-detect batch support from route meta (safely handle undefined in tests)
+const supportsBatch = computed(() => route?.meta?.supportsBatch === true)
+
+const emit = defineEmits<{
   (e: 'next'): void
   (e: 'prev'): void
 }>()
@@ -19,6 +25,31 @@ defineEmits<{
 const showConfig = ref(false)
 const configBtnRef = ref<HTMLButtonElement>()
 const closeBtnRef = ref<HTMLButtonElement>()
+const showBatchDialog = ref(false)
+const batchQuestionCount = ref(20)
+const localQuestionCount = ref(batchQuestionCount.value)
+const columns = ref(3)
+const questionCountInput = ref<HTMLInputElement | null>(null)
+
+// Sync local state with prop changes
+watch(
+  () => batchQuestionCount.value,
+  (newVal) => {
+    localQuestionCount.value = newVal
+  },
+)
+
+// Focus the first input when dialog opens
+watch(
+  () => showBatchDialog.value,
+  (newValue) => {
+    if (newValue) {
+      nextTick(() => {
+        questionCountInput.value?.focus()
+      })
+    }
+  },
+)
 
 const toggleConfig = async () => {
   showConfig.value = !showConfig.value
@@ -30,10 +61,49 @@ const toggleConfig = async () => {
   }
 }
 
+const openBatchDialog = () => {
+  showBatchDialog.value = true
+}
+
+const closeBatchDialog = () => {
+  showBatchDialog.value = false
+}
+
+const handleBatchGenerate = () => {
+  const count = Math.max(1, Math.min(1000, localQuestionCount.value))
+  const cols = Math.max(1, Math.min(6, columns.value))
+
+  const gamePath = route.path.startsWith('/') ? route.path : `/${route.path}`
+  const batchPath = `${gamePath}/batch`
+
+  const batchUrl = router.resolve({
+    path: batchPath,
+    query: {
+      count: count.toString(),
+      columns: cols.toString(),
+    },
+  })
+
+  window.open(batchUrl.href, '_blank')
+  closeBatchDialog()
+}
+
 const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && showConfig.value) {
-    toggleConfig()
+  if (event.key === 'Escape') {
+    if (showConfig.value) {
+      toggleConfig()
+    } else if (showBatchDialog.value) {
+      closeBatchDialog()
+    }
   }
+}
+
+const handlePrev = () => {
+  emit('prev')
+}
+
+const handleNext = () => {
+  emit('next')
 }
 
 onMounted(() => {
@@ -51,6 +121,19 @@ onUnmounted(() => {
       <div class="counter">{{ counterText }}</div>
       <div class="header-actions">
         <slot name="header-actions"></slot>
+        <button
+          v-if="supportsBatch"
+          class="batch-btn"
+          @click="openBatchDialog"
+          aria-label="Batch Generate Questions"
+          title="批量生成题目"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path
+              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"
+            />
+          </svg>
+        </button>
         <button ref="configBtnRef" class="config-btn" @click="toggleConfig" aria-label="Settings">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path
@@ -86,7 +169,7 @@ onUnmounted(() => {
     <button
       v-if="showArrows"
       class="nav-btn left"
-      @click="$emit('prev')"
+      @click="handlePrev"
       :disabled="disableLeftArrow"
       aria-label="Previous"
     >
@@ -102,7 +185,7 @@ onUnmounted(() => {
     <button
       v-if="showArrows"
       class="nav-btn right"
-      @click="$emit('next')"
+      @click="handleNext"
       :disabled="disableRightArrow"
       aria-label="Next"
     >
@@ -110,6 +193,57 @@ onUnmounted(() => {
         <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" />
       </svg>
     </button>
+
+    <!-- Batch Generate Dialog -->
+    <Teleport v-if="supportsBatch" to="body">
+      <Transition name="fade">
+        <div v-if="showBatchDialog" class="batch-dialog-overlay" @click.self="closeBatchDialog">
+          <div class="batch-dialog">
+            <div class="dialog-header">
+              <h2>批量生成题目</h2>
+              <button class="close-btn" @click="closeBatchDialog" aria-label="关闭">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="dialog-body">
+              <div class="config-section">
+                <label class="config-label">
+                  <span>题目数量</span>
+                  <input
+                    ref="questionCountInput"
+                    v-model.number="localQuestionCount"
+                    type="number"
+                    min="1"
+                    max="1000"
+                    class="number-input"
+                  />
+                </label>
+
+                <label class="config-label">
+                  <span>每页栏数</span>
+                  <input
+                    v-model.number="columns"
+                    type="number"
+                    min="1"
+                    max="6"
+                    class="number-input"
+                  />
+                </label>
+              </div>
+
+              <div class="action-buttons">
+                <button class="action-btn primary" @click="handleBatchGenerate">
+                  生成并打开新页面
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -146,6 +280,7 @@ onUnmounted(() => {
   align-items: center;
 }
 
+.batch-btn,
 .config-btn {
   width: 40px;
   height: 40px;
@@ -161,10 +296,12 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
+.batch-btn:hover,
 .config-btn:hover {
   background: rgba(0, 0, 0, 0.1);
 }
 
+.batch-btn svg,
 .config-btn svg {
   width: 20px;
   height: 20px;
@@ -300,6 +437,112 @@ onUnmounted(() => {
   grid-column: 1 / -1;
 }
 
+.batch-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.batch-dialog {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 400px;
+  padding: 1rem;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.dialog-header h2 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.dialog-header .close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.dialog-header .close-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.config-label {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.config-label span {
+  font-weight: bold;
+  color: #333;
+}
+
+.number-input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  text-align: right;
+  color: #333;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.action-btn.primary {
+  background: #007bff;
+}
+
+.action-btn.primary:hover {
+  background: #0056b3;
+}
+
 @media (max-width: 600px) {
   .game {
     grid-template-columns: 40px 1fr 40px;
@@ -309,9 +552,20 @@ onUnmounted(() => {
     width: 40px;
   }
 
+  .batch-btn,
   .config-btn {
     width: 36px;
     height: 36px;
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

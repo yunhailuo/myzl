@@ -77,7 +77,7 @@ describe('additionSubtraction Store', () => {
 
       for (let i = 0; i < 30; i++) {
         store.nextProblem()
-        expect(store.currentProblem).toMatch(/^\d+ [+-] \d+$/)
+        expect(store.currentProblem).toMatch(/^\d+ [+-] \d+ = $/)
       }
     })
   })

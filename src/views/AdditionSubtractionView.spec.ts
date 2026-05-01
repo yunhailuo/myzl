@@ -41,13 +41,13 @@ describe('AdditionSubtractionView.vue', () => {
     it('renders the game with counter and question', () => {
       expect(wrapper.find('.game').exists()).toBe(true)
       expect(wrapper.find('.counter').text()).toContain('第 1 题')
-      expect(wrapper.find('.expression').text()).toMatch(/^\d+ [+-] \d+$/)
+      expect(wrapper.find('.expression').text()).toMatch(/^\d+ [+-] \d+ =$/)
     })
 
     it('has navigation buttons with proper state', () => {
       const buttons = wrapper.findAll('.nav-btn')
       expect(buttons).toHaveLength(2)
-      
+
       expect(wrapper.find('.nav-btn.left').attributes('disabled')).toBeDefined()
       expect(wrapper.find('.nav-btn.right').attributes('disabled')).toBeUndefined()
     })
@@ -173,7 +173,7 @@ describe('AdditionSubtractionView.vue', () => {
       for (let i = 0; i < 20; i++) {
         await wrapper.find('.nav-btn.right').trigger('click')
         const questionText = wrapper.find('.expression').text()
-        const match = questionText.match(/^(\d+) [+-] (\d+)$/)
+        const match = questionText.match(/^(\d+) [+-] (\d+) =$/)
 
         expect(match).not.toBeNull()
         const num1 = parseInt(match![1]!)
@@ -193,7 +193,7 @@ describe('AdditionSubtractionView.vue', () => {
       const latest = wrapper
         .find('.expression')
         .text()
-        .match(/^(\d+) ([+-]) (\d+)$/)
+        .match(/^(\d+) ([+-]) (\d+) =$/)
       expect(latest).not.toBeNull()
       const isNonNegativeSubtraction = latest?.[2] !== '-' || Number(latest[1]) >= Number(latest[3])
       expect(isNonNegativeSubtraction).toBe(true)

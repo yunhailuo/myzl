@@ -12,6 +12,7 @@ const toggleMenu = () => {
 
 <template>
   <div class="app">
+    <!-- Hamburger menu button -->
     <button
       v-if="!menuOpen"
       @click="toggleMenu"
@@ -30,6 +31,7 @@ const toggleMenu = () => {
       </svg>
     </button>
 
+    <!-- Navigation menu -->
     <nav class="nav" :class="{ open: menuOpen }">
       <div class="nav-header">
         <span class="nav-title">菜单</span>
@@ -212,5 +214,13 @@ const toggleMenu = () => {
 .main {
   flex: 1;
   padding: 0;
+}
+
+@media print {
+  .hamburger,
+  .nav,
+  .overlay {
+    display: none !important;
+  }
 }
 </style>

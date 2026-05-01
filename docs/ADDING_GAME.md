@@ -12,6 +12,7 @@ The system automatically:
 - ✅ Generates route configurations
 - ✅ Adds navigation menu entries
 - ✅ Displays the game on the home page
+- ✅ Enables batch generation (if configured)
 
 ## Quick Start
 
@@ -73,6 +74,7 @@ That's it! The system will automatically:
 | `description` | string | ❌ | Short game description |
 | `icon` | string | ❌ | Emoji or icon identifier |
 | `component` | string | ✅ | Component filename (without `.vue` extension) |
+| `batchStoreLoader` | function | ❌ | Dynamic import function for store (enables batch generation) |
 
 ## Examples
 
@@ -105,6 +107,39 @@ Then create the `src/views/PinyinView.vue` file.
 ```
 
 Then create the `src/views/EnglishWordsView.vue` file.
+
+### Example 3: Adding Batch Generation Support
+
+To enable batch question generation for printing:
+
+1. **Export generateProblem from store**:
+   ```typescript
+   // src/stores/myGame.ts
+   export function generateProblem(): string {
+     // Your generation logic
+     return `${num1} + ${num2} = `
+   }
+   ```
+
+2. **Add batchStoreLoader to game config**:
+   ```typescript
+   {
+     path: '/my-game',
+     name: 'my-game',
+     title: 'My Game',
+     component: 'MyGameView',
+     batchStoreLoader: () => import('../stores/myGame'),
+   }
+   ```
+
+The system automatically:
+- Creates `/my-game/batch` route
+- Shows batch button in GameLayout header
+- Opens shared configuration dialog (built into GameLayout)
+- Opens dedicated print page in new tab with user's settings
+- Handles question generation and auto-printing
+
+See [docs/BATCH_GENERATE.md](./BATCH_GENERATE.md) for detailed batch generation documentation.
 
 ## Benefits
 
@@ -182,5 +217,6 @@ The game registry system works as follows:
 2. **Automatic Route Generation**: The [`generateRoutes()`](../src/data/games.ts#L60-L68) function creates Vue Router configurations dynamically
 3. **Dynamic Imports**: Routes use lazy-loading via `import()` for better performance
 4. **Consistent Navigation**: Both the home page and app menu pull from the same registry, ensuring consistency
+5. **Batch Generation**: Games with `batchStoreLoader` automatically get batch routes and UI integration
 
 This eliminates the need to manually synchronize routes, menus, and home page entries across multiple files.

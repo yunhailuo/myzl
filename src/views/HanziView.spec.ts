@@ -85,7 +85,7 @@ describe('HanziView.vue', () => {
   describe('config panel', () => {
     it('opens and closes config panel', async () => {
       const configBtn = wrapper.find('.config-btn')
-      
+
       // Open
       await configBtn.trigger('click')
       expect(wrapper.find('.config-panel').classes()).toContain('open')
@@ -117,13 +117,13 @@ describe('HanziView.vue', () => {
       await wrapper.find('.config-btn').trigger('click')
 
       expect(wrapper.find('.section-header.collapsible').exists()).toBe(true)
-      
+
       const header = wrapper.find('.section-header.collapsible')
       await header.trigger('click')
 
       expect(wrapper.find('.set-list').exists()).toBe(true)
       expect(wrapper.find('.select-all-btn').exists()).toBe(true)
-      
+
       const setItems = wrapper.findAll('.set-item')
       expect(setItems.length).toBeGreaterThan(0)
     })
@@ -173,7 +173,7 @@ describe('HanziView.vue', () => {
 
       const reshuffleBtn = wrapper.find('.reshuffle-btn')
       expect(reshuffleBtn.exists()).toBe(true)
-      
+
       await reshuffleBtn.trigger('click')
       expect(reshuffleSpy).toHaveBeenCalled()
     })
@@ -243,7 +243,7 @@ describe('HanziView.vue', () => {
       // Reveal both pinyin and words
       await wrapper.find('.pinyin-container').trigger('click')
       await wrapper.find('.word-groups-container').trigger('click')
-      
+
       expect(wrapper.find('.pinyin-mask').exists()).toBe(false)
       expect(wrapper.find('.word-groups-mask').exists()).toBe(false)
 

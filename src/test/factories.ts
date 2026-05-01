@@ -60,7 +60,10 @@ export function generateUniqueQuestions(
 /**
  * Create a mock Hanzi character object for testing
  */
-export function createMockCharacter(char: string, pinyin: string = 'test'): {
+export function createMockCharacter(
+  char: string,
+  pinyin: string = 'test',
+): {
   char: string
   pinyin: string
   words: string[]

@@ -26,7 +26,7 @@ describe('useGameNavigation logic', () => {
       const startX = 200
       const endX = 100
       const diffX = startX - endX
-      
+
       expect(diffX).toBeGreaterThan(50)
       expect(diffX).toBeGreaterThan(0) // Positive means left swipe
     })
@@ -35,16 +35,16 @@ describe('useGameNavigation logic', () => {
       const startX = 100
       const endX = 200
       const diffX = startX - endX
-      
+
       expect(diffX).toBeLessThan(-50)
       expect(diffX).toBeLessThan(0) // Negative means right swipe
     })
 
     it('should ignore small swipes below threshold', () => {
       const testCases = [
-        { start: 100, end: 80 },   // 20px
-        { start: 100, end: 60 },   // 40px
-        { start: 100, end: 100 },  // 0px
+        { start: 100, end: 80 }, // 20px
+        { start: 100, end: 60 }, // 40px
+        { start: 100, end: 100 }, // 0px
       ]
 
       testCases.forEach(({ start, end }) => {
@@ -66,7 +66,7 @@ describe('useGameNavigation logic', () => {
     it('should accept boolean enable flag', () => {
       const enabled = true
       const disabled = false
-      
+
       expect(enabled).toBe(true)
       expect(disabled).toBe(false)
     })
@@ -74,7 +74,7 @@ describe('useGameNavigation logic', () => {
     it('should accept function enable check', () => {
       const checkEnabled = () => true
       const checkDisabled = () => false
-      
+
       expect(checkEnabled()).toBe(true)
       expect(checkDisabled()).toBe(false)
     })
