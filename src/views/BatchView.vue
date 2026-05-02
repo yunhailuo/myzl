@@ -15,6 +15,14 @@ const gameName = computed(() => {
 
 const count = computed(() => Math.max(1, Math.min(1000, Number(route.query.count) || 20)))
 const columns = computed(() => Math.max(1, Math.min(6, Number(route.query.columns) || 3)))
+const lineSpacing = computed(() => {
+  const value = Number(route.query.lineSpacing)
+  return Math.max(0, Math.min(20.0, isNaN(value) ? 1.5 : value))
+})
+
+// Calculate dynamic vertical spacing based on line spacing multiplier
+const itemVerticalPadding = computed(() => (lineSpacing.value * 0.3).toFixed(2)) // Only vertical padding scales
+const rowGap = computed(() => (lineSpacing.value * 0.4).toFixed(2)) // Gap scales with line spacing
 
 const gameMeta = computed(() => getGameByName(gameName.value))
 
@@ -63,7 +71,14 @@ onMounted(async () => {
   <div v-if="isLoading" class="loading">Generating...</div>
 
   <div v-else class="print-container">
-    <div class="questions-container" :style="{ gridTemplateColumns: `repeat(${columns}, 1fr)` }">
+    <div
+      class="questions-container"
+      :style="{
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        '--row-gap': `${rowGap}rem`,
+        '--item-vertical-padding': `${itemVerticalPadding}rem`,
+      }"
+    >
       <div v-for="(q, index) in questions" :key="index" class="question-item">
         {{ q }}
       </div>
@@ -89,12 +104,12 @@ onMounted(async () => {
 
 .questions-container {
   display: grid;
-  gap: 1rem;
+  gap: var(--row-gap, 0.6rem) 1rem;
 }
 
 .question-item {
   font-size: 1.5rem;
-  padding: 0.5rem;
+  padding: var(--item-vertical-padding, 0.45rem) 0.5rem;
   text-align: center;
   white-space: nowrap;
 }
@@ -111,7 +126,7 @@ onMounted(async () => {
   }
 
   .questions-container {
-    gap: 0.5rem;
+    gap: var(--row-gap, 0.6rem) 0.5rem;
   }
 
   .question-item {
