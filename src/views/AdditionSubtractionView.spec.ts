@@ -205,7 +205,9 @@ describe('AdditionSubtractionView.vue', () => {
       // Test subtraction problems
       store.enableAddition = false
       store.enableSubtraction = true
-      store.resetToFirst()
+      
+      // Generate new subtraction problem by calling next (which uses the updated settings)
+      store.nextProblem()
       
       for (let i = 0; i < 15; i++) {
         await wrapper.find('.nav-btn.right').trigger('click')
