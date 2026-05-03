@@ -273,6 +273,15 @@ export const useDistributiveLawStore = defineStore(
         'enableNavigation',
       ],
       storage: safeStorage,
+      afterHydrate: (context) => {
+        // Regenerate first problem with persisted settings
+        context.store.history[0] = generateProblem(
+          context.store.maxPower,
+          context.store.decimalPlaces,
+          context.store.enableTrap,
+          context.store.enableSwap,
+        )
+      },
     },
   },
 )

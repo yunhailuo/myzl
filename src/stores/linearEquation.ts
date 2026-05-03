@@ -178,6 +178,10 @@ export const useLinearEquationStore = defineStore(
     persist: {
       pick: ['maxTerms', 'enableArrows', 'enableNavigation'],
       storage: safeStorage,
+      afterHydrate: (context) => {
+        // Regenerate first problem with persisted settings
+        context.store.history[0] = generateProblem(context.store.maxTerms)
+      },
     },
   },
 )
