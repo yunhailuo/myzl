@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import AdditionSubtractionView from './AdditionSubtractionView.vue'
+import { useAdditionSubtractionStore } from '../stores/additionSubtraction'
 
 const swipeLeft = async () => {
   document.dispatchEvent(
@@ -170,22 +171,65 @@ describe('AdditionSubtractionView.vue', () => {
 
   describe('question generation', () => {
     it('generates valid questions in range', async () => {
-      for (let i = 0; i < 20; i++) {
+      // Test addition problems
+      const store = useAdditionSubtractionStore()
+      store.enableAddition = true
+      store.enableSubtraction = false
+      
+      for (let i = 0; i < 15; i++) {
         await wrapper.find('.nav-btn.right').trigger('click')
+        
         const questionText = wrapper.find('.expression').text()
-        const match = questionText.match(/^(\d+) [+-] (\d+) =$/)
-
+        const match = questionText.match(/^(-?\d+(?:\.\d+)?|\(-?\d+(?:\.\d+)?\)) ([+-]) (-?\d+(?:\.\d+)?|\(-?\d+(?:\.\d+)?\)) =$/)
+        
         expect(match).not.toBeNull()
-        const num1 = parseInt(match![1]!)
-        const num2 = parseInt(match![2]!)
+        const num1Str = match![1]!
+        const op = match![2]
+        const num2Str = match![3]!
+        
+        // Remove parentheses for parsing
+        const num1 = parseFloat(num1Str.replace(/[()]/g, ''))
+        const num2 = parseFloat(num2Str.replace(/[()]/g, ''))
+        
+        // Addition: parts should be in [partMin, partMax], sum in [sumMin, sumMax]
+        expect(op).toBe('+')
         expect(num1).toBeGreaterThanOrEqual(1)
-        expect(num1).toBeLessThanOrEqual(19)
+        expect(num1).toBeLessThanOrEqual(10)
         expect(num2).toBeGreaterThanOrEqual(1)
-        expect(num2).toBeLessThanOrEqual(19)
+        expect(num2).toBeLessThanOrEqual(10)
+        const sum = num1 + num2
+        expect(sum).toBeGreaterThanOrEqual(2)
+        expect(sum).toBeLessThanOrEqual(20)
+      }
+      
+      // Test subtraction problems
+      store.enableAddition = false
+      store.enableSubtraction = true
+      store.resetToFirst()
+      
+      for (let i = 0; i < 15; i++) {
+        await wrapper.find('.nav-btn.right').trigger('click')
+        
+        const questionText = wrapper.find('.expression').text()
+        const match = questionText.match(/^(-?\d+(?:\.\d+)?|\(-?\d+(?:\.\d+)?\)) ([+-]) (-?\d+(?:\.\d+)?|\(-?\d+(?:\.\d+)?\)) =$/)
+        
+        expect(match).not.toBeNull()
+        const num1Str = match![1]!
+        const num2Str = match![3]!
+        
+        // Remove parentheses for parsing
+        const num1 = parseFloat(num1Str.replace(/[()]/g, ''))
+        const num2 = parseFloat(num2Str.replace(/[()]/g, ''))
+        
+        // Subtraction: minuend in [sumMin, sumMax], subtrahend/difference in [partMin, partMax]
+        expect(num1).toBeGreaterThanOrEqual(2)
+        expect(num1).toBeLessThanOrEqual(20)
+        expect(num2).toBeGreaterThanOrEqual(1)
+        expect(num2).toBeLessThanOrEqual(10)
       }
     })
 
-    it('keeps subtraction questions non-negative', async () => {
+    it('keeps subtraction questions non-negative by default', async () => {
       for (let i = 0; i < 30; i++) {
         await wrapper.find('.nav-btn.right').trigger('click')
       }
@@ -193,7 +237,7 @@ describe('AdditionSubtractionView.vue', () => {
       const latest = wrapper
         .find('.expression')
         .text()
-        .match(/^(\d+) ([+-]) (\d+) =$/)
+        .match(/^(\d+(?:\.\d+)?) ([+-]) (\d+(?:\.\d+)?) =$/)
       expect(latest).not.toBeNull()
       const isNonNegativeSubtraction = latest?.[2] !== '-' || Number(latest[1]) >= Number(latest[3])
       expect(isNonNegativeSubtraction).toBe(true)

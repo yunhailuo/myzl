@@ -44,7 +44,7 @@ test('disables keyboard navigation when the setting is turned off', async ({ pag
   await page.goto('/addition-subtraction')
 
   await page.getByRole('button', { name: 'Settings' }).click()
-  await page.getByRole('checkbox', { name: '启用键盘和滑动操作' }).uncheck()
+  await page.getByRole('checkbox', { name: '启用键盘/滑动手势' }).uncheck()
   await page.keyboard.press('ArrowRight')
 
   await expect(page.locator('.counter')).toContainText('第 1 题')
@@ -76,8 +76,8 @@ test('config panel checkboxes can be toggled', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Settings' }).click()
 
-  const arrowCheckbox = page.getByRole('checkbox', { name: '显示左右箭头按钮' })
-  const navigationCheckbox = page.getByRole('checkbox', { name: '启用键盘和滑动操作' })
+  const arrowCheckbox = page.getByRole('checkbox', { name: '显示导航箭头' })
+  const navigationCheckbox = page.getByRole('checkbox', { name: '启用键盘/滑动手势' })
 
   await expect(arrowCheckbox).toBeChecked()
   await expect(navigationCheckbox).toBeChecked()
