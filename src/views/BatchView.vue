@@ -44,10 +44,10 @@ onMounted(async () => {
   }
 
   try {
-    const storeModule = await loadStore()
-    const { generateProblem } = storeModule
+    // Load the configured problem generator (already bound to current store settings)
+    const { generateProblem } = await loadStore()
 
-    // Generate questions
+    // Generate questions using the pre-configured generator
     const generatedQuestions: string[] = []
     for (let i = 0; i < count.value; i++) {
       generatedQuestions.push(generateProblem())
@@ -110,7 +110,7 @@ onMounted(async () => {
 .question-item {
   font-size: 1.5rem;
   padding: var(--item-vertical-padding, 0.45rem) 0.5rem;
-  text-align: center;
+  text-align: left;
   white-space: nowrap;
 }
 

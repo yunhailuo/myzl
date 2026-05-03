@@ -12,10 +12,27 @@ export interface GameMeta {
   icon?: string
   /** Component filename (without .vue extension) */
   component: string
-  /** Store module loader for batch generation (if provided, enables batch mode) */
+  /** 
+   * Store module loader for batch generation.
+   * Returns a configured problem generator that respects current store settings.
+   */
   batchStoreLoader?: () => Promise<{
+    /** Generate a single problem with current store configuration */
     generateProblem: () => string
   }>
+}
+
+/**
+ * Helper function to create a batch store loader from a store module path.
+ * Automatically uses the module's createBatchGenerator function.
+ */
+function createBatchLoader<T extends { createBatchGenerator: () => () => string }>(
+  importFn: () => Promise<T>,
+): GameMeta['batchStoreLoader'] {
+  return async () => {
+    const module = await importFn()
+    return { generateProblem: module.createBatchGenerator() }
+  }
 }
 
 /**
@@ -32,7 +49,7 @@ export const GAMES_REGISTRY: GameMeta[] = [
     description: '加减法闪卡练习',
     icon: '🔢',
     component: 'AdditionSubtractionView',
-    batchStoreLoader: () => import('../stores/additionSubtraction'),
+    batchStoreLoader: createBatchLoader(() => import('../stores/additionSubtraction')),
   },
   {
     path: '/hanzi',
@@ -49,6 +66,7 @@ export const GAMES_REGISTRY: GameMeta[] = [
     description: '乘法分配律简便计算练习',
     icon: '✖️',
     component: 'DistributiveLawView',
+    batchStoreLoader: createBatchLoader(() => import('../stores/distributiveLaw')),
   },
   {
     path: '/linear-equation',
@@ -57,6 +75,7 @@ export const GAMES_REGISTRY: GameMeta[] = [
     description: '移项与合并同类项练习',
     icon: '📐',
     component: 'LinearEquationView',
+    batchStoreLoader: createBatchLoader(() => import('../stores/linearEquation')),
   },
 ]
 

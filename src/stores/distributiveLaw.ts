@@ -54,7 +54,7 @@ function generateExpand(maxValue: number, dp: number, trapRate: number): Distrib
       }
     }
 
-    return `${a} × (${b} ${op} ${c})`
+    return `${a} × (${b} ${op} ${c}) =`
   }
 
   // Normal problem: choose strategy
@@ -82,7 +82,7 @@ function generateExpand(maxValue: number, dp: number, trapRate: number): Distrib
     }
 
     const op = Math.random() < 0.5 ? '+' : '-'
-    return `${a} × (${b} ${op} ${c})`
+    return `${a} × (${b} ${op} ${c}) =`
   } else {
     // Near integer split: 3.5 × 9.9 = 3.5×(10-0.1)
     const a = pickRandom([0.5, 1.5, 2.5, 3.5, 6, 8, 0.6, 25, 2])
@@ -102,7 +102,7 @@ function generateExpand(maxValue: number, dp: number, trapRate: number): Distrib
     }
 
     const op = adj > 0 ? '+' : '-'
-    return `${a} × (${base} ${op} ${Math.abs(adj)})`
+    return `${a} × (${base} ${op} ${Math.abs(adj)}) =`
   }
 }
 
@@ -157,10 +157,34 @@ function generateFactor(maxValue: number, dp: number, swapRate: number): Distrib
       }
       return trimmed
     }
-    return `${swapMul(parts[0]!)} ${op} ${swapMul(parts[1]!)}`
+    return `${swapMul(parts[0]!)} ${op} ${swapMul(parts[1]!)} =`
   }
 
-  return expression
+  return `${expression} =`
+}
+
+/** Generate random distributive law problem (mix expand and factor) */
+export function generateProblem(
+  maxPower = 3,
+  decimalPlaces = 1,
+  enableTrap = false,
+  enableSwap = false,
+): DistributiveProblem {
+  const maxValue = Math.pow(10, maxPower)
+  const isExpand = Math.random() < 0.5
+  return isExpand
+    ? generateExpand(maxValue, decimalPlaces, enableTrap ? 0.2 : 0)
+    : generateFactor(maxValue, decimalPlaces, enableSwap ? 0.2 : 0)
+}
+
+/**
+ * Create a problem generator bound to current store settings.
+ * This is used for batch generation to respect user's persisted configuration.
+ */
+export function createBatchGenerator() {
+  const store = useDistributiveLawStore()
+  return () =>
+    generateProblem(store.maxPower, store.decimalPlaces, store.enableTrap, store.enableSwap)
 }
 
 export const useDistributiveLawStore = defineStore(
@@ -182,17 +206,10 @@ export const useDistributiveLawStore = defineStore(
     /** Enable keyboard and swipe navigation */
     const enableNavigation = ref(true)
 
-    /** Generate random problem (mix expand and factor) */
-    function generateRandomProblem(): DistributiveProblem {
-      const maxValue = Math.pow(10, maxPower.value)
-      const isExpand = Math.random() < 0.5
-      return isExpand
-        ? generateExpand(maxValue, decimalPlaces.value, enableTrap.value ? 0.2 : 0)
-        : generateFactor(maxValue, decimalPlaces.value, enableSwap.value ? 0.2 : 0)
-    }
-
     const { history, currentIndex, currentItem, count, next, previous, resetToFirst } =
-      useQuestionHistory(generateRandomProblem)
+      useQuestionHistory(() =>
+        generateProblem(maxPower.value, decimalPlaces.value, enableTrap.value, enableSwap.value),
+      )
 
     // ========== Actions ==========
 
@@ -200,14 +217,24 @@ export const useDistributiveLawStore = defineStore(
     function toggleSetting(setting: 'trap' | 'swap') {
       if (setting === 'trap') enableTrap.value = !enableTrap.value
       else enableSwap.value = !enableSwap.value
-      history.value[currentIndex.value] = generateRandomProblem()
+      history.value[currentIndex.value] = generateProblem(
+        maxPower.value,
+        decimalPlaces.value,
+        enableTrap.value,
+        enableSwap.value,
+      )
     }
 
     /** Update numeric setting and regenerate problem */
     function updateSetting(setting: 'maxPower' | 'decimalPlaces', value: number) {
       if (setting === 'maxPower') maxPower.value = value
       else decimalPlaces.value = value
-      history.value[currentIndex.value] = generateRandomProblem()
+      history.value[currentIndex.value] = generateProblem(
+        maxPower.value,
+        decimalPlaces.value,
+        enableTrap.value,
+        enableSwap.value,
+      )
     }
 
     return {

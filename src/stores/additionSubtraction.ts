@@ -19,6 +19,15 @@ export function generateProblem(): AdditionSubtractionProblem {
   return `${num1} ${op} ${num2} = `
 }
 
+/**
+ * Create a problem generator bound to current store settings.
+ * This is used for batch generation to respect user's persisted configuration.
+ * For addition-subtraction, there are no configurable settings, so this is a simple wrapper.
+ */
+export function createBatchGenerator() {
+  return () => generateProblem()
+}
+
 export const useAdditionSubtractionStore = defineStore(
   'additionSubtraction',
   () => {

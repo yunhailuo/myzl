@@ -7,6 +7,7 @@ import BatchView from './BatchView.vue'
 // Mock the dynamic import
 vi.mock('../stores/additionSubtraction.ts', () => ({
   generateProblem: vi.fn(() => '5 + 3 = '),
+  createBatchGenerator: vi.fn(() => vi.fn(() => '5 + 3 = ')),
 }))
 
 describe('BatchView.vue', () => {
