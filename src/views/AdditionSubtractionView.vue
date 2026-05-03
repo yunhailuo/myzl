@@ -60,6 +60,10 @@ useGameNavigation(
 .expression {
   font-size: clamp(3rem, 7vw, 5rem);
   font-weight: 700;
+  /* Optimize for different screen sizes */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   margin: 0;
   text-align: center;
   line-height: 1.1;

@@ -109,6 +109,7 @@ onMounted(async () => {
 
 .question-item {
   font-size: 1.5rem;
+  font-family: var(--font-print);
   padding: var(--item-vertical-padding, 0.45rem) 0.5rem;
   text-align: left;
   white-space: nowrap;
@@ -131,6 +132,7 @@ onMounted(async () => {
 
   .question-item {
     font-size: 1.2rem;
+    font-family: var(--font-print);
   }
 }
 </style>
