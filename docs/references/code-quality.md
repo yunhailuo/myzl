@@ -34,6 +34,7 @@ Must pass all CI checks as defined in `.github/workflows/ci.yml`:
 - ✅ Build (`npm run build`)
 - ✅ Unit Tests with Coverage (`npm run test:unit -- --coverage`)
 - ✅ E2E Tests (`npm run test:e2e`)
+- ✅ **Documentation Review**: Verify docs are up-to-date with code changes
 
 See [CI Configuration](../.github/workflows/ci.yml) for details.
 
@@ -42,6 +43,22 @@ See [CI Configuration](../.github/workflows/ci.yml) for details.
 - Stores: >85%
 - Views/Composables: >90%
 - Overall statement coverage: >90%
+
+### Documentation Review
+
+**Before completing a task and before Git commit:**
+
+1. **Assess Impact**: Does the code change affect user-facing behavior, introduce new patterns/APIs, or modify existing functionality? If yes → update docs.
+
+2. **Update Relevant Docs**:
+   - User-facing changes → `README.md` + feature guides
+   - New patterns/APIs → reference docs + examples
+   - Architecture changes → architecture docs
+   - See [Documentation Guidelines](./documentation-guidelines.md) for detailed workflow
+
+3. **Verify Quality**: Examples work, links valid, no contradictions, language policy followed (English docs/code, Chinese UI).
+
+See [Documentation Guidelines](./documentation-guidelines.md) for complete maintenance strategy and decision tree.
 
 ## Common Code Review Points
 

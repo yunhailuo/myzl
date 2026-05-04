@@ -82,7 +82,7 @@ git diff v1.0..v2.0 -- docs/TESTING_STRATEGY.md
 - Information no longer accurate or helpful
 
 **Deprecation process:**
-```markdown
+```
 <!-- During deprecation period (1-2 releases) -->
 > **Deprecated:** This approach is deprecated as of v2.0. 
 > Use [new approach](./NEW_APPROACH.md) instead.
@@ -129,7 +129,7 @@ git diff v1.0..v2.0 -- docs/TESTING_STRATEGY.md
 **Rule:** When in doubt, link to source code rather than duplicating it.
 
 **Examples:**
-```markdown
+````
 For complete API details, see:
 - [additionSubtraction store](../src/stores/additionSubtraction.ts)
 - [GameLayout component](../src/components/GameLayout.vue)
@@ -190,7 +190,7 @@ Consider adding to CI:
 3. Decision rationale helps avoid repeating mistakes
 
 **Format:**
-```markdown
+```
 ## Design Evolution
 
 **Current approach:** Uses automatic route generation from game registry.
@@ -223,7 +223,7 @@ git show <commit-hash>:path/to/file
 
 If maintaining a CHANGELOG.md, follow [Keep a Changelog](https://keepachangelog.com/) format:
 
-```markdown
+```
 ## [Unreleased]
 
 ### Added
@@ -259,22 +259,64 @@ If maintaining a CHANGELOG.md, follow [Keep a Changelog](https://keepachangelog.
 
 When AI agents modify the project:
 
-1. **Code Changes → Doc Updates:**
+### 1. Code Changes → Doc Updates:
    - If behavior changes, update relevant docs
    - If new patterns introduced, document them
    - If APIs modified, update interface docs
+   - **Critical**: Before marking task as complete, explicitly check documentation status
 
-2. **Doc-Only Changes:**
+### 2. Doc-Only Changes:
    - Clarify confusing sections
    - Fix inaccuracies
    - Improve examples
    - Add missing cross-references
 
-3. **Before Completing Task:**
+### 3. Pre-Completion Checklist (Before Returning to User):
+
+**Mandatory Steps:**
+```
+- [ ] Reviewed code changes for documentation impact
+- [ ] Identified all affected documentation files
+- [ ] Updated or created necessary documentation
+- [ ] Verified all code examples in docs still work
+- [ ] Checked cross-references and links
+- [ ] Ensured no contradictory information exists
+- [ ] Followed language policy (English docs/code, Chinese UI)
+```
+
+**Quick Decision Tree:**
+```
+Did you change code behavior?
+├─ Yes → Update feature/guide docs
+│   ├─ New feature? → Add to README + create/update guide
+│   ├─ Modified feature? → Update existing docs
+│   └─ Changed API? → Update reference docs
+│
+├─ No, but changed patterns/conventions?
+│   └─ Yes → Update development standards docs
+│
+└─ No changes to behavior or patterns?
+    └─ No doc updates needed (usually)
+```
+
+### 4. Common Scenarios Requiring Doc Updates:
+
+| Code Change | Documents to Update |
+|------------|-------------------|
+| New game/tool feature | README.md, guides/add-new-game.md |
+| Modified store architecture | references/architecture-detailed.md |
+| New testing pattern | references/testing-patterns.md |
+| Changed routing logic | references/architecture-detailed.md |
+| New utility function | references/development-standards.md |
+| UI/UX changes | references/design-system.md |
+| Build/deployment changes | AGENTS.md, guides/index.md |
+
+### 5. Before Completing Task:
    - Verify all referenced docs are current
    - Check for broken links
    - Ensure examples still work
    - Confirm no contradictory information
+   - **Run final verification**: `npm run type-check && npm run lint`
 
 ## Resources
 

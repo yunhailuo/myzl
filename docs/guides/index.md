@@ -11,6 +11,7 @@ Task-oriented guides for common development activities. Start here when you have
   - View component templates
   - Testing requirements
   - Registration in games.ts
+  - **Includes tool features** (non-game utilities like query tools)
 
 - **[Batch Generation](batch-generate.md)**: How to use and configure batch question generation
   - Batch mode overview

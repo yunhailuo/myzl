@@ -60,6 +60,14 @@ export const GAMES_REGISTRY: GameMeta[] = [
     component: 'HanziView',
   },
   {
+    path: '/hanzi-tool',
+    name: 'hanzi-tool',
+    title: '汉字查询',
+    description: '查询汉字的拼音、笔顺和例词',
+    icon: '🔍',
+    component: 'HanziToolView',
+  },
+  {
     path: '/distributive-law',
     name: 'distributive-law',
     title: '分配律',

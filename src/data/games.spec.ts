@@ -4,7 +4,7 @@ import { GAMES_REGISTRY, getGameByPath, getGameByName, generateRoutes } from './
 describe('Games Registry', () => {
   describe('GAMES_REGISTRY', () => {
     it('should contain all registered games', () => {
-      expect(GAMES_REGISTRY).toHaveLength(4)
+      expect(GAMES_REGISTRY).toHaveLength(5)
     })
 
     it('should have required fields for each game', () => {

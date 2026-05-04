@@ -220,3 +220,49 @@ The game registry system works as follows:
 5. **Batch Generation**: Games with `batchStoreLoader` automatically get batch routes and UI integration
 
 This eliminates the need to manually synchronize routes, menus, and home page entries across multiple files.
+
+## Adding Tool Features (Non-Game)
+
+Tools are utility features that don't require game mechanics like question systems, history tracking, or navigation controls.
+
+### Key Differences from Games
+
+| Aspect | Game | Tool |
+|--------|------|------|
+| State Management | Pinia Store required | Local component state only |
+| Navigation | Previous/Next buttons | No navigation needed |
+| History | Track progress | No history tracking |
+| Batch Generation | Optional support | Not applicable |
+| Layout | Uses GameLayout | Custom simple layout |
+
+### Example: Hanzi Query Tool
+
+The Hanzi Query Tool (`HanziToolView`) demonstrates a typical tool implementation:
+
+```typescript
+// src/data/games.ts
+{
+  path: '/hanzi-tool',
+  name: 'hanzi-tool',
+  title: '汉字查询',
+  description: '查询汉字的拼音、笔顺和例词',
+  icon: '🔍',
+  component: 'HanziToolView',
+  // Note: NO batchStoreLoader - tools don't support batch generation
+}
+```
+
+**Implementation characteristics:**
+- Single input field for user query
+- Immediate display of results (pinyin, stroke animation, example words)
+- No settings panel or navigation controls
+- Uses existing libraries (pinyin-pro, hanzi-writer, cnchar)
+- Simple vertical layout without遮罩 (masking) features
+
+### Testing Tools
+
+Tools still require testing but with simpler requirements:
+- **Unit Tests**: Test component rendering and user interactions
+- **No Store Tests**: Tools don't use Pinia stores
+- **E2E Tests**: Verify navigation and basic functionality
+- **Coverage Target**: >80% statement coverage for views

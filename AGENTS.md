@@ -101,4 +101,4 @@ See [Code Quality Checklist](docs/references/code-quality.md) for complete requi
 - Run `npm run lint`
 - Run `CI=1 npm run test:unit -- --run --coverage` (target: >90%)
 - Run `npm run test:e2e`
-- Update docs when workflows or product behavior change
+- **Review documentation**: If code behavior changed, update relevant docs per [Documentation Guidelines](docs/references/documentation-guidelines.md)

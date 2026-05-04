@@ -71,7 +71,7 @@ test.describe('Complete Game Flow Tests', () => {
 
   test.describe('Hanzi Game Flow', () => {
     test('hanzi game basic interaction', async ({ page }) => {
-      await page.getByRole('main').getByRole('link', { name: '汉字' }).click()
+      await page.getByRole('main').getByRole('link', { name: '🀄 汉字' }).click()
       
       // Wait for canvas display (Hanzi Writer uses canvas)
       await expect(page.locator('canvas')).toBeVisible()
@@ -88,7 +88,7 @@ test.describe('Complete Game Flow Tests', () => {
     })
 
     test('hanzi writer initialization', async ({ page }) => {
-      await page.getByRole('main').getByRole('link', { name: '汉字' }).click()
+      await page.getByRole('main').getByRole('link', { name: '🀄 汉字' }).click()
       
       // Check if HanziWriter canvas is created
       const canvas = page.locator('canvas')
@@ -106,7 +106,7 @@ test.describe('Complete Game Flow Tests', () => {
       await page.goBack()
       
       // Navigate to Hanzi
-      await page.getByRole('main').getByRole('link', { name: '汉字' }).click()
+      await page.getByRole('main').getByRole('link', { name: '🀄 汉字' }).click()
       await expect(page.locator('canvas')).toBeVisible()
       
       // Verify we're in Hanzi game
@@ -120,11 +120,11 @@ test.describe('Complete Game Flow Tests', () => {
       // Check that multiple game links exist
       const gameLinks = page.locator('.game-link')
       const count = await gameLinks.count()
-      expect(count).toBeGreaterThanOrEqual(4) // Should have at least 4 games
+      expect(count).toBeGreaterThanOrEqual(5) // Should have at least 5 games
       
       // Verify specific games are present
       await expect(page.getByRole('main').getByRole('link', { name: '加减法' })).toBeVisible()
-      await expect(page.getByRole('main').getByRole('link', { name: '汉字' })).toBeVisible()
+      await expect(page.getByRole('main').getByRole('link', { name: '🀄 汉字' })).toBeVisible()
     })
   })
 
@@ -146,7 +146,7 @@ test.describe('Complete Game Flow Tests', () => {
     })
 
     test('hanzi game on mobile viewport', async ({ page }) => {
-      await page.getByRole('main').getByRole('link', { name: '汉字' }).click()
+      await page.getByRole('main').getByRole('link', { name: '🀄 汉字' }).click()
       
       // Wait for character rendering
       await expect(page.locator('canvas')).toBeVisible()

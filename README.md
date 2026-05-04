@@ -6,7 +6,9 @@ An personal application built with Vue 3 and Vite. The current experience focuse
 
 - Home screen with game selection
 - Addition and subtraction flash-card style practice
-- Previous and next question history
+- **Hanzi character learning** with stroke animation and word examples
+- **Hanzi query tool** for looking up pinyin, stroke order, and example words
+- Previous and next question history (for games)
 - Keyboard arrow navigation
 - Swipe navigation on touch devices
 - Settings drawer for arrow buttons and gesture/keyboard controls
@@ -51,7 +53,9 @@ An personal application built with Vue 3 and Vite. The current experience focuse
 │   │   └── storage.ts
 │   ├── views/
 │   │   ├── AdditionSubtractionView.vue
+│   │   ├── BatchView.vue
 │   │   ├── DistributiveLawView.vue
+│   │   ├── HanziToolView.vue       # Hanzi query tool (non-game utility)
 │   │   ├── HanziView.vue
 │   │   ├── HomeView.vue
 │   │   └── LinearEquationView.vue
