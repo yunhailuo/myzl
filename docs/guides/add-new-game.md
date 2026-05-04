@@ -139,7 +139,7 @@ The system automatically:
 - Opens dedicated print page in new tab with user's settings
 - Handles question generation and auto-printing
 
-See [docs/BATCH_GENERATE.md](./BATCH_GENERATE.md) for detailed batch generation documentation.
+See [Batch Generation Guide](./batch-generate.md) for detailed batch generation documentation.
 
 ## Benefits
 
