@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:cf": "VITE_ENABLE_CLOUDFLARE=true vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "build:gh": "VITE_BASE_URL=/myzl/ run-p type-check \"build-only {@}\" --",
     "build:root": "VITE_BASE_URL=/ run-p type-check \"build-only {@}\" --",

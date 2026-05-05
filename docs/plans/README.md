@@ -6,6 +6,7 @@ This directory contains execution plans and technical debt tracking.
 
 - **`active/`**: Currently in-progress plans
 - **`completed/`**: Finished plans (archived)
+- **`agentic-learning-upgrade.md`**: Proposed roadmap for adaptive learning and AI/agent enablement
 - **`tech-debt-tracker.md`**: Known technical debt items
 
 ## Plan Lifecycle
@@ -62,6 +63,10 @@ Any current obstacles?
 ## Technical Debt Tracker
 
 See [tech-debt-tracker.md](tech-debt-tracker.md) for current technical debt items.
+
+## Proposed Strategic Plans
+
+- **[Agentic Learning Upgrade](agentic-learning-upgrade.md)**: Serious product, architecture, testing, and AI-enablement upgrades inspired by Harness Engineering.
 
 ## Related Resources
 

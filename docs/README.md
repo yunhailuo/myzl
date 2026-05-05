@@ -66,6 +66,7 @@ This documentation is designed for you too! Benefits:
 Check our current quality metrics:
 - **[Quality Score](quality.md)**: Coverage, grades, known gaps
 - **[Technical Debt](plans/tech-debt-tracker.md)**: What needs improvement
+- **[Agentic Learning Upgrade](plans/agentic-learning-upgrade.md)**: Roadmap for adaptive learning, AI-assisted content, and agent-enabled validation
 
 ## 🚀 Getting Started
 

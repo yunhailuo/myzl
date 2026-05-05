@@ -5,20 +5,25 @@ import vue from '@vitejs/plugin-vue'
 import fs from 'fs'
 import path from 'path'
 
-import { cloudflare } from "@cloudflare/vite-plugin";
+import { cloudflare } from '@cloudflare/vite-plugin'
+
+const isTest = process.env.VITEST === 'true'
+const enableCloudflarePlugin = process.env.VITE_ENABLE_CLOUDFLARE === 'true' && !isTest
 
 // https://vite.dev/config/
 export default defineConfig({
   base: process.env.VITE_BASE_URL || '/',
-  plugins: [vue(), // 自定义插件：在构建后生成带有正确 base 路径的 404.html
-  {
-    name: 'generate-404-html',
-    closeBundle() {
-      const baseUrl = process.env.VITE_BASE_URL || '/'
-      const distPath = path.resolve(__dirname, 'dist')
-      const html404Path = path.join(distPath, '404.html')
-      
-      const html404Content = `<!DOCTYPE html>
+  plugins: [
+    vue(),
+    {
+      name: 'generate-404-html',
+      apply: 'build',
+      closeBundle() {
+        const baseUrl = process.env.VITE_BASE_URL || '/'
+        const distPath = path.resolve(__dirname, 'dist')
+        const html404Path = path.join(distPath, '404.html')
+
+        const html404Content = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -52,11 +57,13 @@ export default defineConfig({
 <p>正在加载...</p>
 </body>
 </html>`
-      
-      fs.writeFileSync(html404Path, html404Content, 'utf-8')
-      console.log(`✓ Generated 404.html with base path: ${baseUrl}`)
-    }
-  }, cloudflare()],
+
+        fs.writeFileSync(html404Path, html404Content, 'utf-8')
+        console.log(`✓ Generated 404.html with base path: ${baseUrl}`)
+      },
+    },
+    enableCloudflarePlugin && cloudflare(),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

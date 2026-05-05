@@ -4,7 +4,25 @@ Known technical debt items and remediation plans. Updated regularly as debt is a
 
 ## Active Debt Items
 
-### 1. Module Specification Documentation
+### 1. Agentic Learning Upgrade
+
+**Severity**: High
+**Impact**: The product lacks adaptive learning loops, deterministic generation, and agent-readable validation paths needed for serious AI-enabled development.
+**Effort**: Multi-phase roadmap
+
+**Description**: MYZL should evolve from random flash-card practice into a deterministic, measurable learning system with AI-assisted generation and strong safety boundaries.
+
+**Remediation Plan**:
+- [ ] Follow [Agentic Learning Upgrade](agentic-learning-upgrade.md)
+- [ ] Start with deterministic generation and E2E test isolation
+- [ ] Add answer/reveal/correctness tracking to one math module
+- [ ] Introduce schema-validated AI generation only after core learning data exists
+
+**Target Completion**: Phased
+
+---
+
+### 2. Module Specification Documentation
 
 **Severity**: Medium  
 **Impact**: New developers lack detailed module-specific guidance  
@@ -22,7 +40,7 @@ Known technical debt items and remediation plans. Updated regularly as debt is a
 
 ---
 
-### 2. Historical Architecture Decisions
+### 3. Historical Architecture Decisions
 
 **Severity**: Low  
 **Impact**: Context for past decisions not captured  
@@ -40,7 +58,7 @@ Known technical debt items and remediation plans. Updated regularly as debt is a
 
 ---
 
-### 3. Performance Benchmarking
+### 4. Performance Benchmarking
 
 **Severity**: Medium  
 **Impact**: No baseline metrics for performance regression detection  
@@ -58,7 +76,7 @@ Known technical debt items and remediation plans. Updated regularly as debt is a
 
 ---
 
-### 4. Advanced Task Guides
+### 5. Advanced Task Guides
 
 **Severity**: Low  
 **Impact**: Complex scenarios not covered in guides  
