@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { safeStorage } from '../utils/storage'
-import { pickRandom, shuffleArray } from '../utils/math'
+import { pickRandom, shuffleArray, type RandomSource } from '../utils/math'
 import { useQuestionHistory } from '../composables/useQuestionHistory'
 
 /** Problem expression string */
@@ -57,31 +57,31 @@ function formatSide(terms: Term[], variable: string): string {
 }
 
 /** Generate random linear equation problem */
-export function generateProblem(maxTerms = 8): LinearEquationProblem {
-  const target = Math.max(
-    4,
-    Math.min(12, Math.floor(Math.random() * (maxTerms - 4 + 1)) + 4),
-  )
+export function generateProblem(
+  maxTerms = 8,
+  rng: RandomSource = Math.random,
+): LinearEquationProblem {
+  const target = Math.max(4, Math.min(12, Math.floor(rng() * (maxTerms - 4 + 1)) + 4))
 
   // Select variable and solution
-  const variable = pickRandom(LETTERS)
-  const sol = pickRandom(SOL_SET)
+  const variable = pickRandom(LETTERS, rng)
+  const sol = pickRandom(SOL_SET, rng)
 
   // Select coefficients A (left) and C (right), ensure A ≠ C
   let A: number, C: number
   do {
-    A = pickRandom(COEFF_RANGE)
-    C = pickRandom(COEFF_RANGE)
+    A = pickRandom(COEFF_RANGE, rng)
+    C = pickRandom(COEFF_RANGE, rng)
   } while (A === C)
 
   // Select left constant B, calculate right constant D
-  let B = pickRandom(CONST_RANGE)
+  let B = pickRandom(CONST_RANGE, rng)
   let D = B + (A - C) * sol
 
   // Retry with different values if D is invalid
   let attempts = 0
   while ((D < -10 || D > 10 || D === 0) && attempts < MAX_RETRY_ATTEMPTS) {
-    B = pickRandom(CONST_RANGE)
+    B = pickRandom(CONST_RANGE, rng)
     D = B + (A - C) * sol
     attempts++
   }
@@ -106,32 +106,29 @@ export function generateProblem(maxTerms = 8): LinearEquationProblem {
 
   // Expand terms until reaching target
   let expandAttempts = 0
-  while (
-    leftTerms.length + rightTerms.length < target &&
-    expandAttempts < MAX_EXPAND_ATTEMPTS
-  ) {
+  while (leftTerms.length + rightTerms.length < target && expandAttempts < MAX_EXPAND_ATTEMPTS) {
     expandAttempts++
-    const side = Math.random() < 0.5 ? 'L' : 'R'
+    const side = rng() < 0.5 ? 'L' : 'R'
     const terms = side === 'L' ? leftTerms : rightTerms
 
     if (terms.length === 0) continue
 
-    const idx = Math.floor(Math.random() * terms.length)
+    const idx = Math.floor(rng() * terms.length)
     const [val, isVar] = terms[idx]!
     const splits = validSplit(val)
 
     if (splits.length > 0) {
-      const [a1, a2] = pickRandom(splits)
+      const [a1, a2] = pickRandom(splits, rng)
       terms.splice(idx, 1)
       terms.splice(idx, 0, [a1, isVar], [a2, isVar])
     }
   }
 
   // Shuffle and format
-  shuffleArray(leftTerms)
-  shuffleArray(rightTerms)
+  const shuffledLeft = shuffleArray(leftTerms, rng)
+  const shuffledRight = shuffleArray(rightTerms, rng)
 
-  return `${formatSide(leftTerms, variable)} = ${formatSide(rightTerms, variable)}`
+  return `${formatSide(shuffledLeft, variable)} = ${formatSide(shuffledRight, variable)}`
 }
 
 /**

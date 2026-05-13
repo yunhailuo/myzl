@@ -121,6 +121,8 @@ npm run test:unit -- --coverage
 CI=1 npm run test:unit -- --run
 ```
 
+For reproducible generator tests and debugging, see [Deterministic Generation](./docs/guides/deterministic-generation.md).
+
 ### End-to-end tests
 
 ```bash

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { safeStorage } from '../utils/storage'
-import { roundTo } from '../utils/math'
+import { roundTo, type RandomSource } from '../utils/math'
 import { useQuestionHistory } from '../composables/useQuestionHistory'
 
 /** Problem expression string */
@@ -13,16 +13,21 @@ function formatNumber(num: number): string {
 }
 
 /** Generate a random number with variable decimal places (0 to maxDecimalPlaces) */
-function generateMixedNumber(min: number, max: number, maxDecimalPlaces: number): number {
+function generateMixedNumber(
+  min: number,
+  max: number,
+  maxDecimalPlaces: number,
+  rng: RandomSource = Math.random,
+): number {
   // Randomly choose decimal places for this number (0 to maxDecimalPlaces)
-  const actualDecimalPlaces = Math.floor(Math.random() * (maxDecimalPlaces + 1))
-  const raw = Math.random() * (max - min) + min
+  const actualDecimalPlaces = Math.floor(rng() * (maxDecimalPlaces + 1))
+  const raw = rng() * (max - min) + min
   return roundTo(raw, actualDecimalPlaces)
 }
 
 /**
  * Generate a random addition/subtraction problem with configurable ranges and operations.
- * 
+ *
  * @param sumMin - Minimum value for sum (addition) or minuend (subtraction)
  * @param sumMax - Maximum value for sum (addition) or minuend (subtraction)
  * @param partMin - Minimum value for addends/subtrahend/difference
@@ -30,7 +35,8 @@ function generateMixedNumber(min: number, max: number, maxDecimalPlaces: number)
  * @param enableAddition - Whether to enable addition problems
  * @param enableSubtraction - Whether to enable subtraction problems
  * @param decimalPlaces - Number of decimal places (0 for integers)
- * 
+ * @param rng - Optional random number source (defaults to Math.random for production randomness)
+ *
  * Note: Future enhancement could include validation logic for:
  * - Range conflicts (e.g., sumMin > sumMax)
  * - Feasibility checks (e.g., ensuring partMax * 2 >= sumMin for addition)
@@ -44,11 +50,12 @@ export function generateProblem(
   enableAddition = true,
   enableSubtraction = true,
   decimalPlaces = 0,
+  rng: RandomSource = Math.random,
 ): AdditionSubtractionProblem {
   // Select operation type
   let op: '+' | '-'
   if (enableAddition && enableSubtraction) {
-    op = Math.random() < 0.5 ? '+' : '-'
+    op = rng() < 0.5 ? '+' : '-'
   } else if (enableAddition) {
     op = '+'
   } else if (enableSubtraction) {
@@ -65,89 +72,89 @@ export function generateProblem(
     // Addition: a + b = c
     // c (sum) ∈ [sumMin, sumMax]
     // a, b (parts) ∈ [partMin, partMax]
-    
+
     // Ensure sum is achievable with two parts in [partMin, partMax]
     // Minimum possible sum: partMin + partMin = 2 * partMin
     // Maximum possible sum: partMax + partMax = 2 * partMax
     const achievableSumMin = roundTo(2 * partMin, decimalPlaces)
     const achievableSumMax = roundTo(2 * partMax, decimalPlaces)
-    
+
     // Adjust sum range to be achievable
     const actualSumMin = Math.max(sumMin, achievableSumMin)
     const actualSumMax = Math.min(sumMax, achievableSumMax)
-    
+
     // If range is invalid, use fallback
     let finalSumMin = actualSumMin
     let finalSumMax = actualSumMax
-    
+
     if (finalSumMin > finalSumMax) {
       // Fallback: use the achievable range
       finalSumMin = achievableSumMin
       finalSumMax = achievableSumMax
-      
+
       // If still invalid (shouldn't happen), use simple values
       if (finalSumMin > finalSumMax) {
         finalSumMin = partMin
         finalSumMax = partMax
       }
     }
-    
-    const sum = generateMixedNumber(finalSumMin, finalSumMax, decimalPlaces)
-    
+
+    const sum = generateMixedNumber(finalSumMin, finalSumMax, decimalPlaces, rng)
+
     // Calculate valid range for num1 ensuring num2 is also in [partMin, partMax]
     // num1 ∈ [partMin, partMax] AND num2 = sum - num1 ∈ [partMin, partMax]
     // Therefore: max(partMin, sum - partMax) ≤ num1 ≤ min(partMax, sum - partMin)
     const num1Min = Math.max(partMin, roundTo(sum - partMax, decimalPlaces))
     const num1Max = Math.min(partMax, roundTo(sum - partMin, decimalPlaces))
-    
-    num1 = generateMixedNumber(num1Min, num1Max, decimalPlaces)
+
+    num1 = generateMixedNumber(num1Min, num1Max, decimalPlaces, rng)
     num2 = roundTo(sum - num1, decimalPlaces)
-    
+
     return `${formatNumber(num1)} + ${formatNumber(num2)} = `
   } else {
     // Subtraction: a - b = c
     // a (minuend) ∈ [sumMin, sumMax]
     // b (subtrahend), c (difference) ∈ [partMin, partMax]
-    
+
     // First, ensure we can generate valid values
     // We need: num1 - num2 ∈ [partMin, partMax] where num2 ∈ [partMin, partMax]
     // So: num1 ∈ [partMin + partMin, partMax + partMax] = [2*partMin, 2*partMax]
     // But also: num1 ∈ [sumMin, sumMax]
     // Therefore: num1 ∈ [max(sumMin, 2*partMin), min(sumMax, 2*partMax)]
-    
+
     const actualMinuendMin = Math.max(sumMin, roundTo(2 * partMin, decimalPlaces))
     const actualMinuendMax = Math.min(sumMax, roundTo(2 * partMax, decimalPlaces))
-    
+
     // If range is invalid, use fallback
     let minuendMin = actualMinuendMin
     let minuendMax = actualMinuendMax
-    
+
     if (minuendMin > minuendMax) {
       // Fallback: adjust to ensure feasibility
       minuendMin = Math.max(sumMin, roundTo(partMin + partMin, decimalPlaces))
       minuendMax = Math.min(sumMax, roundTo(partMax + partMax, decimalPlaces))
-      
+
       // If still invalid, use simple approach
       if (minuendMin > minuendMax) {
         minuendMin = sumMin
         minuendMax = sumMax
       }
     }
-    
-    num1 = generateMixedNumber(minuendMin, minuendMax, decimalPlaces)
-    
+
+    num1 = generateMixedNumber(minuendMin, minuendMax, decimalPlaces, rng)
+
     // Generate subtrahend ensuring difference is in [partMin, partMax]
     const maxSubtrahend = Math.min(partMax, roundTo(num1 - partMin, decimalPlaces))
     const minSubtrahend = Math.max(partMin, roundTo(num1 - partMax, decimalPlaces))
-    
+
     if (minSubtrahend <= maxSubtrahend) {
-      num2 = generateMixedNumber(minSubtrahend, maxSubtrahend, decimalPlaces)
+      num2 = generateMixedNumber(minSubtrahend, maxSubtrahend, decimalPlaces, rng)
     } else {
       // Fallback: use middle value
       num2 = roundTo((minSubtrahend + maxSubtrahend) / 2, decimalPlaces)
       num2 = Math.max(partMin, Math.min(partMax, num2))
     }
-    
+
     return `${formatNumber(num1)} - ${formatNumber(num2)} = `
   }
 }

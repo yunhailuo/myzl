@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { useDistributiveLawStore } from './distributiveLaw'
+import { useDistributiveLawStore, generateProblem } from './distributiveLaw'
+import { createSeededRNG } from '../utils/math'
 
 describe('Distributive Law Store', () => {
   beforeEach(() => {
@@ -273,6 +274,57 @@ describe('Distributive Law Store', () => {
       for (let i = 0; i < 10; i++) {
         store.nextProblem()
         expect(store.currentProblem).toContain('×')
+      }
+    })
+  })
+
+  describe('deterministic generation', () => {
+    it('should produce the same sequence with the same seed', () => {
+      const seed = 42
+      const rng1 = createSeededRNG(seed)
+      const rng2 = createSeededRNG(seed)
+
+      const problems1: string[] = []
+      const problems2: string[] = []
+
+      // Generate 10 problems with each RNG
+      for (let i = 0; i < 10; i++) {
+        problems1.push(generateProblem(3, 1, false, false, rng1))
+        problems2.push(generateProblem(3, 1, false, false, rng2))
+      }
+
+      // Both sequences should be identical
+      expect(problems1).toEqual(problems2)
+    })
+
+    it('should produce different sequences with different seeds', () => {
+      const rng1 = createSeededRNG(42)
+      const rng2 = createSeededRNG(123)
+
+      const problems1: string[] = []
+      const problems2: string[] = []
+
+      // Generate 10 problems with each RNG
+      for (let i = 0; i < 10; i++) {
+        problems1.push(generateProblem(3, 1, false, false, rng1))
+        problems2.push(generateProblem(3, 1, false, false, rng2))
+      }
+
+      // Sequences should be different
+      expect(problems1).not.toEqual(problems2)
+    })
+
+    it('should respect constraints with seeded generation', () => {
+      const rng = createSeededRNG(999)
+
+      for (let i = 0; i < 50; i++) {
+        const problem = generateProblem(3, 1, false, false, rng)
+
+        // Should contain multiplication
+        expect(problem).toContain('×')
+
+        // Should end with equals sign
+        expect(problem).toMatch(/=$/)
       }
     })
   })

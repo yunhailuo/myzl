@@ -65,11 +65,13 @@ These are the nine high-leverage recommendations from the 2026-05-05 repository 
 
 ### 1. Deterministic Validation
 
-- [ ] Keep production problem generation random by default.
-- [ ] Add RNG helper APIs that support optional seeds.
-- [ ] Allow tests, batch generation, and debug/reproduction flows to pass seeded RNG.
-- [ ] Add seeded generation tests for current math stores.
-- [ ] Document which flows use real randomness and which may use seeded randomness.
+- [x] Keep production problem generation random by default.
+- [x] Add RNG helper APIs that support optional seeds.
+- [x] Allow tests and debug/reproduction flows to pass seeded RNG.
+- [x] Add seeded generation tests for current math stores.
+- [x] Document which flows use real randomness and which may use seeded randomness.
+
+Completion note: deterministic generation is implemented for the current math stores. The current batch UI does not expose seed controls; seeded batch/share workflows remain a future enhancement.
 
 ### 2. E2E Reliability
 

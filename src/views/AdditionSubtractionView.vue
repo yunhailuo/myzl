@@ -25,21 +25,13 @@ useGameNavigation(
       <!-- Navigation Options -->
       <div class="config-item">
         <label class="config-label">
-          <input 
-            v-model="store.enableArrows" 
-            type="checkbox"
-            data-testid="toggle-arrows"
-          />
+          <input v-model="store.enableArrows" type="checkbox" data-testid="toggle-arrows" />
           <span>显示导航箭头</span>
         </label>
       </div>
       <div class="config-item">
         <label class="config-label">
-          <input 
-            v-model="store.enableNavigation" 
-            type="checkbox"
-            data-testid="toggle-navigation"
-          />
+          <input v-model="store.enableNavigation" type="checkbox" data-testid="toggle-navigation" />
           <span>启用键盘/滑动手势</span>
         </label>
       </div>
@@ -99,17 +91,13 @@ useGameNavigation(
       <!-- Operators -->
       <div class="config-item config-row">
         <label class="config-label config-inline">
-          <input 
-            v-model="store.enableAddition" 
-            type="checkbox" 
-            @change="store.validateOperators"
-          />
+          <input v-model="store.enableAddition" type="checkbox" @change="store.validateOperators" />
           <span>+</span>
         </label>
         <label class="config-label config-inline">
-          <input 
-            v-model="store.enableSubtraction" 
-            type="checkbox" 
+          <input
+            v-model="store.enableSubtraction"
+            type="checkbox"
             @change="store.validateOperators"
           />
           <span>−</span>

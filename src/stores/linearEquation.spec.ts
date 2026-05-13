@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { useLinearEquationStore } from './linearEquation'
+import { useLinearEquationStore, generateProblem } from './linearEquation'
+import { createSeededRNG } from '../utils/math'
 
 describe('Linear Equation Store', () => {
   beforeEach(() => {
@@ -96,5 +97,59 @@ describe('Linear Equation Store', () => {
 
     // Should have generated different problems
     expect(problems.size).toBeGreaterThan(1)
+  })
+
+  describe('deterministic generation', () => {
+    it('should produce the same sequence with the same seed', () => {
+      const seed = 42
+      const rng1 = createSeededRNG(seed)
+      const rng2 = createSeededRNG(seed)
+
+      const problems1: string[] = []
+      const problems2: string[] = []
+
+      // Generate 10 problems with each RNG
+      for (let i = 0; i < 10; i++) {
+        problems1.push(generateProblem(8, rng1))
+        problems2.push(generateProblem(8, rng2))
+      }
+
+      // Both sequences should be identical
+      expect(problems1).toEqual(problems2)
+    })
+
+    it('should produce different sequences with different seeds', () => {
+      const rng1 = createSeededRNG(42)
+      const rng2 = createSeededRNG(123)
+
+      const problems1: string[] = []
+      const problems2: string[] = []
+
+      // Generate 10 problems with each RNG
+      for (let i = 0; i < 10; i++) {
+        problems1.push(generateProblem(8, rng1))
+        problems2.push(generateProblem(8, rng2))
+      }
+
+      // Sequences should be different
+      expect(problems1).not.toEqual(problems2)
+    })
+
+    it('should respect constraints with seeded generation', () => {
+      const rng = createSeededRNG(999)
+
+      for (let i = 0; i < 50; i++) {
+        const problem = generateProblem(8, rng)
+
+        // Should contain equals sign
+        expect(problem).toContain('=')
+
+        // Should not use 'x' as variable
+        const letters = problem.match(/[a-z]/g) || []
+        letters.forEach((letter) => {
+          expect(letter).not.toBe('x')
+        })
+      }
+    })
   })
 })

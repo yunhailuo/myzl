@@ -12,7 +12,7 @@ export interface GameMeta {
   icon?: string
   /** Component filename (without .vue extension) */
   component: string
-  /** 
+  /**
    * Store module loader for batch generation.
    * Returns a configured problem generator that respects current store settings.
    */

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { useAdditionSubtractionStore } from './additionSubtraction'
+import { useAdditionSubtractionStore, generateProblem } from './additionSubtraction'
+import { createSeededRNG } from '../utils/math'
 
 describe('additionSubtraction Store', () => {
   beforeEach(() => {
@@ -151,6 +152,80 @@ describe('additionSubtraction Store', () => {
 
       expect(store.$state.enableArrows).toBe(false)
       expect(store.$state.enableNavigation).toBe(false)
+    })
+  })
+
+  describe('deterministic generation', () => {
+    it('should produce the same sequence with the same seed', () => {
+      const seed = 42
+      const rng1 = createSeededRNG(seed)
+      const rng2 = createSeededRNG(seed)
+
+      const problems1: string[] = []
+      const problems2: string[] = []
+
+      // Generate 10 problems with each RNG
+      for (let i = 0; i < 10; i++) {
+        problems1.push(generateProblem(10, 50, 1, 20, true, true, 0, rng1))
+        problems2.push(generateProblem(10, 50, 1, 20, true, true, 0, rng2))
+      }
+
+      // Both sequences should be identical
+      expect(problems1).toEqual(problems2)
+    })
+
+    it('should produce different sequences with different seeds', () => {
+      const rng1 = createSeededRNG(42)
+      const rng2 = createSeededRNG(123)
+
+      const problems1: string[] = []
+      const problems2: string[] = []
+
+      // Generate 10 problems with each RNG
+      for (let i = 0; i < 10; i++) {
+        problems1.push(generateProblem(10, 50, 1, 20, true, true, 0, rng1))
+        problems2.push(generateProblem(10, 50, 1, 20, true, true, 0, rng2))
+      }
+
+      // Sequences should be different
+      expect(problems1).not.toEqual(problems2)
+    })
+
+    it('should respect range constraints with seeded generation', () => {
+      // Test addition problems separately
+      const addRng = createSeededRNG(100)
+      for (let i = 0; i < 20; i++) {
+        const problem = generateProblem(10, 50, 1, 20, true, false, 0, addRng)
+        const match = problem.match(/^(\d+) \+ (\d+) = $/)
+        expect(match).not.toBeNull()
+
+        const sum = parseInt(match![1]!) + parseInt(match![2]!)
+        expect(sum).toBeGreaterThanOrEqual(10)
+        expect(sum).toBeLessThanOrEqual(50)
+      }
+
+      // Test subtraction problems separately
+      const subRng = createSeededRNG(200)
+      for (let i = 0; i < 20; i++) {
+        const problem = generateProblem(10, 50, 1, 20, false, true, 0, subRng)
+        const match = problem.match(/^(\d+) - (\d+) = $/)
+        expect(match).not.toBeNull()
+
+        const minuend = parseInt(match![1]!)
+        const subtrahend = parseInt(match![2]!)
+        expect(minuend).toBeGreaterThanOrEqual(subtrahend)
+      }
+    })
+
+    it('should work with decimal places in seeded generation', () => {
+      const rng = createSeededRNG(777)
+
+      for (let i = 0; i < 20; i++) {
+        const problem = generateProblem(10, 50, 1, 20, true, true, 2, rng)
+
+        // Should contain decimal points or be integers
+        expect(problem).toMatch(/^[\d.]+ [+-] [\d.]+ = $/)
+      }
     })
   })
 })

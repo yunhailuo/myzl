@@ -35,6 +35,11 @@ Task-oriented guides for common development activities. Start here when you have
   - Coverage requirements
   - Common patterns and anti-patterns
 
+- **[Deterministic Generation](deterministic-generation.md)**: Seeded math problem generation for reproducible tests and debugging
+  - Optional RNG parameter pattern
+  - Generator signatures
+  - Testing examples
+
 ### 🐛 Debugging
 - **[Fixing Bugs](fix-bug.md)**: Systematic debugging workflow
   - Reproduce the bug first

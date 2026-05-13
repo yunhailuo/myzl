@@ -27,13 +27,13 @@ const isValidChar = computed(() => {
 // Get all pinyin readings for the character
 const allPinyins = computed(() => {
   if (!isValidChar.value) return []
-  
+
   // pinyin-pro returns multiple readings separated by spaces when there are multiple pronunciations
-  const result = pinyin(inputChar.value, { 
+  const result = pinyin(inputChar.value, {
     toneType: 'symbol',
-    multiple: true 
+    multiple: true,
   })
-  
+
   // Split by space and remove duplicates
   return [...new Set(result.split(' '))]
 })
@@ -81,7 +81,7 @@ const initWriter = (char: string) => {
     delayBetweenLoops: 1000,
     padding: 10,
   })
-  
+
   writerRef.value.loopCharacterAnimation()
 }
 
@@ -110,10 +110,10 @@ const clearInput = () => {
 // Validate and normalize input (called on blur/enter)
 const validateAndNormalizeInput = () => {
   if (!inputChar.value) return
-  
+
   // Use Array.from to properly handle Unicode characters (including emoji)
   const chars = Array.from(inputChar.value)
-  
+
   // Only keep the last character if multiple are entered
   if (chars.length > 1) {
     const lastChar = chars[chars.length - 1]
@@ -122,13 +122,12 @@ const validateAndNormalizeInput = () => {
     }
   }
 }
-
 </script>
 
 <template>
   <div class="hanzi-tool">
     <h1>汉字查询</h1>
-    
+
     <!-- Input section -->
     <div class="input-section">
       <input
@@ -140,9 +139,9 @@ const validateAndNormalizeInput = () => {
         class="char-input"
         aria-label="输入要查询的汉字"
       />
-      <button 
-        v-if="inputChar" 
-        @click="clearInput" 
+      <button
+        v-if="inputChar"
+        @click="clearInput"
         class="clear-btn"
         aria-label="清空输入"
         title="清空"
@@ -175,9 +174,9 @@ const validateAndNormalizeInput = () => {
         <div class="words-list">
           <div v-for="(group, idx) in wordGroups" :key="idx" class="word-group">
             <div class="word-chars">
-              <span 
-                v-for="(charData, cIdx) in group.chars" 
-                :key="cIdx" 
+              <span
+                v-for="(charData, cIdx) in group.chars"
+                :key="cIdx"
                 class="word-char"
                 :class="{ 'current-char': charData.isCurrent }"
               >
@@ -185,11 +184,7 @@ const validateAndNormalizeInput = () => {
               </span>
             </div>
             <div class="word-pinyin">
-              <span 
-                v-for="(charData, cIdx) in group.chars" 
-                :key="cIdx" 
-                class="pinyin-char"
-              >
+              <span v-for="(charData, cIdx) in group.chars" :key="cIdx" class="pinyin-char">
                 {{ charData.pinyin || '·' }}
               </span>
             </div>
