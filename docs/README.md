@@ -9,6 +9,7 @@ Our documentation follows a **progressive disclosure** model: start simple, dive
 ### For Quick Tasks → Start with [Task Guides](guides/)
 
 Need to accomplish something specific? Task guides provide step-by-step workflows:
+
 - Adding new games
 - Modifying stores
 - Writing tests
@@ -18,6 +19,7 @@ Need to accomplish something specific? Task guides provide step-by-step workflow
 ### For Deep Understanding → Consult [References](references/)
 
 Need detailed specifications or standards? Reference docs provide comprehensive information:
+
 - Architecture details
 - Development standards
 - Testing patterns
@@ -27,6 +29,7 @@ Need detailed specifications or standards? Reference docs provide comprehensive 
 ### For Module-Specific Work → Check [Module Specs](specs/)
 
 Working on a particular game module? Module specs provide focused documentation:
+
 - Addition & Subtraction
 - Hanzi Learning
 - Distributive Law
@@ -35,6 +38,7 @@ Working on a particular game module? Module specs provide focused documentation:
 ### For Context → Read [Architecture Decisions](decisions/)
 
 Want to understand why we made certain choices? ADRs capture decision rationale:
+
 - Modular game architecture
 - Automatic route generation
 - Pinia state management
@@ -64,6 +68,7 @@ This documentation is designed for you too! Benefits:
 ## 📊 Project Health
 
 Check our current quality metrics:
+
 - **[Quality Score](quality.md)**: Coverage, grades, known gaps
 - **[Technical Debt](plans/tech-debt-tracker.md)**: What needs improvement
 - **[Agentic Learning Upgrade](plans/agentic-learning-upgrade.md)**: Roadmap for adaptive learning, AI-assisted content, and agent-enabled validation
@@ -81,8 +86,9 @@ New to the project? Follow this path:
 ## 🔄 Documentation Maintenance
 
 We keep docs current through:
+
 - **Regular reviews**: Quarterly audits
-- **Automated checks**: CI validates links and structure
+- **Automated checks**: CI validates build and test health
 - **Agent assistance**: "Doc-gardening" tasks fix stale content
 - **Community updates**: Everyone contributes improvements
 
@@ -95,7 +101,7 @@ Our documentation philosophy (inspired by [OpenAI's Harness Engineering](https:/
 1. **Context is scarce**: Keep entry points small and focused
 2. **Progressive disclosure**: Reveal complexity gradually
 3. **Repository is source of truth**: All knowledge lives in versioned files
-4. **Mechanical enforcement**: Linters and CI validate documentation quality
+4. **Mechanical enforcement**: Linters and CI validate repository health; documentation quality relies on manual review and regular audits
 5. **Agent legibility**: Optimize for both human and AI readability
 
 ## 📞 Need Help?

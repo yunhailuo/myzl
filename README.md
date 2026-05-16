@@ -64,11 +64,13 @@ An personal application built with Vue 3 and Vite. The current experience focuse
 ├── e2e/
 │   └── vue.spec.ts
 ├── docs/
-│   ├── ADDING_GAME.md                    # How to add new games
-│   ├── REVIEW.md                         # Repository review & backlog
-│   ├── TEST_OPTIMIZATION.md              # Testing optimization process
-│   ├── TESTING_PATTERNS.md               # Testing best practices
-│   └── TESTING_ENHANCEMENT_SUMMARY.md    # Enhancement summary
+│   ├── guides/           # Task guides (adding games, batch generation, etc.)
+│   ├── references/       # Reference documentation (testing, architecture, etc.)
+│   ├── specs/            # Module specifications
+│   ├── decisions/        # Architecture decision records
+│   ├── plans/            # Planning documents
+│   ├── quality.md        # Quality requirements and targets
+│   └── README.md         # Documentation overview
 ├── AGENTS.md
 ├── playwright.config.ts
 ├── vite.config.ts
@@ -162,7 +164,7 @@ Current coverage targets:
 - **Composables**: >90% (focus on core logic)
 - **Overall**: >90% statement coverage
 
-Run `npm run test:unit -- --coverage` to check current coverage. See [TESTING_PATTERNS.md](./docs/TESTING_PATTERNS.md) for testing best practices and examples.
+Run `npm run test:unit -- --coverage` to check current coverage. See [Writing Tests](./docs/references/testing-patterns.md) for testing best practices and examples.
 
 ## Deployment
 
@@ -208,12 +210,12 @@ Use `npm run preview` for a pure Vite preview, and only use `npm run preview:cf`
 - `generateQuestion()` is the current question generator.
 - Behavior changes should include tests.
 - Use test data factories from `src/test/factories.ts` for consistent test data.
-- Follow testing patterns documented in [docs/TESTING_PATTERNS.md](./docs/TESTING_PATTERNS.md).
+- Follow testing patterns documented in [docs/references/testing-patterns.md](./docs/references/testing-patterns.md).
 - `AGENTS.md` contains agent-oriented instructions and project conventions.
-- `docs/ADDING_GAME.md` explains the step-by-step workflow for adding a new playable game.
-- `docs/REVIEW.md` tracks the current review findings and backlog.
-- `docs/TEST_OPTIMIZATION.md` documents the testing optimization process and standards.
-- `docs/TESTING_ENHANCEMENT_SUMMARY.md` provides a complete summary of testing improvements.
+- `docs/guides/add-new-game.md` explains the step-by-step workflow for adding a new playable game.
+- `docs/plans/tech-debt-tracker.md` tracks current technical debt and improvement plans.
+- `docs/references/testing-strategy.md` documents the testing workflow and quality expectations.
+- `docs/quality.md` summarizes current quality metrics and documentation practices.
 
 ## Roadmap Ideas
 
@@ -232,4 +234,4 @@ Use `npm run preview` for a pure Vite preview, and only use `npm run preview:cf`
 - Add integration tests for store-view interactions
 - Set up performance monitoring in CI
 
-See [docs/TESTING_ENHANCEMENT_SUMMARY.md](./docs/TESTING_ENHANCEMENT_SUMMARY.md) for detailed next steps.
+See [docs/quality.md](./docs/quality.md) and [docs/plans/agentic-learning-upgrade.md](./docs/plans/agentic-learning-upgrade.md) for current testing and verification next steps.
