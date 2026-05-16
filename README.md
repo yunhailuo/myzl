@@ -86,8 +86,14 @@ npm install
 ### Run the app locally
 
 ```bash
+# Local Vite development server
 npm run dev
+
+# Cloudflare-aware Vite dev server (opt-in)
+npm run dev:cf
 ```
+
+> Use `npm run dev` for standard local development and `npm run dev:cf` only when you need Cloudflare runtime behavior.
 
 ### Build commands
 
@@ -174,6 +180,18 @@ npm run build:root
 
 Deploy the generated `dist/` folder.
 
+### Previewing locally
+
+```bash
+# Local Vite preview server
+npm run preview
+
+# Cloudflare preview using Wrangler
+npm run preview:cf
+```
+
+Use `npm run preview` for a pure Vite preview, and only use `npm run preview:cf` when verifying Cloudflare-specific runtime behavior.
+
 ## Notes for Contributors
 
 - `src/views/AdditionSubtractionView.vue` contains the main game behavior.
@@ -190,6 +208,7 @@ Deploy the generated `dist/` folder.
 ## Roadmap Ideas
 
 ### Gameplay Features
+
 - Add answer reveal or answer input flow
 - Track correct and incorrect responses
 - Add review mode for missed questions
@@ -197,6 +216,7 @@ Deploy the generated `dist/` folder.
 - Persist settings and progress locally
 
 ### Testing Enhancements
+
 - Implement mutation testing with Stryker Mutator
 - Expand E2E coverage for complete game flows
 - Add integration tests for store-view interactions

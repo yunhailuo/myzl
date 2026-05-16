@@ -1,19 +1,15 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
+import { defineConfig, PluginOption } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import fs from 'fs'
 import path from 'path'
 
-import { cloudflare } from '@cloudflare/vite-plugin'
-
 const isTest = process.env.VITEST === 'true'
 const enableCloudflarePlugin = process.env.VITE_ENABLE_CLOUDFLARE === 'true' && !isTest
 
-// https://vite.dev/config/
-export default defineConfig({
-  base: process.env.VITE_BASE_URL || '/',
-  plugins: [
+async function getPlugins() {
+  const plugins: PluginOption[] = [
     vue(),
     {
       name: 'generate-404-html',
@@ -35,10 +31,10 @@ export default defineConfig({
     var path = window.location.pathname;
     var search = window.location.search;
     var hash = window.location.hash;
-    
+
     // Base 路径（由 Vite 构建时注入）
     var basePath = '${baseUrl}';
-    
+
     // 确保 basePath 格式正确
     if (basePath && !basePath.startsWith('/')) {
       basePath = '/' + basePath;
@@ -46,7 +42,7 @@ export default defineConfig({
     if (basePath && basePath !== '/' && basePath.endsWith('/')) {
       basePath = basePath.slice(0, -1);
     }
-    
+
     // 重定向到 index.html，并通过 URL 参数传递原始路径
     var redirectUrl = basePath + '/index.html' + '?redirect=' + encodeURIComponent(path + search + hash);
     window.location.replace(redirectUrl);
@@ -62,11 +58,23 @@ export default defineConfig({
         console.log(`✓ Generated 404.html with base path: ${baseUrl}`)
       },
     },
-    enableCloudflarePlugin && cloudflare(),
-  ],
+  ]
+
+  if (enableCloudflarePlugin) {
+    const { cloudflare } = await import('@cloudflare/vite-plugin')
+    plugins.push(cloudflare())
+  }
+
+  return plugins
+}
+
+// https://vite.dev/config/
+export default defineConfig(async () => ({
+  base: process.env.VITE_BASE_URL || '/',
+  plugins: await getPlugins(),
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-})
+}))

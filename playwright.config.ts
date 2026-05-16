@@ -84,7 +84,8 @@ export default defineConfig({
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
   // outputDir: 'test-results/',
 
-  /* Run your local dev server before starting the tests */
+  /* Run your local dev server before starting the tests.
+     This uses the pure Vite app, not the Cloudflare dev runtime. */
   webServer: {
     command: 'npm run dev',
     port: 5173,
