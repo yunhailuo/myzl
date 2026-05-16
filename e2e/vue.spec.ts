@@ -1,4 +1,8 @@
-import { expect, test } from '@playwright/test'
+import { test, expect, resetBrowserState } from './helpers'
+
+test.beforeEach(async ({ page }) => {
+  await resetBrowserState(page)
+})
 
 test('home page loads and shows the title', async ({ page }) => {
   await page.goto('/')
@@ -35,7 +39,7 @@ test('supports keyboard navigation when enabled', async ({ page }) => {
 
   // Press ArrowRight to navigate to next question
   await page.keyboard.press('ArrowRight')
-  
+
   // Wait for the counter to update (this implicitly waits for the state change)
   await expect(page.locator('.counter')).toContainText('第 2 题')
 })

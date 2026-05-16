@@ -61,6 +61,12 @@ const count = computed(() => store.currentIndex + 1)
 
 // Initialize Hanzi Writer
 const initWriter = (char: string) => {
+  // Reset ready signal before re-initialization
+  const container = document.getElementById(containerId)
+  if (container) {
+    container.setAttribute('data-ready', 'false')
+  }
+
   if (!writerRef.value) {
     writerRef.value = HanziWriter.create(containerId, char, {
       width: 250,
@@ -82,6 +88,11 @@ const initWriter = (char: string) => {
     writerRef.value.loopCharacterAnimation()
   } else {
     writerRef.value.animateCharacter()
+  }
+
+  // Set ready signal after initialization completes
+  if (container) {
+    container.setAttribute('data-ready', 'true')
   }
 }
 
@@ -235,7 +246,7 @@ watch(
           <span :class="['pinyin-display', { hidden: hidePinyin }]">{{ currentPinyin }}</span>
           <div v-if="hidePinyin" class="pinyin-mask">🙈</div>
         </div>
-        <div :id="containerId"></div>
+        <div :id="containerId" data-testid="hanzi-writer-container"></div>
 
         <!-- Word display area -->
         <div

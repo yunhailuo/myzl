@@ -75,11 +75,13 @@ Completion note: deterministic generation is implemented for the current math st
 
 ### 2. E2E Reliability
 
-- [ ] Clear persisted state before each E2E test.
-- [ ] Avoid assertions that require two random prompts to differ.
-- [ ] Add app-level ready signals for Hanzi Writer instead of depending only on raw `canvas` timing.
+- [x] Clear persisted state before each E2E test.
+- [x] Avoid assertions that require two random prompts to differ.
+- [x] Add app-level ready signals for Hanzi Writer instead of depending only on raw `canvas` timing.
 - [ ] Add focused ARIA snapshots for stable layout and navigation structure.
 - [ ] Add visual snapshots only for high-value, low-volatility screens.
+
+Completion note: the flaky E2E baseline is stabilized. Full E2E passed across Chromium, Firefox, and WebKit. ARIA and visual snapshots remain optional future hardening tasks, not blockers for this reliability milestone.
 
 ### 3. Agent Enablement
 
