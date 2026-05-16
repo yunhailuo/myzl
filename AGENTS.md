@@ -16,6 +16,7 @@ See [Task Guides](docs/guides/index.md) for complete workflows.
 ## Documentation Map
 
 ### Task Guides (Start Here)
+
 - **[Adding New Games](docs/guides/add-new-game.md)**: Complete workflow for new game modules
 - **[Batch Generation](docs/guides/batch-generate.md)**: How to use batch question generation
 - **[Writing Tests](docs/references/testing-patterns.md)**: Testing strategy and patterns
@@ -23,20 +24,25 @@ See [Task Guides](docs/guides/index.md) for complete workflows.
 - **[Code Quality Checklist](docs/references/code-quality.md)**: Pre-submission requirements
 
 ### Reference Documentation
+
 - **[Architecture Details](docs/references/architecture-detailed.md)**: System architecture and patterns
 - **[Testing Strategy](docs/references/testing-strategy.md)**: When and how to test
 - **[Design System](docs/references/design-system.md)**: Language policy and UI guidelines
 - **[Documentation Guidelines](docs/references/documentation-guidelines.md)**: How to maintain docs
 
 ### Module Specifications
+
 - **[Module Specs Index](docs/specs/index.md)**: Individual game module documentation
 
 ### Architecture Decisions
+
 - **[Decision Log](docs/decisions/index.md)**: Why we made key architectural choices
 
 ### Quality & Plans
+
 - **[Quality Score](docs/quality.md)**: Current quality grades by domain
 - **[Technical Debt](docs/plans/tech-debt-tracker.md)**: Known debt and remediation plans
+- **[Agent Enablement](docs/references/agent-enablement.md)**: Local verification and bundle inspection workflow
 
 ## Project Snapshot
 
@@ -49,6 +55,7 @@ See [Task Guides](docs/guides/index.md) for complete workflows.
 ## Essential Commands
 
 ### Development
+
 ```bash
 npm run dev              # Start dev server
 npm run type-check       # Type checking
@@ -56,6 +63,7 @@ npm run lint             # Linting
 ```
 
 ### Testing
+
 ```bash
 npm run test:unit -- --run              # Unit tests
 npm run test:unit -- --run --coverage   # With coverage
@@ -63,6 +71,7 @@ npm run test:e2e                        # E2E tests
 ```
 
 ### Build
+
 ```bash
 npm run build            # Production build
 npm run build:gh         # GitHub Pages build

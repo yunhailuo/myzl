@@ -85,11 +85,11 @@ Completion note: the flaky E2E baseline is stabilized. Full E2E passed across Ch
 
 ### 3. Agent Enablement
 
-- [ ] Add a local "agent verify" script that runs type-check, lint, unit tests, and targeted E2E checks.
-- [ ] Add bundle-size/performance checks that agents can inspect after changes.
-- [ ] Capture acceptance criteria in docs before large feature work.
-- [ ] Keep AGENTS.md as a table of contents and put detailed guidance in linked docs.
-- [ ] Add doc-gardening tasks for stale links, stale coverage claims, and obsolete examples.
+- [x] Add a local "agent verify" script that runs type-check, lint, unit tests, and targeted E2E checks.
+- [x] Add bundle-size/performance checks that agents can inspect after changes.
+- [x] Capture acceptance criteria in docs before large feature work.
+- [x] Keep AGENTS.md as a table of contents and put detailed guidance in linked docs.
+- [x] Add doc-gardening tasks for stale links, stale coverage claims, and obsolete examples.
 
 ### 4. Low-Cost Accessibility
 
@@ -129,12 +129,14 @@ Each plan below is written as a bounded handoff packet for a human or subagent. 
 **Goal**: Keep production randomness, but make tests, debug sessions, and batch/reproduction flows seedable.
 
 **Scope**:
+
 - `src/utils/`
 - `src/stores/*`
 - Store unit tests
 - Relevant module docs/specs if generator contracts change
 
 **Implementation Steps**:
+
 - Add a tiny RNG utility that exposes a `RandomSource` function type and a seeded implementation.
 - Update math problem generators to accept an optional RNG parameter that defaults to `Math.random`.
 - Keep store runtime behavior unchanged by not passing a seed in normal production paths.
@@ -143,6 +145,7 @@ Each plan below is written as a bounded handoff packet for a human or subagent. 
 - Add generator invariant tests for range constraints so seeded tests catch real logic regressions.
 
 **Acceptance Criteria**:
+
 - Normal game screens still generate fresh random prompts without extra configuration.
 - At least one math module has reproducible seeded generator tests.
 - Existing unit tests pass.
@@ -159,11 +162,13 @@ Implement deterministic generation support without changing production randomnes
 **Goal**: Make E2E tests deterministic enough for agents to trust them.
 
 **Scope**:
+
 - `e2e/`
 - `playwright.config.ts`
 - Minimal app changes only if needed for stable test hooks
 
 **Implementation Steps**:
+
 - Add shared E2E setup that clears local storage/session storage before each test.
 - Replace assertions that require random prompts to differ with assertions based on navigation/history behavior.
 - Add stable selectors or app-level readiness markers for Hanzi Writer rendering.
@@ -171,6 +176,7 @@ Implement deterministic generation support without changing production randomnes
 - Add one focused accessibility/structure assertion only after the baseline suite is stable.
 
 **Acceptance Criteria**:
+
 - `npm run test:e2e -- --project=chromium` passes locally.
 - Tests no longer depend on uncontrolled random values being different.
 - Hanzi tests wait for an app-level ready state rather than only waiting for a raw `canvas`.
@@ -187,12 +193,14 @@ Stabilize Playwright tests. Clear persisted browser state before each test, remo
 **Goal**: Keep local app development and tests independent from deployment-runtime tooling.
 
 **Scope**:
+
 - `vite.config.ts`
 - `package.json`
 - `playwright.config.ts`
 - Deployment docs if commands change
 
 **Implementation Steps**:
+
 - Preserve `npm run dev` as pure Vite app development.
 - Keep Cloudflare-specific dev behind an explicit command/env flag.
 - Ensure unit tests do not initialize Cloudflare runtime plugins.
@@ -200,6 +208,7 @@ Stabilize Playwright tests. Clear persisted browser state before each test, remo
 - Document when to use normal dev versus Cloudflare dev/preview.
 
 **Acceptance Criteria**:
+
 - `npm run dev` starts without Cloudflare runtime requirements.
 - `npm run test:unit -- --run` does not initialize Cloudflare plugin behavior.
 - `npm run test:e2e` starts the normal Vite dev server.
@@ -216,12 +225,14 @@ Audit and finish the separation between normal Vite development and Cloudflare r
 **Goal**: Make docs match the current repository, especially CI, coverage, and file paths.
 
 **Scope**:
+
 - `README.md`
 - `AGENTS.md`
 - `docs/`
 - `.github/workflows/`
 
 **Implementation Steps**:
+
 - Check all referenced docs and file paths for stale names or missing files.
 - Compare documented quality gates with actual CI behavior.
 - Either add enforcement where docs claim enforcement, or change docs to say "target" instead of "enforced".
@@ -229,6 +240,7 @@ Audit and finish the separation between normal Vite development and Cloudflare r
 - Avoid duplicating implementation details that should stay in code.
 
 **Acceptance Criteria**:
+
 - No docs link to missing files.
 - Coverage docs accurately distinguish enforced gates from project goals.
 - README and AGENTS.md point to the same current guide structure.
@@ -245,12 +257,14 @@ Do a documentation truthfulness pass. Verify README, AGENTS.md, docs indexes, qu
 **Goal**: Give humans and agents visibility into bundle growth before adding more learning data or AI-related code.
 
 **Scope**:
+
 - `vite.config.ts`
 - `package.json`
 - Optional new bundle report tooling
 - Performance docs
 
 **Implementation Steps**:
+
 - Add a repeatable bundle inspection command.
 - Document current heavy chunks, especially optional Hanzi/dictionary data.
 - Confirm heavy learning data remains route-lazy where practical.
@@ -258,10 +272,17 @@ Do a documentation truthfulness pass. Verify README, AGENTS.md, docs indexes, qu
 - Avoid premature refactors until measurements show a concrete issue.
 
 **Acceptance Criteria**:
+
 - A developer or agent can run one command to inspect bundle output.
 - Docs identify known heavy chunks and why they are acceptable or need watching.
 - No user-facing behavior changes.
 - Any added tooling is optional or low-cost for local development.
+
+**Current status**:
+
+- `npm run inspect:bundle` is available and verified.
+- Route-based dynamic imports already keep heavy optional views and stores lazy-loaded.
+- The bundle report exposes large assets such as `cnchar.words.min`, making it easy to track heavy learning data.
 
 **Suggested Handoff Prompt**:
 
@@ -274,12 +295,14 @@ Add bundle visibility without broad optimization. Provide a command or documente
 **Goal**: Improve baseline accessibility without a broad UI redesign.
 
 **Scope**:
+
 - `src/App.vue`
 - `src/components/GameLayout.vue`
 - Affected view tests
 - Minimal CSS for skip link/focus states
 
 **Implementation Steps**:
+
 - Use Chinese accessible names for user-facing controls.
 - Add a skip link to main content.
 - Reset focus on route changes or provide a stable main-content focus target.
@@ -288,6 +311,7 @@ Add bundle visibility without broad optimization. Provide a command or documente
 - Defer full focus trapping unless it is small and low-risk.
 
 **Acceptance Criteria**:
+
 - Keyboard users can reach main content and return from dialogs/panels predictably.
 - User-facing accessible labels are Chinese where appropriate.
 - Existing unit and E2E tests pass or are updated for changed accessible names.
@@ -304,11 +328,13 @@ Implement the low-cost accessibility pass only. Add Chinese accessible names, sk
 **Goal**: Define the gate that must be passed before user-facing AI is added.
 
 **Scope**:
+
 - `docs/references/`
 - `docs/plans/agentic-learning-upgrade.md`
 - No app code
 
 **Implementation Steps**:
+
 - Create a short AI safety/privacy policy reference.
 - State that no user-facing AI is currently planned.
 - Define required decisions before AI ships: learner age, data retention, API-key boundary, parent/teacher review, and refusal/safety behavior.
@@ -316,6 +342,7 @@ Implement the low-cost accessibility pass only. Add Chinese accessible names, sk
 - Keep policy practical and short.
 
 **Acceptance Criteria**:
+
 - Future agents can see that AI app/game features are blocked until explicit product approval.
 - The policy names minimum privacy and safety decisions.
 - No runtime AI dependency or UI component is introduced.
@@ -331,17 +358,20 @@ Create a concise docs-only AI policy gate. It should say user-facing AI is not c
 **Goal**: Use AI to help maintain and improve the repo without adding AI to the app.
 
 **Scope**:
+
 - `docs/guides/`
 - `docs/references/`
 - Optional prompt templates or checklists
 
 **Implementation Steps**:
+
 - Document approved AI-assisted development use cases: doc gardening, test drafting, question-quality review, module planning, and code review checklists.
 - Document non-goals: no runtime AI, no learner chat, no API keys in client code.
 - Add a short checklist for reviewing AI-generated code or content before merging.
 - Link this from agent-facing docs.
 
 **Acceptance Criteria**:
+
 - Agents have clear allowed AI-development workflows.
 - Human review remains required for generated code/content.
 - No app/game behavior changes.
@@ -357,17 +387,20 @@ Document development-only AI assistance workflows. Keep it docs-only: allowed us
 **Goal**: Preserve the long-term product idea without letting it drive near-term work.
 
 **Scope**:
+
 - `docs/plans/`
 - Optional future module specs
 - No app code unless explicitly approved later
 
 **Implementation Steps**:
+
 - Keep learning-system work listed as future scope.
 - If needed, create a separate future plan for answer entry, correctness tracking, missed review, and adaptive practice.
 - Define a decision point before implementation: target learner, desired workflow, data to store, and success metric.
 - Do not start implementation until the product direction changes.
 
 **Acceptance Criteria**:
+
 - The idea is documented but clearly deprioritized.
 - Future agents do not treat adaptive learning as the current task.
 - No current app/game UI changes.

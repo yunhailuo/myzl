@@ -123,6 +123,9 @@ npm run test:unit
 # Unit tests with coverage report
 npm run test:unit -- --coverage
 
+# Local agent-friendly verify pass
+npm run agent:verify
+
 # CI-friendly unit test run
 CI=1 npm run test:unit -- --run
 ```
@@ -140,6 +143,13 @@ npm run test:e2e
 
 # Run only Chromium
 npm run test:e2e -- --project=chromium
+```
+
+### Bundle Inspection
+
+```bash
+# Build and print a bundle size report
+npm run inspect:bundle
 ```
 
 ### Test Coverage
