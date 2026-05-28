@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import HanziWriter from 'hanzi-writer'
 import { pinyin } from 'pinyin-pro'
 import cnchar from 'cnchar'
@@ -17,6 +17,7 @@ const WORD_DISPLAY_COUNT = 3
 
 const store = useHanziStore()
 const writerRef = ref<HanziWriter | null>(null)
+const writerRefreshRevision = ref(0)
 const containerId = 'hanzi-container'
 
 // Character set selection collapsed state (default collapsed)
@@ -40,6 +41,40 @@ const currentPinyin = computed(() =>
   store.currentCharacter ? pinyin(store.currentCharacter, { toneType: 'symbol' }) : '',
 )
 
+/** Empty state information (message and suggestions) */
+const emptyStateInfo = computed(() => {
+  const hasNoCharacters = store.shuffledCharacters.length === 0
+  
+  // If characters exist, no need to show empty state
+  if (!hasNoCharacters) {
+    return null
+  }
+  
+  // Determine message and suggestions based on configuration
+  let message = ''
+  const suggestions: string[] = []
+  
+  if (store.enabledSetIds.length === 0) {
+    message = '请至少选择一个字库'
+    suggestions.push('勾选内置字库(如"一年级上")')
+  } else {
+    // Check if only custom set is enabled but empty
+    const hasOnlyCustomSet = store.enabledSetIds.length === 1 && store.enabledSetIds.includes('custom')
+    
+    if (hasOnlyCustomSet && !store.customCharacterSet.trim()) {
+      message = '自定义字库为空,请输入汉字或选择其他字库'
+      suggestions.push('在自定义字库输入框中输入汉字')
+      suggestions.push('或同时选择多个字库以获得更多内容')
+    } else {
+      message = '当前选择的字库中没有可用汉字'
+      suggestions.push('检查字库是否正确加载')
+      suggestions.push('尝试选择其他字库或同时选择多个字库')
+    }
+  }
+  
+  return { message, suggestions }
+})
+
 const wordGroups = computed(() => {
   if (!store.currentCharacter) return []
 
@@ -59,13 +94,19 @@ const wordGroups = computed(() => {
 
 const count = computed(() => store.currentIndex + 1)
 
+const updateCustomCharacterSet = () => {
+  store.updateCustomCharacterSet(store.customCharacterSet)
+}
+
 // Initialize Hanzi Writer
 const initWriter = (char: string) => {
   // Reset ready signal before re-initialization
   const container = document.getElementById(containerId)
-  if (container) {
-    container.setAttribute('data-ready', 'false')
+  if (!container) {
+    return
   }
+
+  container.setAttribute('data-ready', 'false')
 
   if (!writerRef.value) {
     writerRef.value = HanziWriter.create(containerId, char, {
@@ -99,16 +140,10 @@ const initWriter = (char: string) => {
 // Navigation functions
 const goToNext = () => {
   store.nextCharacter()
-  if (store.currentCharacter) {
-    initWriter(store.currentCharacter)
-  }
 }
 
 const goToPrevious = () => {
   store.previousCharacter()
-  if (store.currentCharacter) {
-    initWriter(store.currentCharacter)
-  }
 }
 
 useGameNavigation(goToNext, goToPrevious, () => store.enableNavigation)
@@ -116,22 +151,34 @@ useGameNavigation(goToNext, goToPrevious, () => store.enableNavigation)
 // Reshuffle characters and reset to first
 const handleReshuffle = () => {
   store.reshuffleCharacters()
-
-  // Reinitialize animation for current character
-  if (store.currentCharacter) {
-    initWriter(store.currentCharacter)
-  }
+  writerRefreshRevision.value += 1
 
   // Reset masks
   hidePinyin.value = true
   hideWords.value = true
 }
 
-onMounted(() => {
-  if (store.currentCharacter) {
-    initWriter(store.currentCharacter)
-  }
-})
+watch(
+  () => emptyStateInfo.value,
+  (info) => {
+    if (info) {
+      writerRef.value = null
+    }
+  },
+)
+
+watch(
+  () => [store.currentCharacter, writerRefreshRevision.value] as const,
+  async ([char]) => {
+    if (!char) {
+      return
+    }
+
+    await nextTick()
+    initWriter(char)
+  },
+  { immediate: true, flush: 'post' },
+)
 
 // Watch loop animation setting changes
 watch(
@@ -199,6 +246,21 @@ watch(
               />
               <span>{{ set.name }}</span>
             </label>
+            
+            <!-- Custom set input area -->
+            <div v-if="set.id === 'custom' && store.enabledSetIds.includes('custom')" class="custom-set-input-wrapper">
+              <textarea
+                v-model="store.customCharacterSet"
+                @input="updateCustomCharacterSet"
+                placeholder="请输入任意汉字，例如：天地玄黄宇宙洪荒"
+                class="custom-set-textarea"
+                rows="2"
+                data-testid="custom-set-input"
+              ></textarea>
+              <div class="custom-set-info">
+                <span class="char-count">已输入 {{ Array.from(store.customCharacterSet.trim()).length }} 个字符</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -237,7 +299,22 @@ watch(
     </template>
 
     <div class="question-card hanzi-card">
-      <div class="content-wrapper">
+      <!-- Empty state message -->
+      <div v-if="emptyStateInfo" class="empty-state">
+        <div class="empty-icon">📝</div>
+        <p class="empty-message">{{ emptyStateInfo.message }}</p>
+        <div class="empty-hints">
+          <p>💡 建议:</p>
+          <ul>
+            <li v-for="(suggestion, index) in emptyStateInfo.suggestions" :key="index">
+              {{ suggestion }}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Normal content -->
+      <div v-else class="content-wrapper">
         <div
           v-if="store.showPinyin && currentPinyin"
           class="pinyin-container"
@@ -378,9 +455,95 @@ watch(
   padding: 0.25rem 0;
 }
 
+.custom-set-input-wrapper {
+  margin-top: 0.5rem;
+  margin-left: 1.5rem;
+}
+
+.custom-set-textarea {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  line-height: 1.5;
+}
+
+.custom-set-textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.custom-set-textarea::placeholder {
+  color: #aaa;
+}
+
+.custom-set-info {
+  margin-top: 0.4rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.char-count {
+  font-size: 0.8rem;
+  color: #666;
+}
+
 .hanzi-card {
   padding: 2rem 1.5rem;
   overflow-y: auto;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-message {
+  font-size: 1.2rem;
+  color: #e74c3c;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.empty-hints {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  max-width: 500px;
+  text-align: left;
+}
+
+.empty-hints p {
+  margin: 0 0 0.5rem 0;
+  color: #856404;
+  font-weight: 600;
+}
+
+.empty-hints ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #856404;
+}
+
+.empty-hints li {
+  margin-bottom: 0.4rem;
+  line-height: 1.5;
 }
 
 .content-wrapper {

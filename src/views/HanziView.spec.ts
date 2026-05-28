@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { mount, VueWrapper } from '@vue/test-utils'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { flushPromises, mount, VueWrapper } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import HanziWriter from 'hanzi-writer'
 import HanziView from './HanziView.vue'
 import { useHanziStore } from '../stores/hanzi'
 
@@ -41,14 +42,21 @@ describe('HanziView.vue', () => {
 
   beforeEach(() => {
     setActivePinia(createPinia())
+    vi.clearAllMocks()
 
     wrapper = mount(HanziView, {
+      attachTo: document.body,
       global: {
         stubs: {
           'hanzi-writer': true,
         },
       },
     })
+  })
+
+  afterEach(() => {
+    wrapper.unmount()
+    document.body.innerHTML = ''
   })
 
   describe('basic rendering', () => {
@@ -264,6 +272,106 @@ describe('HanziView.vue', () => {
 
       const inputElement = loopToggle.element as HTMLInputElement
       expect(inputElement.checked).toBe(false)
+    })
+  })
+
+  describe('empty state handling', () => {
+    it('shows empty state when only custom set is enabled but empty', async () => {
+      const store = useHanziStore()
+      
+      // Disable all sets and enable only custom
+      store.enabledSetIds = ['custom']
+      store.customCharacterSet = ''
+      store.loadCharacters()
+      
+      await wrapper.vm.$nextTick()
+      
+      expect(wrapper.find('.empty-state').exists()).toBe(true)
+      expect(wrapper.find('.empty-message').text()).toContain('自定义字库为空')
+    })
+
+    it('shows appropriate suggestions for different scenarios', async () => {
+      const store = useHanziStore()
+      
+      // Scenario 1: No sets enabled
+      store.enabledSetIds = []
+      store.loadCharacters()
+      
+      await wrapper.vm.$nextTick()
+      
+      let hints = wrapper.find('.empty-hints')
+      expect(hints.exists()).toBe(true)
+      expect(hints.text()).toContain('勾选内置字库')
+      
+      // Scenario 2: Only custom set enabled but empty
+      store.enabledSetIds = ['custom']
+      store.customCharacterSet = ''
+      store.loadCharacters()
+      
+      await wrapper.vm.$nextTick()
+      
+      hints = wrapper.find('.empty-hints')
+      expect(hints.text()).toContain('在自定义字库输入框中输入汉字')
+    })
+
+    it('hides empty state when characters are available', async () => {
+      const store = useHanziStore()
+      
+      // Enable first built-in set (should have content)
+      const builtinSets = store.availableSets.filter(s => s.id !== 'custom')
+      expect(builtinSets.length).toBeGreaterThan(0)
+      
+      const firstSetId = builtinSets[0]?.id
+      expect(firstSetId).toBeDefined()
+      
+      store.enabledSetIds = [firstSetId!]
+      store.loadCharacters()
+      
+      await wrapper.vm.$nextTick()
+      
+      expect(wrapper.find('.empty-state').exists()).toBe(false)
+    })
+
+    it('reloads custom characters as the user types', async () => {
+      const store = useHanziStore()
+
+      store.enabledSetIds = ['custom']
+      store.customCharacterSet = ''
+      store.loadCharacters()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.empty-state').exists()).toBe(true)
+
+      await wrapper.find('.config-btn').trigger('click')
+      await wrapper.find('.section-header.collapsible').trigger('click')
+      await wrapper.find('[data-testid="custom-set-input"]').setValue('测')
+      await wrapper.vm.$nextTick()
+
+      expect(store.shuffledCharacters).toContain('测')
+      expect(wrapper.find('.empty-state').exists()).toBe(false)
+    })
+
+    it('recreates HanziWriter when leaving the empty state', async () => {
+      const store = useHanziStore()
+      const createWriter = vi.mocked(HanziWriter.create)
+
+      await flushPromises()
+      expect(createWriter).toHaveBeenCalledTimes(1)
+
+      store.enabledSetIds = ['custom']
+      store.customCharacterSet = ''
+      store.loadCharacters()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.empty-state').exists()).toBe(true)
+
+      await wrapper.find('.config-btn').trigger('click')
+      await wrapper.find('.section-header.collapsible').trigger('click')
+      await wrapper.find('[data-testid="custom-set-input"]').setValue('测')
+      await flushPromises()
+
+      expect(createWriter).toHaveBeenCalledTimes(2)
+      expect(createWriter).toHaveBeenLastCalledWith('hanzi-container', '测', expect.any(Object))
     })
   })
 })

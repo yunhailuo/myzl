@@ -42,9 +42,22 @@ describe('hanzi Store', () => {
       expect(store.currentCharacter).toBe(store.shuffledCharacters[0])
     })
 
-    it('should provide availableSets from charactersData', () => {
+    it('should provide availableSets including custom set', () => {
       const store = useHanziStore()
-      expect(store.availableSets).toEqual(charactersData.characterSets)
+      // Should include all built-in sets plus custom set
+      expect(store.availableSets.length).toBe(charactersData.characterSets.length + 1)
+      
+      // Check that all built-in sets are present
+      charactersData.characterSets.forEach(builtInSet => {
+        const found = store.availableSets.find(s => s.id === builtInSet.id)
+        expect(found).toBeDefined()
+        expect(found?.name).toBe(builtInSet.name)
+      })
+      
+      // Check custom set is present
+      const customSet = store.availableSets.find(s => s.id === 'custom')
+      expect(customSet).toBeDefined()
+      expect(customSet?.name).toContain('自定义')
     })
   })
 
@@ -260,6 +273,139 @@ describe('hanzi Store', () => {
       expect(store.$state.showPinyin).toBe(false)
       expect(store.$state.showWords).toBe(false)
       expect(store.$state.loopAnimation).toBe(false)
+    })
+  })
+
+  describe('custom character set', () => {
+    it('should initialize with empty custom character set', () => {
+      const store = useHanziStore()
+      expect(store.customCharacterSet).toBe('')
+      expect(store.enabledSetIds).not.toContain('custom')
+    })
+
+    it('should include custom set in availableSets', () => {
+      const store = useHanziStore()
+      const customSet = store.availableSets.find(set => set.id === 'custom')
+      
+      expect(customSet).toBeDefined()
+      expect(customSet?.name).toContain('自定义')
+    })
+
+    it('should update custom character set', () => {
+      const store = useHanziStore()
+      const customChars = '天地玄黄'
+
+      store.updateCustomCharacterSet(customChars)
+      expect(store.customCharacterSet).toBe(customChars)
+    })
+
+    it('should toggle custom set via toggleCharacterSet', () => {
+      const store = useHanziStore()
+
+      store.toggleCharacterSet('custom')
+      expect(store.enabledSetIds).toContain('custom')
+
+      store.toggleCharacterSet('custom')
+      expect(store.enabledSetIds).not.toContain('custom')
+    })
+
+    it('should include custom characters when enabled', () => {
+      const store = useHanziStore()
+      const customChars = '测试汉字'
+
+      // Disable all built-in sets
+      store.enabledSetIds = []
+      
+      // Enable custom set and set characters
+      store.toggleCharacterSet('custom')
+      store.updateCustomCharacterSet(customChars)
+
+      expect(store.shuffledCharacters.length).toBeGreaterThan(0)
+      expect(store.shuffledCharacters).toContain('测')
+      expect(store.shuffledCharacters).toContain('试')
+    })
+
+    it('should combine custom characters with built-in sets', () => {
+      const store = useHanziStore()
+      const customChars = '自定义'
+      const initialLength = store.shuffledCharacters.length
+
+      // Add custom characters
+      store.toggleCharacterSet('custom')
+      store.updateCustomCharacterSet(customChars)
+
+      expect(store.shuffledCharacters.length).toBeGreaterThan(initialLength)
+    })
+
+    it('should not include custom characters when not enabled', () => {
+      const store = useHanziStore()
+      const customChars = '魑魅魍魉'
+
+      // Disable all built-in sets to isolate the test
+      store.enabledSetIds = []
+      
+      store.updateCustomCharacterSet(customChars)
+      // Don't enable custom set
+      store.loadCharacters()
+      
+      const chars = store.shuffledCharacters
+      expect(chars.length).toBe(0)
+    })
+
+    it('should handle empty custom character set gracefully', () => {
+      const store = useHanziStore()
+      const initialLength = store.shuffledCharacters.length
+
+      store.toggleCharacterSet('custom')
+      store.updateCustomCharacterSet('')
+
+      // Should not affect character count (empty string adds no characters)
+      expect(store.shuffledCharacters.length).toBe(initialLength)
+    })
+
+    it('should handle whitespace-only custom character set', () => {
+      const store = useHanziStore()
+      const initialLength = store.shuffledCharacters.length
+
+      store.toggleCharacterSet('custom')
+      store.updateCustomCharacterSet('   ')
+
+      // Should not add any characters
+      expect(store.shuffledCharacters.length).toBe(initialLength)
+    })
+
+    it('should persist custom character set state', () => {
+      const store = useHanziStore()
+
+      store.customCharacterSet = '持久化测试'
+      store.toggleCharacterSet('custom')
+
+      expect(store.$state.customCharacterSet).toBe('持久化测试')
+      expect(store.$state.enabledSetIds).toContain('custom')
+    })
+
+    it('should reload characters when custom set content changes', () => {
+      const store = useHanziStore()
+      
+      store.toggleCharacterSet('custom')
+      store.updateCustomCharacterSet('初始')
+      const lengthBeforeUpdate = store.shuffledCharacters.length
+
+      store.updateCustomCharacterSet('初始更多字符')
+      expect(store.shuffledCharacters.length).toBeGreaterThan(lengthBeforeUpdate)
+    })
+
+    it('should include custom set in toggleAllSets', () => {
+      const store = useHanziStore()
+      
+      // Disable custom set first
+      if (store.enabledSetIds.includes('custom')) {
+        store.toggleCharacterSet('custom')
+      }
+
+      // Toggle all should enable custom set too
+      store.toggleAllSets()
+      expect(store.enabledSetIds).toContain('custom')
     })
   })
 })

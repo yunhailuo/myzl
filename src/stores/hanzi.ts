@@ -14,13 +14,18 @@ interface CharactersJson {
   characterSets: CharacterSet[]
 }
 
+// Custom character set ID constant
+const CUSTOM_SET_ID = 'custom'
+
 export const useHanziStore = defineStore(
   'hanzi',
   () => {
     // ========== State ==========
 
-    /** Enabled character set IDs */
+    /** Enabled character set IDs (includes 'custom' if custom set is enabled) */
     const enabledSetIds = ref<string[]>([])
+    /** Custom character set content (user-defined characters) */
+    const customCharacterSet = ref('')
     /** Shuffled character array */
     const shuffledCharacters = ref<string[]>([])
     /** Current character index */
@@ -39,10 +44,21 @@ export const useHanziStore = defineStore(
 
     // ========== Getters ==========
 
-    /** Available character sets */
+    /** Available character sets (includes custom set) */
     const availableSets = computed(() => {
       try {
-        return (charactersData as CharactersJson).characterSets
+        const builtInSets = (charactersData as CharactersJson).characterSets
+        
+        // Add custom set to the list
+        return [
+          ...builtInSets,
+          {
+            id: CUSTOM_SET_ID,
+            name: '✏️ 自定义字库',
+            enabled: false,
+            data: customCharacterSet.value,
+          },
+        ]
       } catch (error) {
         console.error('Failed to load character sets:', error)
         return []
@@ -72,14 +88,14 @@ export const useHanziStore = defineStore(
     }
 
     /**
-     * Load and shuffle characters
+     * Load and shuffle characters from all enabled sets
      * Resets progress to first character
      */
     function loadCharacters() {
       try {
         const allChars = availableSets.value
           .filter((set: CharacterSet) => enabledSetIds.value.includes(set.id))
-          .flatMap((set: CharacterSet) => set.data.split(''))
+          .flatMap((set: CharacterSet) => set.data.split('').filter(char => char.trim() !== ''))
 
         shuffledCharacters.value = shuffleArray(allChars)
         currentIndex.value = 0
@@ -122,6 +138,19 @@ export const useHanziStore = defineStore(
       }
     }
 
+    /** Update custom character set content and reload characters if enabled */
+    function updateCustomCharacterSet(characters: string) {
+      try {
+        customCharacterSet.value = characters
+        // If custom set is enabled, reload characters to reflect the change
+        if (enabledSetIds.value.includes(CUSTOM_SET_ID)) {
+          loadCharacters()
+        }
+      } catch (error) {
+        console.error('Failed to update custom character set:', error)
+      }
+    }
+
     /** Go to next character */
     function nextCharacter() {
       if (currentIndex.value < shuffledCharacters.value.length - 1) {
@@ -150,6 +179,7 @@ export const useHanziStore = defineStore(
     return {
       // State
       enabledSetIds,
+      customCharacterSet,
       shuffledCharacters,
       currentIndex,
       enableArrows,
@@ -167,6 +197,7 @@ export const useHanziStore = defineStore(
       reshuffleCharacters,
       toggleCharacterSet,
       toggleAllSets,
+      updateCustomCharacterSet,
       nextCharacter,
       previousCharacter,
       resetToFirst,
