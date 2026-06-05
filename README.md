@@ -192,6 +192,17 @@ npm run build:root
 
 Deploy the generated `dist/` folder.
 
+### CloudBase Static Hosting (Tencent Cloud)
+
+Manual deployment to CloudBase Static Hosting via GitHub Actions.
+
+See [CloudBase Deployment Guide](./docs/cloudbase-deployment.md) for setup instructions.
+
+**Quick Start:**
+
+1. Configure `TCB_SECRET_ID`, `TCB_SECRET_KEY`, and `TCB_ENV_ID` in GitHub Secrets.
+2. Open the **Actions** page and run the "Deploy to CloudBase Static Hosting" workflow.
+
 ### Previewing locally
 
 ```bash
