@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig, PluginOption } from 'vite'
+import { defineConfig, PluginOption, ResolvedConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import fs from 'fs'
 import path from 'path'
@@ -9,53 +9,40 @@ const isTest = process.env.VITEST === 'true'
 const enableCloudflarePlugin = process.env.VITE_ENABLE_CLOUDFLARE === 'true' && !isTest
 
 async function getPlugins() {
+  let config: ResolvedConfig | undefined
   const plugins: PluginOption[] = [
     vue(),
     {
-      name: 'generate-404-html',
+      name: 'generate-spa-fallbacks',
       apply: 'build',
+      configResolved(resolvedConfig: ResolvedConfig) {
+        config = resolvedConfig
+      },
       closeBundle() {
+        if (!config) {
+          throw new Error('Cannot generate SPA fallbacks: Vite config was not resolved.')
+        }
+
         const baseUrl = process.env.VITE_BASE_URL || '/'
-        const distPath = path.resolve(__dirname, 'dist')
-        const html404Path = path.join(distPath, '404.html')
+        const distPath = path.resolve(config.root, config.build.outDir)
+        const indexHtmlPath = path.join(distPath, 'index.html')
 
-        const html404Content = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>myzl - 加载中...</title>
-<script>
-  // SPA 路由重定向 - 适用于任何静态托管平台
-  (function() {
-    var path = window.location.pathname;
-    var search = window.location.search;
-    var hash = window.location.hash;
+        if (!fs.existsSync(indexHtmlPath)) {
+          throw new Error('Cannot generate SPA fallbacks: dist/index.html was not found.')
+        }
 
-    // Base 路径（由 Vite 构建时注入）
-    var basePath = '${baseUrl}';
+        const indexHtml = fs.readFileSync(indexHtmlPath, 'utf-8')
+        fs.writeFileSync(path.join(distPath, '404.html'), indexHtml, 'utf-8')
 
-    // 确保 basePath 格式正确
-    if (basePath && !basePath.startsWith('/')) {
-      basePath = '/' + basePath;
-    }
-    if (basePath && basePath !== '/' && basePath.endsWith('/')) {
-      basePath = basePath.slice(0, -1);
-    }
+        const normalizedBase = baseUrl.startsWith('/') ? baseUrl : `/${baseUrl}`
+        const fallbackPath =
+          normalizedBase === '/'
+            ? '/index.html'
+            : `${normalizedBase.replace(/\/$/, '')}/index.html`
 
-    // 重定向到 index.html，并通过 URL 参数传递原始路径
-    var redirectUrl = basePath + '/index.html' + '?redirect=' + encodeURIComponent(path + search + hash);
-    window.location.replace(redirectUrl);
-  })();
-</script>
-</head>
-<body>
-<p>正在加载...</p>
-</body>
-</html>`
+        fs.writeFileSync(path.join(distPath, '_redirects'), `/* ${fallbackPath} 200\n`, 'utf-8')
 
-        fs.writeFileSync(html404Path, html404Content, 'utf-8')
-        console.log(`✓ Generated 404.html with base path: ${baseUrl}`)
+        console.log(`✓ Generated SPA fallbacks with base path: ${baseUrl}`)
       },
     },
   ]

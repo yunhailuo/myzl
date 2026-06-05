@@ -9,7 +9,7 @@ import router from './router'
 
 const app = createApp(App)
 
-// 配置 Pinia
+// Configure Pinia
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 

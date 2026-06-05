@@ -12,7 +12,7 @@ An personal application built with Vue 3 and Vite. The current experience focuse
 - Keyboard arrow navigation
 - Swipe navigation on touch devices
 - Settings drawer for arrow buttons and gesture/keyboard controls
-- Static hosting support for both GitHub Pages and root-hosted sites
+- Static hosting support for GitHub Pages, Cloudflare Pages, and Tencent CloudBase
 
 ## Tech Stack
 
@@ -182,7 +182,9 @@ Use this when the app is hosted at:
 https://<username>.github.io/myzl/
 ```
 
-### Cloudflare Pages or root hosting
+The build emits `dist/404.html` as a copy of the SPA shell so GitHub Pages can load Vue Router history-mode routes on refresh.
+
+### Cloudflare Pages
 
 Build with:
 
@@ -190,7 +192,21 @@ Build with:
 npm run build:root
 ```
 
-Deploy the generated `dist/` folder.
+Deploy the generated `dist/` folder. The build emits `dist/_redirects` with a `/* /index.html 200` rewrite for history-mode routes.
+
+### Tencent CloudBase
+
+Build with:
+
+```bash
+npm run build:root
+```
+
+Deploy the generated `dist/` folder to the static site root. In CloudBase static website settings:
+
+- Set the index document to `index.html`.
+- Set the 4xx/error document to `index.html`.
+- Do not add a 404 redirect rule to `index.html`; redirect rules can loop before the SPA loads.
 
 ### Previewing locally
 
