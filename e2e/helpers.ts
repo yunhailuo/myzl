@@ -1,14 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 
-/**
- * Reset persisted browser state once at the start of a test.
- *
- * This intentionally does not use addInitScript because some tests verify
- * persistence across reload within the same test.
- */
+/** Start each test with a fresh app origin and empty browser storage. */
 export async function resetBrowserState(page: Page) {
-  await page.context().clearCookies()
   await page.goto('/')
+  await page.context().clearCookies()
   await page.evaluate(() => {
     localStorage.clear()
     sessionStorage.clear()

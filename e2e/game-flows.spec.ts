@@ -1,4 +1,10 @@
-import { expect, expectHanziWriterReady, goToHanziPractice, resetBrowserState, test } from './helpers'
+import {
+  expect,
+  expectHanziWriterReady,
+  goToHanziPractice,
+  resetBrowserState,
+  test,
+} from './helpers'
 
 test.describe('Complete Game Flow Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -42,12 +48,15 @@ test.describe('Complete Game Flow Tests', () => {
       await page.getByRole('main').getByRole('link', { name: '加减法' }).click()
 
       // Open settings
+      await page.addStyleTag({ content: '.config-panel { transition: none !important; }' })
       await page.locator('.config-btn').click()
       await expect(page.locator('.config-overlay.active')).toBeVisible()
 
       // Toggle a setting (e.g., hide arrows)
       const toggleButton = page.locator('[data-testid="toggle-arrows"]')
-      await toggleButton.click()
+      await expect(toggleButton).toBeChecked()
+      await toggleButton.uncheck()
+      await expect(toggleButton).not.toBeChecked()
 
       // Close settings
       await page.keyboard.press('Escape')
@@ -58,7 +67,7 @@ test.describe('Complete Game Flow Tests', () => {
 
       // Verify setting persisted by checking if toggle is still unchecked
       const toggleState = page.locator('[data-testid="toggle-arrows"]')
-      await expect(toggleState).not.toBeChecked() // Should remain unchecked after reload
+      await expect(toggleState).not.toBeChecked()
     })
   })
 
