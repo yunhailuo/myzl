@@ -5,6 +5,7 @@ Detailed specifications for each game module. Use these when working on specific
 ## Game Modules
 
 ### Core Games
+
 - **[Addition & Subtraction](addition-subtraction.md)**: Arithmetic practice module
   - Numerical ranges (1-19)
   - Question generation algorithm
@@ -29,9 +30,17 @@ Detailed specifications for each game module. Use these when working on specific
   - Step-by-step solutions
   - Configuration options
 
+### Utilities
+
+- **[Countdown Timer](timer.md)**: Configurable countdown with optional cycle looping
+  - Duration and alert thresholds
+  - Pause, resume, and reset behavior
+  - Background timing and cycle tracking
+
 ## Specification Structure
 
 Each module specification includes:
+
 - **Overview**: Purpose and target users
 - **Architecture**: Store structure, view components, composables
 - **Data Flow**: How data moves through the module
@@ -42,6 +51,7 @@ Each module specification includes:
 ## Adding New Specifications
 
 When adding a new game module:
+
 1. Create `<module-name>.md` in this directory
 2. Follow the standard specification structure
 3. Link from this index file

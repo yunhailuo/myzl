@@ -64,11 +64,37 @@ npm run lint             # Linting
 
 ### Testing
 
+**Important**:
+
+- Vitest runs in watch mode by default. Use `--run` flag for one-time execution.
+- Playwright test runs in one-time mode by default (no watch mode).
+- **For agents**: Always use `--reporter=list` with Playwright to disable HTML report server.
+
 ```bash
-npm run test:unit -- --run              # Unit tests
-npm run test:unit -- --run --coverage   # With coverage
-npm run test:e2e                        # E2E tests
+# Unit tests - one-time run (no watch mode)
+npm run test:unit -- --run
+
+# Unit tests with coverage
+npm run test:unit -- --run --coverage
+
+# Unit tests - CI mode (recommended for agents)
+CI=1 npm run test:unit -- --run --coverage
+
+# E2E tests (Playwright - one-time run by default)
+# IMPORTANT: Use --reporter=list to disable HTML report server
+npm run test:e2e -- --reporter=list
+
+# E2E tests - specific project
+npm run test:e2e -- --project=chromium --reporter=list
+
+# E2E tests - CI mode (recommended for agents)
+CI=1 npm run test:e2e -- --project=chromium --reporter=list
 ```
+
+**Note**:
+
+- For Vitest: The `--run` flag or `CI=1` environment variable ensures tests run in non-watch mode.
+- For Playwright: Tests always run in one-time mode. Use `--reporter=list` to prevent HTML report server from starting. The `CI=1` environment variable is still recommended for automated testing.
 
 ### Build
 

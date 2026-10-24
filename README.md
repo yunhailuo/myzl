@@ -8,6 +8,7 @@ An personal application built with Vue 3 and Vite. The current experience focuse
 - Addition and subtraction flash-card style practice
 - **Hanzi character learning** with stroke animation and word examples
 - **Hanzi query tool** for looking up pinyin, stroke order, and example words
+- Countdown timer with direct time entry, alerts, and optional looping
 - Previous and next question history (for games)
 - Keyboard arrow navigation
 - Swipe navigation on touch devices

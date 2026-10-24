@@ -66,7 +66,7 @@ describe('App.vue', () => {
     expect(wrapper.find('.nav-title').text()).toBe('菜单')
 
     const links = wrapper.findAll('.nav a')
-    expect(links).toHaveLength(6)
+    expect(links).toHaveLength(7)
     expect(links[0]?.text()).toBe('首页')
     // Navigation links contain icon and title
     expect(links[1]?.text()).toContain('加减法')
@@ -74,6 +74,7 @@ describe('App.vue', () => {
     expect(links[3]?.text()).toContain('汉字查询')
     expect(links[4]?.text()).toContain('分配律')
     expect(links[5]?.text()).toContain('一元一次方程')
+    expect(links[6]?.text()).toContain('倒计时')
   })
 
   it('has correct navigation links', async () => {
@@ -86,6 +87,7 @@ describe('App.vue', () => {
     expect(links[3]?.attributes('href')).toBe('/hanzi-tool')
     expect(links[4]?.attributes('href')).toBe('/distributive-law')
     expect(links[5]?.attributes('href')).toBe('/linear-equation')
+    expect(links[6]?.attributes('href')).toBe('/timer')
   })
 
   it('menu link has active class styling capability', async () => {

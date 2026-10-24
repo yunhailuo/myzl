@@ -85,6 +85,14 @@ export const GAMES_REGISTRY: GameMeta[] = [
     component: 'LinearEquationView',
     batchStoreLoader: createBatchLoader(() => import('../stores/linearEquation')),
   },
+  {
+    path: '/timer',
+    name: 'timer',
+    title: '倒计时',
+    description: '计时器',
+    icon: '⏱️',
+    component: 'TimerView',
+  },
 ]
 
 /** Get game metadata by path */
